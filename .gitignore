@@ -1,1 +1,4 @@
 tmp/
+dist/
+original/
+test/qunit/
