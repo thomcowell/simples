@@ -1,252 +1,253 @@
 
-	// ======= AJAX ========== //
-	// Constants  
-	var DEFAULTS = {
-	    // Functions to call when the request fails, succeeds,
-	    // or completes (either fail or succeed)
-	    complete: function() {},
-	    error: function() {},
-	    success: function() {},
-	    additionalData: [],
-	    dataType: 'json',
-	    async: true,
-	    type: "GET",
-	    timeout: 5000,
-	    // The data type that'll be returned from the server
-	    // the default is simply to determine what data was returned from the
-	    // and act accordingly.
-	    data: null
-	},
-	ACCEPTS = {
-	    xml: "application/xml, text/xml",
-	    html: "text/html",
-	    script: "text/javascript, application/javascript",
-	    json: "application/json, text/javascript",
-	    text: "text/plain",
-	    _default: "*/*"
-	},
-	AJAX_IS_JSON = /^[\],:{}\s]*$/,
-	AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-	AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
-	AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
-	TYPEOF = /number|string/;
+// ======= AJAX ========== //
+// Constants
+var DEFAULTS = {
+    // Functions to call when the request fails, succeeds,
+    // or completes (either fail or succeed)
+    complete: function() {},
+    error: function() {},
+    success: function() {},
+    additionalData: [],
+    dataType: 'json',
+    async: true,
+    type: "GET",
+    timeout: 5000,
+    // The data type that'll be returned from the server
+    // the default is simply to determine what data was returned from the
+    // and act accordingly.
+    data: null
+},
+ACCEPTS = {
+    xml: "application/xml, text/xml",
+    html: "text/html",
+    script: "text/javascript, application/javascript",
+    json: "application/json, text/javascript",
+    text: "text/plain",
+    _default: "*/*"
+},
+AJAX_IS_JSON = /^[\],:{}\s]*$/,
+AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
+TYPEOF = /number|string/;
 
-	function ajaxDefaults(opts) {
-	    DEFAULTS = Simples.merge(DEFAULTS, opts);
-	}
-	// A generic function for performming AJAX requests
-	// It takes one argument, which is an object that contains a set of options
-	// All of which are outline in the comments, below
-	// From John Resig's book Pro JavaScript Techniques
-	// published by Apress, 2006-8
-	function ajax(url, options) {
+function ajaxDefaults(opts) {
+    DEFAULTS = Simples.merge(DEFAULTS, opts);
+}
+// A generic function for performming AJAX requests
+// It takes one argument, which is an object that contains a set of options
+// All of which are outline in the comments, below
+// From John Resig's book Pro JavaScript Techniques
+// published by Apress, 2006-8
+function ajax(url, options) {
 
-	    // Load the options object with defaults, if no
-	    // values were provided by the user
-	    if (!url) {
-	        throw new Error('A URL must be provided.');
-	    }
+    // Load the options object with defaults, if no
+    // values were provided by the user
+    if (!url) {
+        throw new Error('A URL must be provided.');
+    }
 
-	    options = Simples.merge({},DEFAULTS, options);
+    options = Simples.merge({},
+    DEFAULTS, options);
 
-	    // How long to wait before considering the request to be a timeout
-	    // Create the request object
-	    var xhr = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest();
+    // How long to wait before considering the request to be a timeout
+    // Create the request object
+    var xhr = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest();
 
-	    // Open the asynchronous POST request
-	    xhr.open(options.type, url, options.async);
+    // Open the asynchronous POST request
+    xhr.open(options.type, url, options.async);
 
-	    // Keep track of when the request has been succesfully completed
-	    var requestDone = false;
+    // Keep track of when the request has been succesfully completed
+    var requestDone = false;
 
-	    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		
-	    if (options.type === 'POST') {
-	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-			
-			if( options.data !== null && options.data !== "" ){
-				options.data = serialise( options.data ).replace(/&$/, '');
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-		        if ( options.additionalData.toString() === "[object Object]" || options.additionalData.length || typeof options.additionalData === 'string' ) {
-	                options.data += ("&" + serialise( options.additionalData ) );
-		        }
-			}
+    if (options.type === 'POST') {
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-	    }
+        if (options.data !== null && options.data !== "") {
+            options.data = serialise(options.data).replace(/&$/, '');
 
-	    var content = ACCEPTS[options.dataType];
-	    content = content ? content + ',': '';
-	    xhr.setRequestHeader("Accept", content + ACCEPTS._default);
+            if (options.additionalData.toString() === "[object Object]" || options.additionalData.length || typeof options.additionalData === 'string') {
+                options.data += ("&" + serialise(options.additionalData));
+            }
+        }
 
-	    // Watch for when the state of the document gets updated
-	    function onreadystatechange() {
-	        // Wait until the data is fully loaded,
-	        // and make sure that the request hasn't already timed out
-	        if (xhr.readyState == 4 && !requestDone) {
-	            // clear poll interval
-	            if (ival) {
-	                clearInterval(ival);
-	                ival = null;
-	            }
-	            // clearTimeout( TIMEOUT_ID );
-	            // Check to see if the request was successful
-	            if (httpSuccess(xhr)) {
+    }
 
-	                // Execute the success callback with the data returned from the server
-	                try {
-	                    var data = httpData(xhr, options.dataType);
-	                } catch(e) {
-	                    options.error(xhr, 'parseerror');
-	                }
+    var content = ACCEPTS[options.dataType];
+    content = content ? content + ',': '';
+    xhr.setRequestHeader("Accept", content + ACCEPTS._default);
 
-	                options.success(data, 'success');
+    // Watch for when the state of the document gets updated
+    function onreadystatechange() {
+        // Wait until the data is fully loaded,
+        // and make sure that the request hasn't already timed out
+        if (xhr.readyState == 4 && !requestDone) {
+            // clear poll interval
+            if (ival) {
+                clearInterval(ival);
+                ival = null;
+            }
+            // clearTimeout( TIMEOUT_ID );
+            // Check to see if the request was successful
+            if (httpSuccess(xhr)) {
 
-	                // Otherwise, an error occurred, so execute the error callback
-	            } else {
-	                options.error(xhr, 'error');
-	            }
+                // Execute the success callback with the data returned from the server
+                try {
+                    var data = httpData(xhr, options.dataType);
+                } catch(e) {
+                    options.error(xhr, 'parseerror');
+                }
 
-	            // Call the completion callback
-	            options.complete(xhr);
+                options.success(data, 'success');
 
-	            // Clean up after ourselves, to avoid memory leaks
-	            xhr = null;
-	        }
-	    }
+                // Otherwise, an error occurred, so execute the error callback
+            } else {
+                options.error(xhr, 'error');
+            }
 
-	    // Setup async ajax call
-	    if (options.async) {
-	        // don't attach the handler to the request, just poll it instead
-	        var ival = setInterval(onreadystatechange, 13);
-	        // Initalize a callback which will fire 5 seconds from now, cancelling
-	        // the request (if it has not already occurred).
-	        setTimeout(function() {
-	            requestDone = true;
-	        },
-	        options.timeout);
-	    }
+            // Call the completion callback
+            options.complete(xhr);
 
-	    // Establish the connection to the server
-	    xhr.send(options.data);
-	    // non-async requests
-	    if (!options.async) {
-	        onreadystatechange();
-	    }
+            // Clean up after ourselves, to avoid memory leaks
+            xhr = null;
+        }
+    }
 
-	    // Determine the success of the HTTP response
-	    function httpSuccess(xhr) {
-	        try {
-	            // If no server status is provided, and we're actually
-	            // requesting a local file, then it was successful
-	            return ! xhr.status && location.protocol == "file:" ||
+    // Setup async ajax call
+    if (options.async) {
+        // don't attach the handler to the request, just poll it instead
+        var ival = setInterval(onreadystatechange, 13);
+        // Initalize a callback which will fire 5 seconds from now, cancelling
+        // the request (if it has not already occurred).
+        setTimeout(function() {
+            requestDone = true;
+        },
+        options.timeout);
+    }
 
-	            // Any status in the 200 range is good
-	            (xhr.status >= 200 && xhr.status < 300) ||
+    // Establish the connection to the server
+    xhr.send(options.data);
+    // non-async requests
+    if (!options.async) {
+        onreadystatechange();
+    }
 
-	            // Successful if the document has not been modified
-	            xhr.status == 304 ||
+    // Determine the success of the HTTP response
+    function httpSuccess(xhr) {
+        try {
+            // If no server status is provided, and we're actually
+            // requesting a local file, then it was successful
+            return ! xhr.status && location.protocol == "file:" ||
 
-	            // Safari returns an empty status if the file has not been modified
-	            navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
-	        } catch(e) {}
+            // Any status in the 200 range is good
+            (xhr.status >= 200 && xhr.status < 300) ||
 
-	        // If checking the status failed, then assume that the request failed too
-	        return false;
-	    }
+            // Successful if the document has not been modified
+            xhr.status == 304 ||
 
-	    // httpData parsing is from jQuery 1.4
-	    function httpData(xhr, type, dataFilter) {
+            // Safari returns an empty status if the file has not been modified
+            navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
+        } catch(e) {}
 
-	        var ct = xhr.getResponseHeader("content-type") || "",
-	        xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
-	        data = xml ? xhr.responseXML: xhr.responseText;
+        // If checking the status failed, then assume that the request failed too
+        return false;
+    }
 
-	        if (xml && data.documentElement.nodeName === "parsererror") {
-	            throw "parsererror";
-	        }
+    // httpData parsing is from jQuery 1.4
+    function httpData(xhr, type, dataFilter) {
 
-	        if (typeof dataFilter === 'function') {
-	            data = dataFilter(data, type);
-	        }
+        var ct = xhr.getResponseHeader("content-type") || "",
+        xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
+        data = xml ? xhr.responseXML: xhr.responseText;
 
-	        // The filter can actually parse the response
-	        if (typeof data === "string") {
-	            // Get the JavaScript object, if JSON is used.
-	            if (type === "json" || !type && ct.indexOf("json") >= 0) {
-	                // Make sure the incoming data is actual JSON
-	                // Logic borrowed from http://json.org/json2.js
-	                if ( AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
+        if (xml && data.documentElement.nodeName === "parsererror") {
+            throw "parsererror";
+        }
 
-	                    // Try to use the native JSON parser first
-	                    if (window.JSON && window.JSON.parse) {
-	                        data = window.JSON.parse(data);
+        if (typeof dataFilter === 'function') {
+            data = dataFilter(data, type);
+        }
 
-	                    } else {
-	                        data = (new Function("return " + data))();
-	                    }
+        // The filter can actually parse the response
+        if (typeof data === "string") {
+            // Get the JavaScript object, if JSON is used.
+            if (type === "json" || !type && ct.indexOf("json") >= 0) {
+                // Make sure the incoming data is actual JSON
+                // Logic borrowed from http://json.org/json2.js
+                if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
 
-	                } else {
-	                    throw "Invalid JSON: " + data;
-	                }
+                    // Try to use the native JSON parser first
+                    if (window.JSON && window.JSON.parse) {
+                        data = window.JSON.parse(data);
 
-	                // If the type is "script", eval it in global context
-	            } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
+                    } else {
+                        data = (new Function("return " + data))();
+                    }
 
-	                eval.call(window, data);
-	            }
-	        }
+                } else {
+                    throw "Invalid JSON: " + data;
+                }
 
-	        return data;
-	    }
+                // If the type is "script", eval it in global context
+            } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
 
-	}
+                eval.call(window, data);
+            }
+        }
 
-	function serialise( obj ) {
-		var arr = [];
+        return data;
+    }
 
-		if( obj.toString === "[object Object]"){  
-			for( var key in obj ){
-				arr.push( formatData( key, obj[ key ] ) );
-			}
-		} else if( obj.toString === "[object Array]") {
-			for(var i=0,l=obj.length;i<l;i++){
-				if( obj[i].toString === "[object Object]" ){
-					arr.push( params( obj[i].name, obj[i].value ) );
-				}
-			}
-		}
-		
-		return typeof( obj ) === 'string' ? obj : arr.join('&');
-	}
-	
-	function params( name, value ){
-		
-		value = typeof( value ) === 'function' ? value() : value;
-		if ( name && TYPEOF.test( typeof( value ) ) ) {
-			
-	        return encodeURIComponent( name ) + '=' + encodeURIComponent( value );
-	    } 
-	}
+}
 
-	function formatData( name, value ) {
-		
-	    if( value.toString() === '[object Object]' ) {
-	        arr = [];
-	
-	        for (var key in value) {
+function serialise(obj) {
+    var arr = [];
 
-	            arr.push( formatData(name + "[" + key + "]", (typeof value[key] === 'function') ? value[key]() : value[key] ) );
-	        }
-	
-	        return arr.join('&');
-	    } else {
+    if (obj.toString === "[object Object]") {
+        for (var key in obj) {
+            arr.push(formatData(key, obj[key]));
+        }
+    } else if (obj.toString === "[object Array]") {
+        for (var i = 0, l = obj.length; i < l; i++) {
+            if (obj[i].toString === "[object Object]") {
+                arr.push(params(obj[i].name, obj[i].value));
+            }
+        }
+    }
 
-            return params( name, value ) || "";
-	    }
-	}
-	
-	Simples.merge( Simples, {
-		ajax : ajax,
-		ajaxSettings : ajaxDefaults,
-		params : params
-	});	
+    return typeof(obj) === 'string' ? obj: arr.join('&');
+}
+
+function params(name, value) {
+
+    value = typeof(value) === 'function' ? value() : value;
+    if (name && TYPEOF.test(typeof(value))) {
+
+        return encodeURIComponent(name) + '=' + encodeURIComponent(value);
+    }
+}
+
+function formatData(name, value) {
+
+    if (value.toString() === '[object Object]') {
+        arr = [];
+
+        for (var key in value) {
+
+            arr.push(formatData(name + "[" + key + "]", (typeof value[key] === 'function') ? value[key]() : value[key]));
+        }
+
+        return arr.join('&');
+    } else {
+
+        return params(name, value) || "";
+    }
+}
+
+Simples.merge(Simples, {
+    ajax: ajax,
+    ajaxSettings: ajaxDefaults,
+    params: params
+});

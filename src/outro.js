@@ -1,4 +1,4 @@
-// Expose jQuery to the global object
+// Expose Simples to the global object
 window.simples = window.$ = Simples;
 
 })(window);       
