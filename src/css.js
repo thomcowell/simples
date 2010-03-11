@@ -1,5 +1,3 @@
-(function( Simples ){ 
-	var EXTEND = Simples.extend;
 	// exclude the following css properties to add px
 	// REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	// RALPHA = /alpha([^)]*)/,
@@ -92,12 +90,11 @@
 	    return ret;
 	} 
 	
-	EXTEND({
+	Simples.extend({
 	    width: function() {
 	        currentCSS(this[0], 'width');
 	    },
 	    height: function() {
 	        currentCSS(this[0], 'height');
 	    }
-	});  
-})( simples );
+	});

@@ -1,4 +1,4 @@
-simples.extend({
+Simples.extend({
 	position : (function(){
 
 		if ( "getBoundingClientRect" in document.documentElement ) {

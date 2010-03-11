@@ -1,4 +1,4 @@
-(function( Simples ){
+
 	// ======= AJAX ========== //
 	// Constants  
 	var DEFAULTS = {
@@ -17,7 +17,6 @@
 	    // and act accordingly.
 	    data: null
 	},
-	MERGE = simples.merge,
 	ACCEPTS = {
 	    xml: "application/xml, text/xml",
 	    html: "text/html",
@@ -33,7 +32,7 @@
 	TYPEOF = /number|string/;
 
 	function ajaxDefaults(opts) {
-	    DEFAULTS = MERGE(DEFAULTS, opts);
+	    DEFAULTS = Simples.merge(DEFAULTS, opts);
 	}
 	// A generic function for performming AJAX requests
 	// It takes one argument, which is an object that contains a set of options
@@ -48,7 +47,7 @@
 	        throw new Error('A URL must be provided.');
 	    }
 
-	    options = MERGE({},DEFAULTS, options);
+	    options = Simples.merge({},DEFAULTS, options);
 
 	    // How long to wait before considering the request to be a timeout
 	    // Create the request object
@@ -61,22 +60,17 @@
 	    var requestDone = false;
 
 	    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-
+		
 	    if (options.type === 'POST') {
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	        if (typeof(options.data) !== 'string' && options.data.constructor == Array) {
-	            options.data = options.data.join('&');
-	        }
+			
+			if( options.data !== null && options.data !== "" ){
+				options.data = serialise( options.data ).replace(/&$/, '');
 
-	        options.data.replace(/&$/, '');
-
-	        var len = options.additionalData.length;
-	        if (len) {
-	            for (var i = 0; i < len; i++) {
-
-	                options.data += ("&" + serialise.apply(this, options.additionalData[i]));
-	            }
-	        }
+		        if ( options.additionalData.toString() === "[object Object]" || options.additionalData.length || typeof options.additionalData === 'string' ) {
+	                options.data += ("&" + serialise( options.additionalData ) );
+		        }
+			}
 
 	    }
 
@@ -207,38 +201,52 @@
 
 	}
 
-	function serialise(name, value) {
-	    if (TYPEOF.test(typeof(name)) && TYPEOF.test(typeof(value))) {
-	        return encodeURIComponent(name) + '=' + encodeURIComponent(value);
-	    }
+	function serialise( obj ) {
+		var arr = [];
+
+		if( obj.toString === "[object Object]"){  
+			for( var key in obj ){
+				arr.push( formatData( key, obj[ key ] ) );
+			}
+		} else if( obj.toString === "[object Array]") {
+			for(var i=0,l=obj.length;i<l;i++){
+				if( obj[i].toString === "[object Object]" ){
+					arr.push( params( obj[i].name, obj[i].value ) );
+				}
+			}
+		}
+		
+		return typeof( obj ) === 'string' ? obj : arr.join('&');
+	}
+	
+	function params( name, value ){
+		
+		value = typeof( value ) === 'function' ? value() : value;
+		if ( name && TYPEOF.test( typeof( value ) ) ) {
+			
+	        return encodeURIComponent( name ) + '=' + encodeURIComponent( value );
+	    } 
 	}
 
-	function formatData(name, value, opts) {
-
-	    opts = opts || {};
-	    opts.objTest = opts.objTest || function(name) { return false; };
-
-	    if ((typeof(value) === 'object' && opts.objTest()) || opts.nested === true) {
+	function formatData( name, value ) {
+		
+	    if( value.toString() === '[object Object]' ) {
 	        arr = [];
+	
 	        for (var key in value) {
 
-	            opts.recursion = opts.recursion || 2;
-	            opts.recursed = opts.recursed > 0 ? opts.recursed: 0;
-
-	            var v = (typeof value[key] === 'function') ? value[key]() : value[key];
-	            opts.nested = (key === opts.nestKey);
-	            arr.push( formatData(name + "[" + key + "]", v, opts) );
+	            arr.push( formatData(name + "[" + key + "]", (typeof value[key] === 'function') ? value[key]() : value[key] ) );
 	        }
+	
 	        return arr.join('&');
 	    } else {
 
-	        return serialise(name, value);
+            return params( name, value ) || "";
 	    }
 	}
 	
 	Simples.merge( Simples, {
-		formatData : formatData,
 		ajax : ajax,
-		ajaxSettings : ajaxDefaults
+		ajaxSettings : ajaxDefaults,
+		params : params
 	});	
-})( simples );
