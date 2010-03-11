@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">        
+	<meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  	<title>Simples Prototype</title>
+  	
+		<link rel="stylesheet" href="actions.css" title="standard" type="text/css" />
+
+  </head>
+  <body class="no-javascript">
+	
+	<div id="no-javascript">  
+		<h2>The Application is loading....</h2>
+		<p>If JavaScript is turned off, please enable JavaScript and reload the page.</p>
+	</div> 
+    
+	<div id="start-up">                                                                                                    
+		<h2>Waiting for available Region</h2>
+	    <p>You are currently being held in a queue. Your queue position is: <strong><span id='queue-position'>999</span></strong></p>
+	</div>   
+	<div id='region'>                        
+		<div id='region-picker'>
+			<span id='region-label'>Region: <span id='current-region'>Unknown</span></span>
+		</div>
+		<div id='color-picker'></div>        
+		<div id='lights'>        
+			<div class="row one" row="0">
+				<div class='light' col="0"></div>
+			</div>
+			<div class="row one" row="1">
+				<div class='light' col="0"></div>	  
+			</div>  
+			<div class="row two" row="2">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+			</div>
+			<div class="row two" row="3">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+			</div>
+			<div class="row three" row="4">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>	
+				<div class='light' col="2"></div>						  
+			</div>                 
+			<div class="row three" row="5">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>						  			
+			</div>
+			<div class="row" row="6">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>     
+			<div class="row" row="7">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>
+			<div class="row" row="8">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div> 
+			<div class="row" row="9">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>
+			<div class="row" row="10">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>
+			<div class="row" row="11">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>
+			<div class="row" row="12">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>
+			<div class="row" row="13">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>										   			
+			<div class="row" row="14">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>		            
+			<div class="row" row="15">
+				<div class='light' col="0"></div>
+				<div class='light' col="1"></div>			  
+				<div class='light' col="2"></div>
+				<div class='light' col="3"></div>						  									  			
+			</div>		
+		</div>     
+		<div id="wrapper">
+			<a href="#reset-page" id="reset-page">Reset Page</a>     
+			<div id="net-log"></div>
+			<div id='logger'></div>   
+		</div>
+	</div>
+	
+	<!-- js files -->                                      
+	<script type="text/javascript">
+		document.getElementById('net-log').innerHTML = new Date().toString()
+	</script>
+	          
+	<script type="text/javascript" charset="utf-8" src="../src/core.js"></script>		  
+	<script type="text/javascript" charset="utf-8" src="../src/ajax.js"></script>		  
+	<script type="text/javascript" charset="utf-8" src="../src/css.js"></script>		  
+	<script type="text/javascript" charset="utf-8" src="../src/position.js"></script>		  			
+</body>                                                          
+</html>
+	

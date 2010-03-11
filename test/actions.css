@@ -1,0 +1,74 @@
+html, body{
+	margin: 5px 10px;  
+	height:420px;   
+	position: fixed;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;                      
+	font-family: Arial, "MS Trebuchet", sans-serif;
+}             
+.region{     
+	display:inline;
+	padding:3px;
+}                                  
+#region-label{
+	font-weight: bold;
+}
+.light, .picker{
+	width: 23px;
+	height: 23px;
+	background-color: #cccccc;
+	margin:1px;
+	float:left;
+}
+.row{
+	clear:both;
+}
+.one{
+	padding-left:36px;
+	padding-right:36px;
+}
+.two{
+	padding-left:24px;
+	padding-right:24px;
+}
+.three{
+	padding-left:12px;
+	padding-right:12px;
+}
+#color-picker, #wrapper{
+	display:block; 
+	float:left;
+	clear:left;
+}
+#wrapper{
+	margin: 20px 0;
+}                
+#color-picker{
+	width:50px;
+}
+#lights{
+	position:fixed; 
+	display:block; 
+	top:10px;
+	right:10px;
+	bottom:0px;
+}
+#current-color{
+	display:block;
+	padding:1px;
+	width: 48px;
+	height:23px;
+	float:left;  
+}
+
+/*body.no-javascript div, body.startup div{
+	display:none !important;
+}
+#no-javascript, #start-up{
+	display:none;
+}
+body.no-javascript #no-javascript, body.startup #start-up{
+	display:block !important;
+} */
