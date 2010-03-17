@@ -3,13 +3,13 @@ var TAG = /\<(\w+)\/?\>/g;
 
 function Simples( selector, context ) {
 	if( !this.each ){
-	     return new Simples(selector, context);   
+	     return new Simples( selector, context );   
 	}  
 	
-	return init.apply( this, arguments );
+	return select.apply( this, arguments );
 }
 
-function init( selector, context ){
+function select( selector, context ){
 	
    	// Handle $(""), $(null), or $(undefined)
 	if ( !selector ) {
