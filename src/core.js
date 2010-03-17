@@ -186,6 +186,14 @@ Simples.prototype = {
 			});
 		}
 		return this;
+	}, 
+	prepend : function( child ){
+		if ( child.nodeType || child instanceof Simples ) {
+			return this.each(function(){
+				
+				this.parentNode.insertBefore( child, this );
+			});
+		}
 	},
 	wrap : function( selector ) {
 		
