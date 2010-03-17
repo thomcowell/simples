@@ -1,8 +1,79 @@
 // Constants
 var TAG = /\<(\w+)\/?\>/g;
 
-function Simples(selector, context) {
-    return new Simples.fn.init(selector, context);
+function Simples( selector, context ) {
+	if( !this.each ){
+	     return new Simples(selector, context);   
+	}  
+	
+	return init.apply( this, arguments );
+}
+
+function init( selector, context ){
+	
+   	// Handle $(""), $(null), or $(undefined)
+	if ( !selector ) {
+		return this;
+	}
+
+	// Handle $(DOMElement)
+	if ( selector.nodeType ) {
+		this.context = this[0] = selector;
+		this.length = 1;
+		return this;
+	}
+
+	
+    if ( typeof( selector ) === 'string' ) {  
+	
+		var tag = TAG.exec( selector );
+
+		if( tag !== null && tag.length === 2 ){       
+			
+			this.context = document;
+			this[0] = this.context.createElement( tag[1] );
+			this.length = 1;        
+			
+			return this;
+		} else {
+			
+			this.selector = selector;
+			this.context = context || document;		 
+
+			tag = selector.substring(1);
+
+	    	if (selector.indexOf('#') === 0) {
+	            // Native function   
+				tag = this.context.getElementById( tag );
+				this.length = 1;
+	            this[0] = tag;
+
+	        } else if (selector.indexOf('.') === 0) {
+	         	if( this.context.getElementsByClassName ){
+		            // Native function
+	             	tag = this.context.getElementsByClassName( tag );
+
+					this.length = tag.length;
+					Simples.merge( this, tag );
+				} else {
+					// For IE which doesn't support getElementsByClassName
+					var length = 0;
+					var elems = this.context.getElementsByTagName('*'); 
+					// Loop over elements to test for correct class
+					for(var i=0,l=elems.length;i<l;i++){  
+						// Detect whether this element has the class specified
+						if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
+							this[length] = elems[i];
+							length++;
+						}
+					}
+					this.length = length;
+				}
+			}
+		}
+    }                      
+	
+ 	return this;
 }
 
 /**
@@ -97,76 +168,8 @@ merge( Simples, {
 		cssFloat: !!a.style.cssFloat
 	}
 });
-      
-// Assigned to Simples.fn to allow the Simples( selector ) to correctly call new Simples.init
-Simples.fn = Simples.prototype = {  
-	// selector function
-    init: function(selector, context) { 
-	
-       	// Handle $(""), $(null), or $(undefined)
-		if ( !selector ) {
-			return this;
-		}
 
-		// Handle $(DOMElement)
-		if ( selector.nodeType ) {
-			this.context = this[0] = selector;
-			this.length = 1;
-			return this;
-		}
-  
-		
-	    if ( typeof( selector ) === 'string' ) {  
-		
-			var tag = TAG.exec( selector );
-
-			if( tag !== null && tag.length === 2 ){       
-				
-				this.context = document;
-				this[0] = this.context.createElement( tag[1] );
-				this.length = 1;        
-				
-				return this;
-			} else {
-				
-				this.selector = selector;
-				this.context = context || document;		 
-
-				tag = selector.substring(1);
-
-		    	if (selector.indexOf('#') === 0) {
-		            // Native function   
-					tag = this.context.getElementById( tag );
-					this.length = 1;
-		            this[0] = tag;
-
-		        } else if (selector.indexOf('.') === 0) {
-		         	if( this.context.getElementsByClassName ){
-			            // Native function
-		             	tag = this.context.getElementsByClassName( tag );
-
-						this.length = tag.length;
-						Simples.merge( this, tag );
-					} else {
-						// For IE which doesn't support getElementsByClassName
-						var length = 0;
-						var elems = this.context.getElementsByTagName('*'); 
-						// Loop over elements to test for correct class
-						for(var i=0,l=elems.length;i<l;i++){  
-							// Detect whether this element has the class specified
-							if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
-								this[length] = elems[i];
-								length++;
-							}
-						}
-						this.length = length;
-					}
-				}
-			}
-	    }                      
-		
-	 	return this;
-    },
+Simples.prototype = {  
 	each : function( callback ){
 		
 		for(var i=0,l=this.length;i<l;i++){
@@ -205,7 +208,3 @@ Simples.fn = Simples.prototype = {
 		});
 	}
 };      
-
-
-// Give the init function the Simples prototype for later instantiation
-Simples.fn.init.prototype = Simples.fn;
