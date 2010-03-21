@@ -1,5 +1,6 @@
 // Constants
-var TAG = /\<(\w+)\/?\>/g;
+var TAG = /\<(\w+)\/?\>/g,
+	SPACE_WITH_BOUNDARY = /\b\s+\b/;
 
 function Simples( selector, context ) {
 	if( !this.each ){
@@ -26,54 +27,68 @@ function select( selector, context ){
 	
     if ( typeof( selector ) === 'string' ) {  
 	
-		var tag = TAG.exec( selector );
-
+		var tag = TAG.exec( selector );         
+		
 		if( tag !== null && tag.length === 2 ){       
 			
 			this.context = document;
 			this[0] = this.context.createElement( tag[1] );
 			this.length = 1;        
+
+		} else {   
 			
-			return this;
-		} else {
+			context = context || document;
+			this.context = context;
 			
 			this.selector = selector;
-			this.context = context || document;		 
-
-			tag = selector.substring(1);
-
-	    	if (selector.indexOf('#') === 0) {
-	            // Native function   
-				tag = this.context.getElementById( tag );
-				this.length = 1;
-	            this[0] = tag;
-
-	        } else if (selector.indexOf('.') === 0) {
-	         	if( this.context.getElementsByClassName ){
-		            // Native function
-	             	tag = this.context.getElementsByClassName( tag );
-
-					this.length = tag.length;
-					Simples.merge( this, tag );
+			
+			var split = selector.split( SPACE_WITH_BOUNDARY );     
+			
+			for(var i=0,l=split.length;i<l;i++){           
+			   	if( context.length > 0){
+					var result = [];
+					for(var m=0,n=context.length;m<n;m++){
+						result.concat( getElements( split[i], context[m] ) );
+					}                                                     
+					context = result;
 				} else {
-					// For IE which doesn't support getElementsByClassName
-					var length = 0;
-					var elems = this.context.getElementsByTagName('*'); 
-					// Loop over elements to test for correct class
-					for(var i=0,l=elems.length;i<l;i++){  
-						// Detect whether this element has the class specified
-						if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
-							this[length] = elems[i];
-							length++;
-						}
-					}
-					this.length = length;
+					context = getElements( split[i], context );
 				}
-			}
+			}     
+			
+			this.length = context.length;
+			Simples.merge( this, context );
 		}
     }                      
 	
  	return this;
+}
+
+function getElements( selector, context ){
+	tag = selector.substring(1);
+
+	if ( selector.indexOf('#') === 0) {
+        // Native function   
+		return [ context.getElementById( tag ) ];
+
+    } else if (selector.indexOf('.') === 0) {
+     	if( context.getElementsByClassName ){
+            // Native function
+         	return context.getElementsByClassName( tag );
+		} else {
+			// For IE which doesn't support getElementsByClassName
+			var elems = context.getElementsByTagName('*'),
+				nodes = [];
+			// Loop over elements to test for correct class
+			for(var i=0,l=elems.length;i<l;i++){  
+				// Detect whether this element has the class specified
+				if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
+					nodes.push( elems[i] );
+				}
+			}
+			return nodes;
+		}
+	}
 }
 
 /**
