@@ -3,27 +3,27 @@ var TAG = /\<(\w+)\/?\>/g,
 	SPACE_WITH_BOUNDARY = /\b\s+\b/;
 
 function Simples( selector, context ) {
+	
 	if( !this.each ){
 	     return new Simples( selector, context );   
+	}
+	
+   	// Handle $(""), $(null), or $(undefined)
+	if ( !selector ) {
+		return this;
+	}
+	
+	// Handle $(DOMElement)
+	if ( selector.nodeType ) {
+		this.context = this[0] = selector;
+		this.length = 1;
+		return this;
 	}  
 	
 	return select.apply( this, arguments );
 }
 
 function select( selector, context ){
-	
-   	// Handle $(""), $(null), or $(undefined)
-	if ( !selector ) {
-		return this;
-	}
-
-	// Handle $(DOMElement)
-	if ( selector.nodeType ) {
-		this.context = this[0] = selector;
-		this.length = 1;
-		return this;
-	}
-
 	
     if ( typeof( selector ) === 'string' ) {  
 	
@@ -191,7 +191,13 @@ Simples.prototype = {
 			
 			callback.call( this[i] );
 		}   
-	}, 
+	},  
+	find : function( selector ){               
+		if( !TAG.test( selector ) ){
+			return select.call( new Simples(), this );
+		}
+		return this;
+	},
 	append : function( child ){                        
 		debugger;
 		if ( child.nodeType || child instanceof Simples ) {
