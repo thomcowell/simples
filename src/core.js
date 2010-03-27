@@ -194,12 +194,12 @@ Simples.prototype = {
 	},  
 	find : function( selector ){               
 		if( !TAG.test( selector ) ){
-			return select.call( new Simples(), this );
+			return new Simples( selector, this );
 		}
 		return this;
 	},
 	append : function( child ){                        
-		debugger;
+
 		if ( child.nodeType || child instanceof Simples ) {
 			return this.each(function(){
 				
