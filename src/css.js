@@ -107,7 +107,7 @@ Simples.extend({
 		}
 
 		var style = elem.style || elem, set = value !== undefined;
-		if( name && value ){
+		if( typeof name === 'string' && value ){
 			
 			this.each(function(){
 				this.style[ name ] = value;

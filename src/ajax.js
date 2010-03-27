@@ -249,5 +249,5 @@ function formatData(name, value) {
 Simples.merge(Simples, {
     ajax: ajax,
     ajaxSettings: ajaxDefaults,
-    params: params
+    params: formatData
 });
