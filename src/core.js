@@ -118,10 +118,12 @@ function merge( target /* obj1, obj2..... */) {
 **/
 function extend(subClass, superClass, addMethods) { 
 
-	if( arguments.length === 1 && typeof(arguments[0]) === 'object' ){
+	if( arguments.length === 1 && Simples.isObject( arguments[0] ) ){
 		// Shortcut to extend Simples without adding subClasses
-		addMethods = subClass;
+		addMethods = arguments[0];
 		subClass = Simples;                                     
+	} else if( arguments.length === 2 && Simples.isObject( arguments[1] ) ){
+		addMethods = arguments[1];
 	} else {                      
 		// Standard extend behaviour expected
 		var F = function() {};
@@ -152,7 +154,7 @@ var a = div.getElementsByTagName("a")[0];
 
 merge( Simples, {
 	extend : extend,
-	merge : merge,
+	merge : merge, 
 	support:{
 		boxModel : (function(){
 			var div = document.createElement("div");
@@ -171,18 +173,26 @@ merge( Simples, {
 
 Simples.prototype = {  
 	each : function( callback ){
-		
-		for(var i=0,l=this.length;i<l;i++){
+		                                                     
+		if( this.length === 1){
 			
-			callback.call( this[i] );
-		}   
+			return callback.call( this[0] );
+		} else {
+			var response = [];
+			for(var i=0,l=this.length;i<l;i++){
+			
+				response.push( callback.call( this[i] ) );
+			}
+		
+			return response.length === 1 ? response[0] : response;
+		}
 	}, 
 	append : function( child ){                        
-		debugger;
+
 		if ( child.nodeType || child instanceof Simples ) {
 			return this.each(function(){
 				
-				this.appendChild( child );
+				this.appendChild( child instanceof Simples ? child[0] : child );
 			});
 		}
 		return this;
@@ -191,7 +201,7 @@ Simples.prototype = {
 		if ( child.nodeType || child instanceof Simples ) {
 			return this.each(function(){
 				
-				this.parentNode.insertBefore( child, this );
+				this.parentNode.insertBefore( child instanceof Simples ? child[0] : child, this );
 			});
 		}
 	},
@@ -210,9 +220,10 @@ Simples.prototype = {
 		return this;
     },  
 	remove : function(){
-		return this.each(function(){
-			
+		this.each(function(){
 		   	this.parentNode.removeChild( this ); 
-		});
+		}); 
+		
+		new Simples();
 	}
 };      

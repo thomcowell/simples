@@ -95,11 +95,6 @@ Simples.extend({
 		if( value === undefined ){
 			return currentCSS(this[0], name );  
 		}   
-		
-        // don't set styles on text and comment nodes
-		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
-			return undefined;
-		}
 
 		// ignore negative width and height values #1599
 		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
@@ -115,8 +110,11 @@ Simples.extend({
 		} else if( name.toString === '[object Object]' ) {
 			
 			for( var key in name ){
-				this.each(function(){
-					this.style[ key ] = name[ key ];
+				this.each(function(){  
+					// don't set styles on text and comment nodes
+					if ( this && ( this.nodeType !== 3 || this.nodeType !== 8 ) ) {
+						this.style[ key ] = name[ key ];                           
+					}
 				});
 			}
 		}
