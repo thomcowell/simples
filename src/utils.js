@@ -1,7 +1,7 @@
 Simples.merge( Simples, {
 	setContext : function( context, func ){
 		return function(){
-			func.apply( context, arguments );
+			return func.apply( context, arguments );
 		};
 	},
 	noop : function(){},
@@ -10,6 +10,7 @@ Simples.merge( Simples, {
 		return ( obj.constructor === Array );
 	},
 	isObject : function( obj ){
+		if( !obj ){ return false; }
 		return ( obj.toString() === '[object Object]' );
 	}
 });
