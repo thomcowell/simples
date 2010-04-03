@@ -67,41 +67,30 @@ SimplesEvent.prototype = {
 	isImmediatePropagationStopped: returnFalse
 };
 
-var Events = { 
-	memory : {},
+var Events = {
 	register : function( elem, type, original, handled ){
-		if( typeof(callback) === 'function' && elem ){
-			Events.memory[ type ] = Events.memory[ type ] || {};
-			var id = elem.getAttribute('event');
-			if( !id ){                          
-				id = Events.guid++;
-				elem.setAttribute('event', id );
-				Events.memory[ type ][ id ] = [];
-			}
-			Events.memory[ type ][ id ].push( { original: original, handled: handled } );
+		if( typeof(callback) === 'function' && elem ){ 
+			elem.events = elem.events || {};
+			elem.events[ type ] = elem.events[ type ] || {};
+
+			elem.events[ type ][ Events.guid++ ] = { original: original, handled: handled };
+			return Events.guid;
 		}
 	}, 
-	getByType : function( elem, type ){
-		var id = elem.getAttribute('event') || 0;
-		if( id && Events.memory[ type ] && Events.memory[ type ][ id ] ){
-			return Events.memory[ type ][ id ];
-		}
-		return [];
-	},
 	unregister : function( elem, type, original ){
 			
 		if( typeof( orignal ) !== 'function' ){
 			return original;
 		}
 		
-		var evt = Events.getByType( elem, type );
+		var evt = elem.events[ type ];
 		
-		for(var i=0,l=evt.length;i<l;i++){
+		for( var key in evt ){
 
-			if( evt[ i ].original === original ){
+			if( evt[ key ].original === original ){
 			
-				var h = evt[ i ].handled;
-				delete evt[ i ];
+				var h = evt[ key ].handled;
+				delete evt[ key ];
 				return h;
 			}
 		}
@@ -166,23 +155,21 @@ var Events = {
 	guid : 1,
 	handler : function( elem, callback ){ 
 		
-	    var handler = function( event ) {
+	    return function( event ) {
 			event = arguments[0] = Events.fix( event || window.event );
-	        callback.apply(elem, arguments);
+	        callback.apply( elem, arguments );
 	    };
-	
-		return handler;
 	}
 };
 
 Simples.extend({
-	bind : function( type, callback){
+	bind : function( type, callback ){
 	    // create a single handled callback to ensure the function ids are the as much as possible
 	    var handled = Events.handler( this, callback );
 		// Loop over elements 
 		this.each(function(){
 			// Register each original event and the handled event to allow better detachment
-			Events.register( this, type, callback, handled );
+			var guid = Events.register( this, type, callback, handled );
 			// Attach to the element
 			if (this.addEventListener) {
 				
@@ -206,11 +193,11 @@ Simples.extend({
 			}
 		});
 	}, 
-	trigger : function( type ){
+	trigger : function( type, data ){
 		this.each(function(){
-			var events = Events.getByType( this, type );
-			for(var i=0,l=events.length;i<l;i++){
-				events[i].handled.call( SimplesEvent({ type: type, target: this }) );
+			var evt = this.events ? this.events[ type ] : {};
+			for(var key in evt ){
+				evt[ key ].handled.call( SimplesEvent({ type: type, target: this, data: data }) );
 			}
 		});
 	}
