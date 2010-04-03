@@ -6,7 +6,7 @@ function returnTrue() {
 	return true;
 }
 
-function SimplesEvent( event ){
+function SimplesEvent( event, data ){
 	// Allow instantiation without the 'new' keyword
 	if ( !this.preventDefault ) {
 		return new SimplesEvent( event );
@@ -19,6 +19,10 @@ function SimplesEvent( event ){
 	// Event type
 	} else {
 		this.type = event;
+	}
+	
+	if( data != null ){
+		this.data = data;
 	}
 
 	// timeStamp is buggy for some events on Firefox(#3843)
