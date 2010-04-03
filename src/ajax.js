@@ -16,7 +16,8 @@ var DEFAULTS = {
     // the default is simply to determine what data was returned from the
     // and act accordingly.
     data: null
-},
+},    
+// borrowed from jQuery
 ACCEPTS = {
     xml: "application/xml, text/xml",
     html: "text/html",
@@ -47,8 +48,7 @@ function ajax(url, options) {
         throw new Error('A URL must be provided.');
     }
 
-    options = Simples.merge({},
-    DEFAULTS, options);
+    options = Simples.merge({}, DEFAULTS, options);
 
     // How long to wait before considering the request to be a timeout
     // Create the request object
@@ -183,7 +183,7 @@ function ajax(url, options) {
                         data = window.JSON.parse(data);
 
                     } else {
-                        data = (new Function("return " + data))();
+                        data = ( new Function("return " + data) )();
                     }
 
                 } else {
@@ -205,44 +205,44 @@ function ajax(url, options) {
 function serialise(obj) {
     var arr = [];
 
-    if (obj.toString === "[object Object]") {
+    if ( Simples.isObject( obj ) ) {
         for (var key in obj) {
-            arr.push(formatData(key, obj[key]));
-        }
-    } else if (obj.toString === "[object Array]") {
+	
+            arr[ arr.length ] = formatData( key, obj[key] );
+		}
+    } else if ( Simples.isArray( obj ) ) {
         for (var i = 0, l = obj.length; i < l; i++) {
-            if (obj[i].toString === "[object Object]") {
-                arr.push(params(obj[i].name, obj[i].value));
+	
+            if ( Simples.isObject( obj[i] ) ) {
+	
+                arr[ arr.length ] = params( obj[i].name, obj[i].value );
             }
         }
     }
 
-    return typeof(obj) === 'string' ? obj: arr.join('&');
-}
-
-function params(name, value) {
-
-    value = typeof(value) === 'function' ? value() : value;
-    if (name && TYPEOF.test(typeof(value))) {
-
-        return encodeURIComponent(name) + '=' + encodeURIComponent(value);
-    }
+    return typeof( obj ) === 'string' ? obj: arr.join('&');
 }
 
 function formatData(name, value) {
 
-    if (value.toString() === '[object Object]') {
+    if ( Simples.isObject( value ) ) {
         arr = [];
 
         for (var key in value) {
 
-            arr.push(formatData(name + "[" + key + "]", (typeof value[key] === 'function') ? value[key]() : value[key]));
+            arr[ arr.length ] = formatData(name + "[" + key + "]", ( typeof value[key] === 'function' ) ? value[key]() : value[key] );
         }
 
         return arr.join('&');
-    } else {
+    } else if( typeof value === 'string' ) {
+	
+	    value = typeof(value) === 'function' ? value() : value;
+		var str = "";
+	    if (name && TYPEOF.test(typeof(value))) {
 
-        return params(name, value) || "";
+	        str = encodeURIComponent(name) + '=' + encodeURIComponent(value);
+	    }
+        return str;
     }
 }
 
