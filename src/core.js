@@ -197,39 +197,55 @@ Simples.prototype = {
 
 		if ( child.nodeType || child instanceof Simples ) {
 			return this.each(function(){
-				
-				this.appendChild( child instanceof Simples ? child[0] : child );
+				if( child instanceof Simples ){
+					var that = this;
+					child.each(function(){
+						that.appendChild( this );
+					});
+				} else {
+					this.appendChild( child );
+				}
 			});
 		}
 		return this;
 	}, 
 	prepend : function( child ){
 		if ( child.nodeType || child instanceof Simples ) {
-			return this.each(function(){
-				
-				this.parentNode.insertBefore( child instanceof Simples ? child[0] : child, this );
+			return this.each(function(){       
+				var parent = this.parentNode;
+				if( child instanceof Simples ){
+					var that = this;
+					child.each(function(){
+						parent.insertBefore( this, that );
+					});
+				} else {
+					parent.insertBefore( child, this );
+				}
 			});
 		}
+		return this;
 	},
-	wrap : function( selector ) {
+	wrap : function( selector ) { 
 		
-		this.each(function(){                         
+		if( typeof selector === 'string' ){            
 			
-			var tag = TAG.exec( selector || '<div/>' ); 
+			var tag = TAG.exec( selector || '<div/>' );
+			tag = ( tag !== null && tag.length === 2 ) ? tag[1] : 'div';
+			
+			this.each(function(){                          
 
-			var div = document.createElement( ( tag !== null && tag.length === 2 ) ? tag[1] : 'div' );
+				var elem = document.createElement( tag );
 
-	        this.parentNode.insertBefore(div, this);
-	        div.appendChild(this);
-		});
+		        this.parentNode.insertBefore(elem, this);
+		        elem.appendChild(this);
+			});                                
+		}
 		
 		return this;
-    },  
+    },   
 	remove : function(){
 		this.each(function(){
 		   	this.parentNode.removeChild( this ); 
-		}); 
-		
-		new Simples();
+		});
 	}
 };      
