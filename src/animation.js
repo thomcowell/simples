@@ -1,5 +1,16 @@
 var FRAME_RATE = 24,
-	TEST_TYPE = /padding|margin|height|width|top|left|right|bottom/;   
+	TEST_TYPE = /padding|margin|height|width|top|left|right|bottom/,
+	TWEENS = {
+		easing : function( frame, frameCount, start, delta) {
+			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
+		},
+		linear : function( frame, frameCount, start, delta){
+			return start + ( delta * ( frame/frameCount ));
+		},
+		quadratic : function( frame, frameCount, start, delta ){
+			return start + (((Math.cos((frame/frameCount)*Math.PI) )/2) * delta );
+		}
+	};   
 	
 function init( opts ){
 
@@ -21,20 +32,16 @@ function init( opts ){
 
 			this._start[ key ] = start;				
 			this._delta[ key ] = ( (opts.setStyle[ key ] + '' || '0').replace('px','') * 1 ) - start;
-		}
-	}
+		}                                        
+	}                                            
+	this._tween = opts.tween && TWEENS.propertyIsEnumerable( opts.tween ) ? TWEENS[ opts.tween ] : TWEENS.easing;
 	
 	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : opts.reverse ? Simples.setContext( this, this.reverse ) : null;
 
-	this._autoStart = opts.manualStart !== true;  
-	debugger;
+	this._autoStart = opts.manualStart !== true; 
 	
 	return this._autoStart ? this.start() : this;	
-}         
-
-function tween( frame, frameCount, start, delta) {
-	return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
-};
+}
 
 function Animation( elem, opts ){
 	if( !( elem && opts ) ){
@@ -50,21 +57,15 @@ function Animation( elem, opts ){
 Animation.prototype = { 
 	start : function( frame ){
 		
-		this._frame = typeof frame === 'number' ? frame : 0;  
+		this._frame = ( typeof frame === 'number' ) ? frame : 0;  
 		var that = this;
 		
-		this._intervalId = setInterval( function(){      
-			
-			that.advance();
-
-			if ( that._frame > that._frames ) {  
-				that.stop();
-			}
-		}, this._interval ); 
+		this._intervalId = setInterval( Simples.setContext( this, this.advance ), this._interval ); 
 		
 		return this;
 	}, 
 	stop : function(){
+		
 		clearInterval( this._intervalId );                                                      
 		
 		if( typeof this._callback === 'function' ){ 
@@ -88,39 +89,59 @@ Animation.prototype = {
 	advance : function(){
 		
 		for( var key in this._start ){
-			this[0].style[ key ] = tween( this._frame, this._frames, this._start[ key ], this._delta[ key ] );
+			this[0].style[ key ] = this._tween( this._frame, this._frames, this._start[ key ], this._delta[ key ] );
 		}
 		
-		this._frame++;       
+		this._frame++;   
+		
+		if ( this._frame > this._frames ) { this.stop(); }
+		    
 		return this;
 	}
-};
+};  
 
-// function testForSimpleCSS( simple, css ){    
-// 	var length = 0;
-// 	
-// 	if( Simples.isObject( css ) ){
-// 		for( var key in css ){
-// 			length++;
-// 		}
-// 	} else if ( typeof css === 'string' ){
-// 		length = 1;
-// 	}
-// 	
-// 	return ( length === 1 );
-// }
+
+function CompositeAnimation( elems, opts ){
+	this.length = 0;
+	var that = this;
+	
+	elems.each(function(){
+		that[ that.length ] = new Animation( this, opts );
+		that.length++;
+	});
+	
+	return this;
+}
+
+for( var key in Animation.prototype ){
+	CompositeAnimation.prototype[ key ] = function(){
+		for(var i=0,l=this.length;i<l;i++){
+			this[ i ][ key ]();
+		}
+		return this;
+	};
+}
 
 Simples.merge(Simples, {
     animationDefaults: function( opts ){
 	  	opts = opts || {};
 		FRAME_RATE = opts.frameRate || FRAME_RATE;
+		if( opts.tweens ){
+			for( var key in opts.tweens ){
+				if( !hasOwnProperty.call( TWEENS, key ) ){
+					TWEENS[ key ] = opts.tweens[ key ];
+				}
+			}
+		}
 	}
 });
 
 Simples.extend({
     animate: function( opts ){    
-		return this.each(function(){     
-			return new Animation( this, opts );
-		});                                     
+		if( this.length === 1){
+			return new Animation( this[0], opts );
+		} else {
+			return new CompositeAnimation( this, opt );
+		}                                
 	}
 });	
