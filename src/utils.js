@@ -7,10 +7,10 @@ Simples.merge( Simples, {
 	noop : function(){},
 	isArray : function( obj ){ 
 		if( !obj ){ return false; }
-		return ( obj.constructor === Array );
+		return ( toString.call( obj ) === '[object Array]' );
 	},
 	isObject : function( obj ){
 		if( !obj ){ return false; }
-		return ( obj.toString() === '[object Object]' );
+		return ( toString.call( obj ) === '[object Object]' );
 	}
 });

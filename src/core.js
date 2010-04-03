@@ -1,5 +1,11 @@
 // Constants
-var TAG = /\<(\w+)\/?\>/g;
+var TAG = /\<(\w+)\/?\>/g,
+	// Save a reference to some core methods
+	toString = Object.prototype.toString,
+	hasOwnProperty = Object.prototype.hasOwnProperty,
+	push = Array.prototype.push,
+	slice = Array.prototype.slice,
+	indexOf = Array.prototype.indexOf;
 
 function Simples( selector, context ) {
 	if( !this.each ){
