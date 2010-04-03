@@ -94,21 +94,19 @@ function merge( target /* obj1, obj2..... */) {
     target = target || {};
     
     for (var i=1,l=arguments.length; i<l; i++) {
-        if (typeof(arguments[i]) === 'object' && arguments[i] !== null) {
 	
-			if( arguments[i].constructor === Array ){
-				
-				for( var a=0,b=arguments[i].length;a<b;a++){
-					target[a] = arguments[i][a]; 
-				}
-			} else {
-				for (var key in arguments[i]) {
-	                if (arguments[i].hasOwnProperty(key)) {
-	                    target[key] = arguments[i][key];
-	                }
-	            }
+		if( Simples.isObject( arguments[i] ) ){
+			for (var key in arguments[i]) {
+                if ( hasOwnProperty.call( arguments[i], key ) ) {
+                    target[key] = arguments[i][key];
+                }
+            }
+		} else if( Simples.isArray( arguments[i] ) ){
+
+			for( var a=0,b=arguments[i].length;a<b;a++){
+				target[a] = arguments[i][a]; 
 			}
-        }
+		}                                            
     }
 
     return target;
@@ -117,18 +115,21 @@ function merge( target /* obj1, obj2..... */) {
 /**
 * @name extend
 * @namespace
-* @description used to extend a superclass onto a subclass and add functions
+* @description used to extend functions onto an Class 
+	if subClass & superClass are not specified extend onto Simples the object provided
+	if SuperClass is not specified extend onto subClass the object provided
+	if no addMethods are specified no superClass structure is created, to ensure superClass structure pass in an empty object
 * @param {Constructor} subClass the base class to add the superClass and addMethods to
 * @param {Constructor} superClass the Class to extend onto subClass
 * @param {Object} addMethods methods to add to the extended subClass object
 **/
 function extend(subClass, superClass, addMethods) { 
-
-	if( arguments.length === 1 && Simples.isObject( arguments[0] ) ){
+	
+	if( arguments.length === 1 ){
 		// Shortcut to extend Simples without adding subClasses
 		addMethods = arguments[0];
 		subClass = Simples;                                     
-	} else if( arguments.length === 2 && Simples.isObject( arguments[1] ) ){
+	} else if( arguments.length === 2 ){
 		addMethods = arguments[1];
 	} else {                      
 		// Standard extend behaviour expected
@@ -145,11 +146,14 @@ function extend(subClass, superClass, addMethods) {
 	    }
 	}
 
-    for (var key in addMethods) {
-        if (addMethods.hasOwnProperty(key)) {
-            subClass.prototype[key] = addMethods[key];
-        }
-    }
+	// Detect whether addMethods is an object to extend onto subClass
+	if( Simples.isObject( addMethods ) ){
+		for (var key in addMethods) {
+	        if ( hasOwnProperty.call( addMethods, key ) ) {
+	            subClass.prototype[key] = addMethods[key];
+	        }
+	    }
+	}
 }
   
 var div = document.createElement("div");
