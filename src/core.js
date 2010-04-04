@@ -59,7 +59,6 @@ function select( selector, context ){
 		            // Native function
 	             	tag = this.context.getElementsByClassName( tag );
 
-					this.length = tag.length;
 					Simples.merge( this, tag );
 				} else {
 					// For IE which doesn't support getElementsByClassName
@@ -116,10 +115,12 @@ function merge( first /* obj1, obj2..... */) {
                     target[key] = arguments[i][key];
                 }
             }
-		} else if( Simples.isArray( arguments[i] ) ){
-
+		} else if( isArray( arguments[i] ) ){
+         	// if array apply directly to target with numerical keys
+			if ( !hasOwnProperty.call( target, 'length' ) ){ target.length = 0; }
 			for( var a=0,b=arguments[i].length;a<b;a++){
-				target[a] = arguments[i][a]; 
+				target[ target.length ] = arguments[i][a]; 
+				target.length++;
 			}
 		}                                            
     }
@@ -130,22 +131,21 @@ function merge( first /* obj1, obj2..... */) {
 /**
 * @name extend
 * @namespace
-* @description used to extend functions onto an Class 
-	if subClass & superClass are not specified extend onto Simples the object provided
-	if SuperClass is not specified extend onto subClass the object provided
-	if no addMethods are specified no superClass structure is created, to ensure superClass structure pass in an empty object
+* @description used to extend functions onto an Class: 1 argument onto this, 2 arguments onto Class & 3 arguments subClass, superClass and methods to add to build a heirarchy
 * @param {Constructor} subClass the base class to add the superClass and addMethods to
 * @param {Constructor} superClass the Class to extend onto subClass
 * @param {Object} addMethods methods to add to the extended subClass object
 **/
 function extend(subClass, superClass, addMethods) { 
-	
+    // if subClass & superClass are not specified extend onto Simples the object provided
 	if( arguments.length === 1 ){
 		// Shortcut to extend Simples without adding subClasses
 		addMethods = arguments[0];
-		subClass = Simples;                                     
+		subClass = this;  
+	// if SuperClass is not specified extend onto subClass the object provided
 	} else if( arguments.length === 2 ){
-		addMethods = arguments[1];
+		addMethods = arguments[1];      
+	// if no addMethods are specified no superClass structure is created, to ensure superClass structure pass in an empty object
 	} else {                      
 		// Standard extend behaviour expected
 		var F = function() {};

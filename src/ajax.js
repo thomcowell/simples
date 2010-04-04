@@ -246,7 +246,7 @@ function formatData(name, value) {
     }
 }
 
-Simples.merge(Simples, {
+Simples.merge({
     ajax: ajax,
     ajaxSettings: ajaxDefaults,
     params: formatData
