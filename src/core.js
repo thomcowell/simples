@@ -82,6 +82,20 @@ function select( selector, context ){
  	return this;
 }
 
+function isArray( obj ){ 
+	if( !obj ){ return false; }
+	return ( toString.call( obj ) === '[object Array]' );
+}
+
+function isObject( obj ){
+	if( !obj ){ return false; }
+	return ( toString.call( obj ) === '[object Object]' );
+}
+
+function isFunction( obj ) {
+	return ( toString.call(obj) === "[object Function]" );
+}        
+
 /**
  * @name merge
  * @namespace
@@ -89,13 +103,14 @@ function select( selector, context ){
  * @param {Object} obj native javascript object to be merged  
  * @param {Object|Array} obj native javascript object or array to be merged onto first  	
  **/
-function merge( target /* obj1, obj2..... */) { 
-	
-    target = target || {};
-    
-    for (var i=1,l=arguments.length; i<l; i++) {
-	
-		if( Simples.isObject( arguments[i] ) ){
+function merge( first /* obj1, obj2..... */) { 
+	// if only 1 argument is passed in assume Simples is the target
+    var target = arguments.length === 1 ? this : isObject( first ) ? first : {};
+    var i = arguments.length > 1 ? 1 : 0;
+	// Loop over arguments
+    for (var l=arguments.length; i<l; i++) {
+		// if object apply directly to target with same keys
+		if( isObject( arguments[i] ) ){
 			for (var key in arguments[i]) {
                 if ( hasOwnProperty.call( arguments[i], key ) ) {
                     target[key] = arguments[i][key];
@@ -147,7 +162,7 @@ function extend(subClass, superClass, addMethods) {
 	}
 
 	// Detect whether addMethods is an object to extend onto subClass
-	if( Simples.isObject( addMethods ) ){
+	if( isObject( addMethods ) ){
 		for (var key in addMethods) {
 	        if ( hasOwnProperty.call( addMethods, key ) ) {
 	            subClass.prototype[key] = addMethods[key];
@@ -162,9 +177,13 @@ div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:le
 
 var a = div.getElementsByTagName("a")[0];
 
-merge( Simples, {
+// call with Simples to make sure context is correct
+merge.call( Simples, {
 	extend : extend,
-	merge : merge, 
+	merge : merge,
+	isArray : isArray,
+	isObject : isObject,
+	isFunction: isFunction,	
 	support:{
 		boxModel : (function(){
 			var div = document.createElement("div");
