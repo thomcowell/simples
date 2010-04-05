@@ -1,6 +1,7 @@
 // Constants
 var TAG = /\<(\w+)\/?\>/,
-	TAG_STRIP = /\b[\.|\#\|\[\=].+/g,
+	// TAG_STRIP = /\b[\.|\#\|\[].+/g,
+	TAG_STRIP = /\b[\.|\#\|\[\=].+/g,	
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	slice = Array.prototype.slice;
 
@@ -28,8 +29,8 @@ function Simples( selector, context ) {
 function select( selector, context ){
 
     if ( typeof( selector ) === 'string' ) {
-
-        selector = selector.replace( TAG_STRIP, '');
+		// clean up selector
+        selector = selector.replace( TAG_STRIP, ''); 
 		var tag = TAG.exec( selector );         
 
 		if( tag !== null && tag.length > 1 ){       
@@ -73,7 +74,9 @@ function getElements( selector, context ){
 	
 	if ( selector.indexOf('#') === 0) {
         // Native function
-		return [ document.getElementById( tag ) ];
+		var id = document.getElementById( tag ); 
+		// test to make sure id is the own specified, because of name being read as id in some browsers
+		return id && id.id === tag ? [ id ] : [];
 
     } else if ( selector.indexOf('.') === 0) {
      	if( context.getElementsByClassName ){
@@ -92,11 +95,37 @@ function getElements( selector, context ){
 			}
 			return nodes;
 		}
+	// } else if (selector.indexOf('name=') === 0) {
+	// 	tag = selector.substring(5);
+	// 	var result = document.getElementsByName( tag ),      
+	// 		nodes = [];
+	// 
+	// 	for ( var i = 0, l = result.length; i < l; i++ ) {
+	// 		if ( result[i].getAttribute("name") === tag ) {
+	// 			nodes.push( result[i] );
+	// 		}
+	// 	}
+	// 
+	// 	return nodes.length === 0 ? [] : nodes;  
 	} else {     
 		// assume that if not id or class must be tag
 		return slice.call( context.getElementsByTagName( selector ), 0 );
 	}
 }
+
+function isArray( obj ){ 
+	if( !obj ){ return false; }
+	return ( toString.call( obj ) === '[object Array]' );
+}
+
+function isObject( obj ){
+	if( !obj ){ return false; }
+	return ( toString.call( obj ) === '[object Object]' );
+}
+
+function isFunction( obj ) {
+	return ( toString.call(obj) === "[object Function]" );
+}        
 
 /**
  * @name merge

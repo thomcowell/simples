@@ -25,9 +25,13 @@ test('simple selector', 6, function(){
 	var body = Simples('body');
 	same( body.length, 1, "body -- should find 1 element with the tagName of body");
 	same( body[0].tagName, 'BODY', "body -- should have a tagName of body");
-	
+
 	var none = Simples('hammer');
-	same( none.length, 0, "hammer -- should have returned no elements");		
+	same( none.length, 0, "hammer -- should have returned no elements");
+	
+	// var input = Simples('name=hammer');
+	// same( input.length, 1, "name=hammer -- should find 1 element with the tagName of body");
+	// same( input[0].tagName, 'INPUT', "name=hammer -- should have a tagName of body");  	
 });
 
 test('chained selector', 9, function(){
@@ -48,6 +52,10 @@ test('chained selector', 9, function(){
 	var body = Simples('body h2');
 	same( body.length, 2, "body h2 -- should find 2 elements with the tagName of h2");
 	same( body[0].tagName, 'H2', "body h2 -- should have a tagName of h2");	
+	
+	// var rows = Simples('#row-wrapper name=row');
+	// same( rows.length, 2, "#row-wrapper name=row -- should find 2 elements with the class cell" );
+	// same( rows[0].tagName, 'INPUT', "#row-wrapper name=row -- should have a tagName of input");	
 });
 
 test('badly constructed selector', 12, function(){
