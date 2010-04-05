@@ -1,6 +1,7 @@
 // Constants
-var TAG = /\<(\w+)\/?\>/g,
-	SPACE_WITH_BOUNDARY = /\b\s+\b/;
+var TAG = /\<(\w+)\/?\>/,
+	SPACE_WITH_BOUNDARY = /\b\s+/g,
+	slice = Array.prototype.slice;
 
 function Simples( selector, context ) {
 	
@@ -24,39 +25,40 @@ function Simples( selector, context ) {
 }
 
 function select( selector, context ){
-	
+
     if ( typeof( selector ) === 'string' ) {  
-	
+
 		var tag = TAG.exec( selector );         
-		
-		if( tag !== null && tag.length === 2 ){       
-			
+
+		if( tag !== null && tag.length > 1 ){       
+
 			this.context = document;
+			this.selector = tag[0];
 			this[0] = this.context.createElement( tag[1] );
 			this.length = 1;        
 
-		} else {   
-			
-			context = context || document;
+		} else {
+
+			context = ( ' '+ selector.indexOf('#') > 0 ) ? document : ( context || document );
 			this.context = context;
-			
 			this.selector = selector;
 			
 			var split = selector.split( SPACE_WITH_BOUNDARY );     
-			
+
 			for(var i=0,l=split.length;i<l;i++){           
 			   	if( context.length > 0){
+
 					var result = [];
 					for(var m=0,n=context.length;m<n;m++){
-						result.concat( getElements( split[i], context[m] ) );
+
+						result = result.concat( getElements( split[i], context[m] ) );
 					}                                                     
 					context = result;
 				} else {
 					context = getElements( split[i], context );
 				}
 			}     
-			
-			this.length = context.length;
+
 			Simples.merge( this, context );
 		}
     }                      
@@ -66,21 +68,21 @@ function select( selector, context ){
 
 function getElements( selector, context ){
 	tag = selector.substring(1);
-
+	
 	if ( selector.indexOf('#') === 0) {
-        // Native function   
-		return [ context.getElementById( tag ) ];
+        // Native function
+		return [ document.getElementById( tag ) ];
 
-    } else if (selector.indexOf('.') === 0) {
+    } else if ( selector.indexOf('.') === 0) {
      	if( context.getElementsByClassName ){
             // Native function
-         	return context.getElementsByClassName( tag );
+         	return slice.call( context.getElementsByClassName( tag ), 0 );
 		} else {
 			// For IE which doesn't support getElementsByClassName
 			var elems = context.getElementsByTagName('*'),
 				nodes = [];
 			// Loop over elements to test for correct class
-			for(var i=0,l=elems.length;i<l;i++){  
+			for(var i=0,l=elems.length;i<l;i++){
 				// Detect whether this element has the class specified
 				if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
 					nodes.push( elems[i] );
@@ -88,6 +90,9 @@ function getElements( selector, context ){
 			}
 			return nodes;
 		}
+	} else {     
+		// assume that if not id or class must be tag
+		return slice.call( context.getElementsByTagName( selector ), 0 );
 	}
 }
 

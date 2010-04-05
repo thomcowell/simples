@@ -21,20 +21,19 @@
 	<ol id="qunit-tests"></ol> 
 	
 	<div id="test-area">
-	</div>               
+	</div>       
 	
-	<script type="text/javascript" charset="utf-8">
-		var test_area = document.getElementById('test-area');
-		var str = "<div class='test'>{c}</div>";
-		var html = "";
-				
-		for(var i=0,l=6;i<l;i++){
-			html += str.replace('{c}', i);
-		}
-		
-		test_area.innerHTML = html;
-	</script>
-	
+	<div id="row-wrapper">
+		<div class="row"></div>
+		<div class="row"></div> 
+		<div class="row"></div> 
+		<div class="row"></div> 
+		<div class="row"></div> 
+		<div class="row"></div> 
+		<div class="row"></div> 
+		<div class="row"></div>
+	</div>
+								
 	<!-- Library Files -->
 	<script type="text/javascript" charset="utf-8" src="../src/core.js"></script>
 	<script type="text/javascript" charset="utf-8" src="../src/utils.js"></script>    
