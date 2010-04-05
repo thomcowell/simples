@@ -1,5 +1,6 @@
 // Constants
 var TAG = /\<(\w+)\/?\>/,
+	TAG_STRIP = /\b[\.|\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	slice = Array.prototype.slice;
 
@@ -26,8 +27,9 @@ function Simples( selector, context ) {
 
 function select( selector, context ){
 
-    if ( typeof( selector ) === 'string' ) {  
+    if ( typeof( selector ) === 'string' ) {
 
+        selector = selector.replace( TAG_STRIP, '');
 		var tag = TAG.exec( selector );         
 
 		if( tag !== null && tag.length > 1 ){       
@@ -39,7 +41,7 @@ function select( selector, context ){
 
 		} else {
 
-			context = ( ' '+ selector.indexOf('#') > 0 ) ? document : ( context || document );
+			context = context || document;
 			this.context = context;
 			this.selector = selector;
 			
