@@ -1,5 +1,9 @@
 // Constants
-var TAG = /\<(\w+)\/?\>/g,
+var TAG = /\<(\w+)\/?\>/,
+	// TAG_STRIP = /\b[\.|\#\|\[].+/g,
+	FIRST_ID = '#',
+	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
+	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	// Save a reference to some core methods
 	toString = Object.prototype.toString,
 	hasOwnProperty = Object.prototype.hasOwnProperty,
@@ -8,77 +12,115 @@ var TAG = /\<(\w+)\/?\>/g,
 	indexOf = Array.prototype.indexOf;
 
 function Simples( selector, context ) {
+	
 	if( !this.each ){
 	     return new Simples( selector, context );   
+	}
+	
+   	// Handle $(""), $(null), or $(undefined)
+	if ( !selector ) {
+		return this;
+	}
+	
+	// Handle $(DOMElement)
+	if ( selector.nodeType ) {
+		this.context = this[0] = selector;
+		this.length = 1;
+		return this;
 	}  
 	
 	return select.apply( this, arguments );
 }
 
 function select( selector, context ){
-	
-   	// Handle $(""), $(null), or $(undefined)
-	if ( !selector ) {
-		return this;
-	}
 
-	// Handle $(DOMElement)
-	if ( selector.nodeType ) {
-		this.context = this[0] = selector;
-		this.length = 1;
-		return this;
-	}
-
-	
-    if ( typeof( selector ) === 'string' ) {  
-	
+    if ( typeof( selector ) === 'string' ) {
+		// clean up selector           
+        selector = selector.replace( TAG_STRIP, '');
+		// get last id in selector
+		var index = selector.lastIndexOf( FIRST_ID );
+		selector = selector.substring( index > 0 ? index : 0 );
+		// check selector if structured to create element
 		var tag = TAG.exec( selector );
+		if( tag !== null && tag.length > 1 ){
 
-		if( tag !== null && tag.length === 2 ){       
-			
 			this.context = document;
+			this.selector = tag[0];
 			this[0] = this.context.createElement( tag[1] );
 			this.length = 1;        
-			
-			return this;
 		} else {
-			
+
+			context = context || document;
+			this.context = context;
 			this.selector = selector;
-			this.context = context || document;		 
+			
+			var split = selector.split( SPACE_WITH_BOUNDARY );     
 
-			tag = selector.substring(1);
+			for(var i=0,l=split.length;i<l;i++){           
+			   	if( context.length > 0){
 
-	    	if (selector.indexOf('#') === 0) {
-	            // Native function   
-				tag = this.context.getElementById( tag );
-				this.length = 1;
-	            this[0] = tag;
+					var result = [];
+					for(var m=0,n=context.length;m<n;m++){
 
-	        } else if (selector.indexOf('.') === 0) {
-	         	if( this.context.getElementsByClassName ){
-		            // Native function
-	             	tag = this.context.getElementsByClassName( tag );
-
-					Simples.merge( this, tag );
-				} else {
-					// For IE which doesn't support getElementsByClassName
-					var length = 0;
-					var elems = this.context.getElementsByTagName('*'); 
-					// Loop over elements to test for correct class
-					for(var i=0,l=elems.length;i<l;i++){  
-						// Detect whether this element has the class specified
-						if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
-							this[length] = elems[i];
-							length++;
-						}
+						result = result.concat( getElements( split[i], context[m] ) );
 					}
-					this.length = length;
+					context = result;
+				} else {
+					context = getElements( split[i], context );
 				}
-			}
+			}     
+
+			Simples.merge( this, context );
 		}
     }                      
 	
  	return this;
+}
+
+function getElements( selector, context ){
+
+	context = context || document;
+	tag = selector.substring(1);
+	
+	if ( selector.indexOf('#') === 0) {
+        // Native function
+		var id = document.getElementById( tag ); 
+		// test to make sure id is the own specified, because of name being read as id in some browsers
+		return id && id.id === tag ? [ id ] : [];
+
+    } else if ( selector.indexOf('.') === 0) {
+     	if( context.getElementsByClassName ){
+            // Native function
+         	return slice.call( context.getElementsByClassName( tag ), 0 );
+		} else {
+			// For IE which doesn't support getElementsByClassName
+			var elems = context.getElementsByTagName('*'),
+				nodes = [];
+			// Loop over elements to test for correct class
+			for(var i=0,l=elems.length;i<l;i++){
+				// Detect whether this element has the class specified
+				if( (" " + ( elems[i].className || elems[i].getAttribute("class") ) + " ").indexOf( tag ) > -1 ) {
+					nodes.push( elems[i] );
+				}
+			}
+			return nodes;
+		}
+	// } else if (selector.indexOf('name=') === 0) {
+	// 	tag = selector.substring(5);
+	// 	var result = document.getElementsByName( tag ),      
+	// 		nodes = [];
+	// 
+	// 	for ( var i = 0, l = result.length; i < l; i++ ) {
+	// 		if ( result[i].getAttribute("name") === tag ) {
+	// 			nodes.push( result[i] );
+	// 		}
+	// 	}
+	// 
+	// 	return nodes;  
+	} else {     
+		// assume that if not id or class must be tag
+		return slice.call( context.getElementsByTagName( selector ), 0 );
+	}
 }
 
 function isArray( obj ){ 
@@ -204,15 +246,15 @@ Simples.prototype = {
 	each : function( callback ){
 		                                                     
 		if( this.length === 1){
-			
+
 			return callback.call( this[0] );
 		} else {
 			var response = [];
 			for(var i=0,l=this.length;i<l;i++){
-			
+
 				response.push( callback.call( this[i] ) );
 			}
-		
+
 			return response.length === 1 ? response[0] : response;
 		}
 	}

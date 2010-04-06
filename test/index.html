@@ -23,18 +23,74 @@
 	<div id="test-area">
 	</div>               
 	
-	<script type="text/javascript" charset="utf-8">
-		var test_area = document.getElementById('test-area');
-		var str = "<div class='test'>{c}</div>";
-		var html = "";
-				
-		for(var i=0,l=6;i<l;i++){
-			html += str.replace('{c}', i);
-		}
+	<div id="row-wrapper">
 		
-		test_area.innerHTML = html;
-	</script>
+		<input name="row" type="hidden"/>
+		<input name="row" type="hidden"/>
+		
+		<div class="row">
+			<div id="cell-test"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+		<div class="row">
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+			<div class="cell"></div>
+		</div>
+	</div>
 	
+	<input name="hammer" type="hidden"/>
+    <input name="row" type="hidden"/>
+
+	<div class="cell"></div>
+	<div class="cell"></div>
+	<div class="cell"></div>
+	<div class="cell"></div>
+
 	<!-- Library Files -->
 	<script type="text/javascript" charset="utf-8" src="../src/core.js"></script>
 	<script type="text/javascript" charset="utf-8" src="../src/utils.js"></script>    
