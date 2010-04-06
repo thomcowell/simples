@@ -70,6 +70,8 @@ function select( selector, context ){
 }
 
 function getElements( selector, context ){
+
+	context = context || document;
 	tag = selector.substring(1);
 	
 	if ( selector.indexOf('#') === 0) {

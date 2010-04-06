@@ -1,5 +1,41 @@
 module("Core");
 
+test('getElements with only selector', 9, function(){ 
+	var id = getElements( '#test-area' );
+	same( id.length, 1, "should return an aray with 1 element");
+	same( id[0].tagName, 'DIV', "should return a div");
+	same( id[0].id, 'test-area', "should return an element with the same id"); 
+	
+	var className = getElements( '.row' );
+	same( className.length, 8, "should return an aray with 8 elements");
+	same( className[0].tagName, 'DIV', "should return a div");
+	same( className[0].className, 'row', "should return an element with the same className");
+	
+	var tag = getElements( 'h2' );
+	same( tag.length, 2, "should return an aray with 8 elements");
+	same( tag[0].tagName, 'H2', "should return a div");
+	same( tag[0].className, '', "should return an element with no className");		
+});  
+
+test('getElements with context', 9, function(){
+	var body = document.getElementsByTagName('body')[0];
+	
+	var id = getElements( '#test-area', body );
+	same( id.length, 1, "should return an aray with 1 element");
+	same( id[0].tagName, 'DIV', "should return a div");
+	same( id[0].id, 'test-area', "should return an element with the same id"); 
+	
+	var className = getElements( '.row', document.getElementById('row-wrapper') );
+	same( className.length, 8, "should return an aray with 8 elements");
+	same( className[0].tagName, 'DIV', "should return a div");
+	same( className[0].className, 'row', "should return an element with the same className");
+	
+	var tag = getElements( 'h2', body );
+	same( tag.length, 2, "should return an aray with 8 elements");
+	same( tag[0].tagName, 'H2', "should return a div");
+	same( tag[0].className, '', "should return an element with no className");		
+});
+
 test('create selector', 6, function(){
 	
 	var div1 = select.call( {},'<div/>');
