@@ -3,7 +3,7 @@ function cleanData( ){
 }
 
 Simples.extend({
-	append : function( child ){                        
+	appendChild : function( child ){                        
 
 		if ( child.nodeType || child instanceof Simples ) {
 			return this.each(function(){
@@ -19,7 +19,7 @@ Simples.extend({
 		}                 	
 		return this;
 	}, 
-	prepend : function( child ){
+	prependChild : function( child ){
 		if ( child.nodeType || child instanceof Simples ) {
 			return this.each(function(){       
 				var parent = this.parentNode;
@@ -69,10 +69,14 @@ Simples.extend({
 	hasClass : function( className ){
 		return " "+this[0].className.indexOf( className )+" " > 0;
 	},
-	remove : function(){
+	removeSelf : function(){
 		this.each(function(){
-			if ( this.parentNode ) {
-				 this.parentNode.removeChild( this );
+			if ( this.parentNode ) { 
+				if ( this.nodeType === 1 ) {
+					cleanData( this.getElementsByTagName("*") );
+				}
+				
+				this.parentNode.removeChild( this );
 			}
 		});
 	}
