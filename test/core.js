@@ -186,3 +186,179 @@ test('badly constructed selector', 19, function(){
 	same( body3.length, 8, ".row#cell-test -- should find 8 elements with the className of row");
 	same( body3[0].tagName, 'DIV', "body#test-area -- should have a tagName of body");
 });
+
+test('merge works as expected with 1 argument', 8, function(){
+	var array = ['red','blue','green'];
+	var result = merge( array );
+	same( result.length, array.length, "Should have the same length as the array");
+	
+	for(var i=0,l=3;i<l;i++){
+		same( result[i], array[i], "obj should have the same response as array["+i+"] => "+array[i]);
+	}
+	
+	var insert = {bool:true,func:function(){},str:'string',num:1};
+	result = merge( insert );
+	for(var key in insert){
+		same( result[key], insert[key], "obj should have the same response as insert."+key+" => "+insert[ key ]);
+	}
+});
+
+test('merge works as expected with 2 argument', 8, function(){
+	var array = ['red','blue','green'];
+	var result = merge( {}, array );
+	same( result.length, array.length, "Should have the same length as the array");
+	
+	for(var i=0,l=3;i<l;i++){
+		same( result[i], array[i], "obj should have the same response as array["+i+"] => "+array[i]);
+	}
+	
+	var insert = {bool:true,func:function(){},str:'string',num:1};
+	result = merge({},insert);
+	for(var key in insert){
+		same( result[key], insert[key], "obj should have the same response as insert."+key+" => "+insert[ key ]);
+	}
+});
+
+test('merge works as expected with 3 argument', 8, function(){
+	var array = ['red','blue','green'],
+		insert = { bool:true, func:function(){}, str:'string', num:1 };
+		
+	var result = merge( {}, array, insert );
+
+	same( result.length, array.length, "Should have the same length as the array");
+
+	for(var i=0,l=3;i<l;i++){
+		same( result[i], array[i], "obj should have the same response as array["+i+"] => "+array[i]);
+	}
+
+	for(var key in insert){
+		same( result[key], insert[key], "obj should have the same response as insert."+key+" => "+insert[ key ]);
+	}
+});
+
+test('extend works as expected with 1 arguments', 10, function(){
+	function Class(){ this.start = false; return this; }
+	
+	var length = 0;
+	for(var func in Class.prototype ){
+		length++;
+	}
+	
+	same( length, 0, "Should have an empty prototype chain");
+	
+	var funcs = { 
+		_start : function(){ this.start = new Date(); },
+		_stop : function(){ this.start = false; },
+		_reset : function(){ this.reset = new Date(); }
+	};
+    // to ensure that the window doesn't have the properties in funcs 
+	for( var f in funcs ){
+		same( window[ f ], undefined, "Should not have the same functions window."+f+" => undefined");
+	}
+
+	extend.call( window, funcs );
+    // now test that the window doesn't have the properties in funcs	
+	for( var e in funcs ){
+		same( window[ e ], undefined, "Should not have the same functions window."+e+" => undefined");
+	}
+	
+	extend.call( Class, funcs );
+	
+	for( var key in Class.prototype ){
+		same( funcs[ key ], Class.prototype[key], "Should have the same functions Class.prototype."+key+" => "+funcs[ key ]);
+	}
+
+});
+   
+test('extend works as expected with 2 arguments', 4, function(){
+	function Class(){ this.start = false; return this; }
+	
+	var length = 0;
+	for(var func in Class.prototype ){
+		length++;
+	}
+	
+	same( length, 0, "Should have an empty prototype chain");
+	
+	var funcs = { 
+		start : function(){ this.start = new Date(); },
+		stop : function(){ this.start = false; },
+		reset : function(){ this.reset = new Date(); }
+	};
+
+	extend( Class, funcs);
+
+	for( var key in Class.prototype ){
+		same( funcs[ key ], Class.prototype[key], "Should have the same functions Class.prototype."+key+" => "+funcs[ key ]);
+	}
+}); 
+
+test('extend works as expected with 3 arguments', 7, function(){
+	function SubClass(){ return this; }
+	function Class(){ this.start = false; return this; }
+	
+	var length = 0;
+	for(var func in Class.prototype ){ length++; }
+	for(var sfunc in SubClass.prototype ){ length++; }
+	same( length, 0, "Should have an empty prototype chain");
+	
+	var funcs = { 
+		start : function(){ this.start = new Date(); },
+		stop : function(){ this.start = false; },
+		reset : function(){ this.reset = new Date(); }
+	};
+
+	Class.prototype = funcs;
+	
+	var extra = { 
+		reset: function(){
+			this.start = null;
+		},
+		more : function(){
+			return 'I want more!!!';
+		}
+	};
+
+	extend( SubClass, Class, extra );
+	var result = merge( {}, funcs, extra );
+
+	same( funcs, Class.prototype, "Should have the same functions Class.prototype.");
+	same( SubClass.prototype.superclass, Class.prototype, "SubClass should have Class as the superClass" );
+
+	for(var key in result ){
+		if( key !== 'constructor' ){
+			same( result[ key ], SubClass.prototype[ key ], "should have the same functions -> "+ key );
+		}
+	}
+});
+
+test('extend works as expected with 3 arguments and null addMethods', 6, function(){
+
+	function SubClass(){ return this; }
+	function Class(){ this.start = false; return this; }
+	
+	var length = 0;
+	for(var func in Class.prototype ){ length++; }
+	for(var sfunc in SubClass.prototype ){ length++; }
+	
+	same( length, 0, "Should have an empty prototype chain");
+	
+	var funcs = { 
+		start : function(){ this.start = new Date(); },
+		stop : function(){ this.start = false; },
+		reset : function(){ this.reset = new Date(); }
+	};
+
+	Class.prototype = funcs;
+
+	extend( SubClass, Class, null );
+
+	same( funcs, Class.prototype, "Should have the same functions Class.prototype.");
+	same( SubClass.prototype.superclass, Class.prototype, "SubClass should have Class as the superClass" );
+
+	for(var key in funcs ){
+		if( key !== 'constructor' ){
+			same( funcs[ key ], SubClass.prototype[ key ], "should have the same functions -> "+ key );
+		}
+	}
+});
