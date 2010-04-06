@@ -146,7 +146,8 @@ function isFunction( obj ) {
  **/
 function merge( first /* obj1, obj2..... */) { 
 	// if only 1 argument is passed in assume Simples is the target
-    var target = arguments.length === 1 ? this : isObject( first ) ? first : {};
+    var target = ( arguments.length === 1 && !( this === window || this === document ) ) ? this : isObject( first ) ? first : {};
+	// set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1 : 0;
 	// Loop over arguments
     for (var l=arguments.length; i<l; i++) {
@@ -180,7 +181,7 @@ function merge( first /* obj1, obj2..... */) {
 **/
 function extend(subClass, superClass, addMethods) { 
     // if subClass & superClass are not specified extend onto Simples the object provided
-	if( arguments.length === 1 ){
+	if( arguments.length === 1 && !( this === window || this === document ) ){
 		// Shortcut to extend Simples without adding subClasses
 		addMethods = arguments[0];
 		subClass = this;  
@@ -188,7 +189,7 @@ function extend(subClass, superClass, addMethods) {
 	} else if( arguments.length === 2 ){
 		addMethods = arguments[1];      
 	// if no addMethods are specified no superClass structure is created, to ensure superClass structure pass in an empty object
-	} else {                      
+	} else if( arguments.length === 3 ) {                      
 		// Standard extend behaviour expected
 		var F = function() {};
 
