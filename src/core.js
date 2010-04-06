@@ -1,7 +1,8 @@
 // Constants
 var TAG = /\<(\w+)\/?\>/,
 	// TAG_STRIP = /\b[\.|\#\|\[].+/g,
-	TAG_STRIP = /\b[\.|\#\|\[\=].+/g,	
+	FIRST_ID = '#',
+	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	slice = Array.prototype.slice;
 
@@ -29,17 +30,19 @@ function Simples( selector, context ) {
 function select( selector, context ){
 
     if ( typeof( selector ) === 'string' ) {
-		// clean up selector
-        selector = selector.replace( TAG_STRIP, ''); 
-		var tag = TAG.exec( selector );         
-
-		if( tag !== null && tag.length > 1 ){       
+		// clean up selector           
+        selector = selector.replace( TAG_STRIP, '');
+		// get last id in selector
+		var index = selector.lastIndexOf( FIRST_ID );
+		selector = selector.substring( index > 0 ? index : 0 );
+		// check selector if structured to create element
+		var tag = TAG.exec( selector );
+		if( tag !== null && tag.length > 1 ){
 
 			this.context = document;
 			this.selector = tag[0];
 			this[0] = this.context.createElement( tag[1] );
 			this.length = 1;        
-
 		} else {
 
 			context = context || document;
@@ -108,7 +111,7 @@ function getElements( selector, context ){
 	// 		}
 	// 	}
 	// 
-	// 	return nodes.length === 0 ? [] : nodes;  
+	// 	return nodes;  
 	} else {     
 		// assume that if not id or class must be tag
 		return slice.call( context.getElementsByTagName( selector ), 0 );

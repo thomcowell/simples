@@ -133,10 +133,10 @@ test('badly constructed selector', 19, function(){
 	same( rows2[0].tagName, 'DIV', ".row.cell -- should have a tagName of div");
 
 	var rows3 = select.call( {}, '.row.cell.row#test-area');
-	same( rows3.length, 1, ".row.cell.row#test-area -- should find 1 elements with the id of test-area" );
-	same( rows3.selector, '#test-area', "body#test-area -- should have a selector of #test-area");
-	same( rows3[0].id, 'test-area', ".row.cell.row#hammer -- should have an id of test-area");            
-	same( rows3[0].tagName, 'DIV', ".row.cell.row#hammer -- should have a tagName of div");
+	same( rows3.length, 8, ".row.cell.row#test-area -- should find 8 elements with the className of row" );
+	same( rows3.selector, '.row', ".row.cell.row#test-area -- should have a selector of .row.cell.row#test-area");
+	same( rows3[0].className, 'row', ".row.cell.row#test-area -- should have an className of .row.cell.row#test-area");            
+	same( rows3[0].tagName, 'DIV', ".row.cell.row#test-area -- should have a tagName of div");
 		
 	var body1 = select.call( {}, 'body.row');
 	same( body1.selector, 'body', "body.row -- should have a selector of body");	
@@ -144,13 +144,13 @@ test('badly constructed selector', 19, function(){
 	same( body1[0].tagName, 'BODY', "body.row -- should have a tagName of body");
 
 	var body2 = select.call( {}, 'body#test-area');   
-	same( body2.selector, '#test-area', "body#test-area -- should have a selector of #test-area");
-	same( body2.length, 1, "body#test-area -- should find 1 elements with the className of row");
-	same( body2[0].tagName, 'DIV', "body#test-area -- should have a tagName of body");
+	same( body2.selector, 'body', "body#test-area -- should have a selector of body");
+	same( body2.length, 1, "body#test-area -- should find 1 elements with the tagName of body");
+	same( body2[0].tagName, 'BODY', "body#test-area -- should have a tagName of body");
 		
 	var body3 = select.call( {}, '.row#cell-test');
-	same( body3.selector, '#cell-test', "body#cell-test -- should have a selector of #cell-test");	
-	same( body3.length, 1, ".row#cell-test -- should find 1 elements with the className of row");
+	same( body3.selector, '.row', ".row#cell-test -- should have a selector of .row");	
+	same( body3.length, 8, ".row#cell-test -- should find 8 elements with the className of row");
 	same( body3[0].tagName, 'DIV', "body#test-area -- should have a tagName of body");
 });
 
