@@ -253,13 +253,15 @@ Simples.prototype = {
 	},
 	filter : function( testFn ){
 		
-		var results = merge.call( [], SimplesList );
+		var results = new Simples();
+		results.length = 0;
 		
 		this.each(function(){
 			if( testFn.call( this ) ){
-				results.push( this );
+				results[ results.length ] = this;
+				results.length++;
 			}
-		});
+		});           
 		
 		return results;
 	}
