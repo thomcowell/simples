@@ -245,10 +245,22 @@ Simples.prototype = {
 			var response = [];
 			for(var i=0,l=this.length;i<l;i++){
 
-				response.push( callback.call( this[i] ) );
+				response.push( callback.call( this[i], i, l ) );
 			}
 
 			return response.length === 1 ? response[0] : response;
 		}
+	},
+	filter : function( testFn ){
+		
+		var results = merge.call( [], SimplesList );
+		
+		this.each(function(){
+			if( testFn.call( this ) ){
+				results.push( this );
+			}
+		});
+		
+		return results;
 	}
 };      
