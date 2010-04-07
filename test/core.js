@@ -33,6 +33,18 @@ test("isFunction", 8, function() {
 	ok( Simples.isFunction( function(){} ), 'passing in a function should return false' );   					
 });
 
+test("noop is a empty function", 1, function() {
+	same( Simples.noop(), undefined, 'noop should return undefined' );
+});
+
+test("setContext", 3, function() {                                                                           
+	var object = {hammer:true};
+	var context = Simples.setContext( object, function(){ return this; });   
+	equal( typeof context, 'function', 'should be an object');
+	equal( context( 'hammer' ).toString(), '[object Object]', 'should be an object');
+	same( context( 'hammer' ), object, 'should return object' );
+});
+
 test('getElements with only selector', 9, function(){ 
 	var id = getElements( '#test-area' );
 	same( id.length, 1, "should return an aray with 1 element");
