@@ -29,17 +29,12 @@
             <fileset file="src/core.js" />
             <fileset file="src/support.js" />
             <fileset file="src/data.js" />
-            <fileset file="src/queue.js" />
-            <fileset file="src/attributes.js" />
-            <fileset file="src/event.js" />
-            <fileset file="src/selector.js" />
-            <fileset file="src/traversing.js" />
-            <fileset file="src/manipulation.js" />
-            <fileset file="src/css.js" />
             <fileset file="src/ajax.js" />
-            <fileset file="src/effects.js" />
-            <fileset file="src/offset.js" />
-            <fileset file="src/dimensions.js" />
+            <fileset file="src/dom.js" />
+            <fileset file="src/css.js" />
+            <fileset file="src/event.js" />
+            <fileset file="src/position.js" />
+            <fileset file="src/animation.js" />
             <fileset file="src/outro.js" />
         </concat>
     	<replaceregexp match="@VERSION" replace="${version}" flags="g" byline="true" file="${SIMPLE}" />

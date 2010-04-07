@@ -1,5 +1,5 @@
 # Basic Rakefile for building Simple
-files = [ "intro", "core", "utils", "ajax", "css", "events", "position", "animation", "outro" ]
+files = [ "intro", "core", "support", "data", "ajax", "dom", "css", "events", "position", "animation", "outro" ]
 
 date = `git log -1 | grep Date: | sed 's/[^:]*: *//'`.gsub(/\n/, "")
 version = `cat version.txt`.gsub(/\n/, "")
