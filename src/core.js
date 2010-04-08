@@ -10,30 +10,64 @@ var TAG = /\<(\w+)\/?\>/,
 	push = Array.prototype.push,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf;
+	// Internal Preferences
+	useSimplesObject = true;
 
 function Simples( selector, context ) {
-	
-	if( !this.each ){
-	     return new Simples( selector, context );   
+
+	if( useSimplesObject ){
+
+		if ( !this.each && !this.filter ){	
+			return new Simples( selector, context );  		
+		}
+		
+   		// Handle $(""), $(null), or $(undefined) 		
+		if ( !selector ){
+			return this;
+		}
+		
+		// Handle $(DOMElement)
+		if ( selector.nodeType ) {
+			this.context = this[0] = selector;
+			this.length = 1;
+			return this;
+		}
+		
+		var result = select( selector, context );
+		this.context = result.context;
+		this.selector = result.selector;
+		return merge.call( this, result.elems );
 	}
-	
-   	// Handle $(""), $(null), or $(undefined)
-	if ( !selector ) {
-		return this;
-	}
-	
-	// Handle $(DOMElement)
-	if ( selector.nodeType ) {
-		this.context = this[0] = selector;
-		this.length = 1;
-		return this;
-	}  
-	
-	return select.apply( this, arguments );
+ 
+	var elements = ( selector.nodeType ) ? [ selector ] : select( selector, context ).elems;
+
+	if( elements.length === 1){  
+		if( !elements[0].prependChild ){
+			elements = merge.call( elements[0], SimplesElement );
+		}
+	} else if( elements.length > 1 ){
+		for(var i=0,l=elements.length;i<l;i++){
+			if( !elements[i].prependChild ){
+				elements[i] = merge.call( elements[i], SimplesElement );
+			}
+		} 
+		
+		elements = elements.merge( elements, SimplesList );
+	} else {
+		elements = undefined;
+	} 
+
+	return elements;
 }
 
 function select( selector, context ){
-
+	
+	var results = {
+		context : context,
+		selector : selector,
+		elems : []
+	};
+	
     if ( typeof( selector ) === 'string' ) {
 		// clean up selector           
         selector = selector.replace( TAG_STRIP, '');
@@ -43,16 +77,13 @@ function select( selector, context ){
 		// check selector if structured to create element
 		var tag = TAG.exec( selector );
 		if( tag !== null && tag.length > 1 ){
-
-			this.context = document;
-			this.selector = tag[0];
-			this[0] = this.context.createElement( tag[1] );
-			this.length = 1;        
+			
+			results.context = document;
+			results.selector = tag[0];
+            results.elems = [ document.createElement( tag[1] ) ];
 		} else {
-
-			context = context || document;
-			this.context = context;
-			this.selector = selector;
+			results.selector = selector;
+			results.context = context = selector.indexOf('#') === 0 ? document : ( context || document );
 			
 			var split = selector.split( SPACE_WITH_BOUNDARY );     
 
@@ -68,13 +99,13 @@ function select( selector, context ){
 				} else {
 					context = getElements( split[i], context );
 				}
-			}     
-
-			Simples.merge( this, context );
+			}
+			
+			results.elems = context;
 		}
     }                      
 	
- 	return this;
+ 	return results;
 }
 
 function getElements( selector, context ){
@@ -104,19 +135,7 @@ function getElements( selector, context ){
 				}
 			}
 			return nodes;
-		}
-	// } else if (selector.indexOf('name=') === 0) {
-	// 	tag = selector.substring(5);
-	// 	var result = document.getElementsByName( tag ),      
-	// 		nodes = [];
-	// 
-	// 	for ( var i = 0, l = result.length; i < l; i++ ) {
-	// 		if ( result[i].getAttribute("name") === tag ) {
-	// 			nodes.push( result[i] );
-	// 		}
-	// 	}
-	// 
-	// 	return nodes;  
+		} 
 	} else {     
 		// assume that if not id or class must be tag
 		return slice.call( context.getElementsByTagName( selector ), 0 );
@@ -227,6 +246,9 @@ merge.call( Simples, {
 	isArray : isArray,
 	isObject : isObject,
 	isFunction: isFunction,
+	extendElement : function(){
+		useSimplesObject = false;
+	},
 	setContext : function( context, func ){
 		return function(){
 			return func.apply( context, arguments );
