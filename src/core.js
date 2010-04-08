@@ -52,7 +52,7 @@ function Simples( selector, context ) {
 			}
 		} 
 		
-		elements = elements.merge( elements, SimplesList );
+		elements = merge.call( new Simples(), elements );
 	} else {
 		elements = undefined;
 	} 

@@ -215,39 +215,43 @@ function serialise(obj) {
 	
             if ( Simples.isObject( obj[i] ) ) {
 	
-                arr[ arr.length ] = params( obj[i].name, obj[i].value );
+                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
             }
         }
-    }
+    } else if( arguments.length === 2 ) {
+		obj = formatData( arguments[0], arguments[1] );
+	}
 
-    return typeof( obj ) === 'string' ? obj: arr.join('&');
+    return typeof( obj ) === 'string' ? obj : arr.join('&');
 }
 
 function formatData(name, value) {
 
-    if ( Simples.isObject( value ) ) {
+	var str;
+	if( typeof value === 'string' ) {
+
+	    if ( name && value == ( 'number' || 'string' ) ) {
+	        str = encodeURIComponent(name) + '=' + encodeURIComponent(value);
+	    }                            
+	} else if( typeof value === 'function' ){
+		
+	 	str = formatData( name, value() );
+    } else if ( Simples.isObject( value ) ) {
         arr = [];
 
-        for (var key in value) {
-
-            arr[ arr.length ] = formatData(name + "[" + key + "]", ( typeof value[key] === 'function' ) ? value[key]() : value[key] );
+        for (var key in value) { 
+	
+			var result = formatData(name + "[" + key + "]", value[ key ] );
+            if( result ){ arr[ arr.length ] = result; }
         }
 
-        return arr.join('&');
-    } else if( typeof value === 'string' ) {
-	
-	    value = typeof(value) === 'function' ? value() : value;
-		var str = "";
-	    if (name && TYPEOF.test(typeof(value))) {
-
-	        str = encodeURIComponent(name) + '=' + encodeURIComponent(value);
-	    }
-        return str;
+        str = arr.join('&');
     }
+	return str;
 }
 
 Simples.merge({
     ajax: ajax,
     ajaxSettings: ajaxDefaults,
-    params: formatData
+    params: serialise
 });
