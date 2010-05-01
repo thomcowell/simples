@@ -259,9 +259,9 @@ test('extend works as expected with 1 arguments', 10, function(){
 	same( length, 0, "Should have an empty prototype chain");
 	
 	var funcs = { 
-		_start : function(){ this.start = new Date(); },
-		_stop : function(){ this.start = false; },
-		_reset : function(){ this.reset = new Date(); }
+		__start__ : function(){ this.start = new Date(); },
+		__stop__ : function(){ this.start = false; },
+		__reset__ : function(){ this.reset = new Date(); }
 	};
     // to ensure that the window doesn't have the properties in funcs 
 	for( var f in funcs ){
