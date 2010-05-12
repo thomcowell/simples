@@ -8,14 +8,23 @@ var accessID = 'simplesData',
 	};      
 
 function addData( elem, key, value ){
-	if ( elem.nodeName && jQuery.noData[elem.nodeName.toLowerCase()] ) {
-		return;
+	if ( elem.nodeName && noData[ elem.nodeName.toLowerCase() ] ) {
+		if( !elem[ accessID ] ){ elem[ accessID ] = {}; }
+		elem[ accessID ][ key ] = value;
+	}	
+}
+
+function returnData( elem, key ){
+	if ( elem.nodeName && noData[ elem.nodeName.toLowerCase() ] ) {
+		return elem[ accessID ] ? elem[ accessID ][ key ] : null;
 	}	
 }   
 
 function removeData( elem, key ){
-	if ( elem.nodeName && jQuery.noData[elem.nodeName.toLowerCase()] ) {
-		return;
+	if ( elem.nodeName && noData [elem.nodeName.toLowerCase() ] ) {
+		if( elem[ accessID ] && elem[ accessID ][ key ] ){
+			delete elem[ accessID ][ key ];
+		}
 	}	
 } 
 

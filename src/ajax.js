@@ -75,7 +75,7 @@ function ajax(url, options) {
 
     }
 
-    var content = ACCEPTS[options.dataType];
+    var content = ACCEPTS[ options.dataType ];
     content = content ? content + ',': '';
     xhr.setRequestHeader("Accept", content + ACCEPTS._default);
 
