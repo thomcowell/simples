@@ -1,10 +1,12 @@
 <project name="simples" default="simples" basedir=".">
 
-	<loadfile property="version" srcfile="version.txt" />
+	<loadfile property="version" srcfile="version.txt" />         
+	<loadfile property="filelist" srcfile="filelist.txt" />
     <property description="Folder for jquery and min target" name="dist" value="./dist" />
 
     <property name="SIMPLE" value="${dist}/simples.js" />
-    <property name="SIMPLE_MIN" value="${dist}/simples.min.js" />
+    <property name="SIMPLE_MIN" value="${dist}/simples.min.js" />   
+	<property name="FILE_LIST" value="filetest.xml" />
 	
 	<available property="qunit" file="test/qunit" />
 	

@@ -1,5 +1,5 @@
-# Basic Rakefile for building Simple
-files = [ "intro", "core", "support", "data", "ajax", "dom", "css", "events", "position", "animation", "outro" ]
+# Basic Rakefile for building Simple 
+files = File.new('filelist.txt').read.gsub(/\n/, "").split(',')
 
 date = `git log -1 | grep Date: | sed 's/[^:]*: *//'`.gsub(/\n/, "")
 version = `cat version.txt`.gsub(/\n/, "")
