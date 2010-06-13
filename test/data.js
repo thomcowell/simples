@@ -127,3 +127,21 @@ test("cleanData on element with data as requested", 1, function() {
 	equal( r_div[ accessID ], undefined, "a div should have data removed");
 });
 
+module("Data: simples");
+var s_obj = new Simples()
+test("on an empty simples object",function(){
+	ok(false, "test not written");
+});
+ 
+test("on an simples object add data",function(){
+	ok(false, "test not written");
+});
+
+test("on an simples object read data",function(){
+	ok(false, "test not written");
+});                              
+
+test("on an simples object remove data",function(){
+	ok(false, "test not written");
+});
+
