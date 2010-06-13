@@ -5,19 +5,28 @@ var accessID = 'simplesData',
 		"embed": true,
 		"object": true,
 		"applet": true
-	};      
+	};
+	
+function notNoData( elem ){
+	return !noData[ elem.nodeName.toLowerCase() ];
+}
 
 function addData( elem, key, value ){
-	if ( elem.nodeName && noData[ elem.nodeName.toLowerCase() ] ) {
-		if( !elem[ accessID ] ){ elem[ accessID ] = {}; }
+	if ( elem.nodeName && notNoData( elem ) ) {
+		if( !elem[ accessID ] ){
+			elem[ accessID ] = elem[ accessID ] || {};
+		}
 		elem[ accessID ][ key ] = value;
 	}	
 }
 
-function returnData( elem, key ){
-	if ( elem.nodeName && noData[ elem.nodeName.toLowerCase() ] ) {
-		return elem[ accessID ] ? elem[ accessID ][ key ] : null;
-	}	
+function readData( elem, key ){
+	if ( elem.nodeName && notNoData( elem ) ) {
+		if( elem[ accessID ] ){
+			return elem[ accessID ][ key ];
+		}
+	}
+	return null;
 }   
 
 function removeData( elem, key ){
