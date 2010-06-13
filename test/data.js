@@ -1,5 +1,4 @@
 module("Data");
-
 test("noData", 4, function() {
 	var div = document.createElement('div');
 	var embed = document.createElement('embed');
@@ -13,14 +12,12 @@ test("noData", 4, function() {
 });
 
 module("Data: addData");
-
 var data = {ham:'sandwich',"super":true};
-
 test("addData to element with no accessId", 2, function() { 
 	var div = document.createElement('div');
 	addData( div, 'test', data);
 
-	ok( div[ accessID ] != null, "a div should have the attribute of "+accessID+" set"); 	
+	notEqual( div[ accessID ], null, "a div should have the attribute of "+accessID+" set"); 	
 	same( div[ accessID ][ 'test' ], data, "div should return the same data as provided");   
 });
 
@@ -67,7 +64,6 @@ test("addData on invalid element", 1, function() {
 });
 
 module("Data: readData");
-
 test("readData on element without data attribute", 1, function() {
 	var div = document.createElement('div');
 	same( readData( div, 'test'), null, "a div should return undefined as provided");
@@ -84,4 +80,23 @@ test("readData on element with data as requested", 2, function() {
 	
 	same( readData( r_div, 'test'), data, "a div should return the same as provided");
 	same( readData( r_div, 'note'), undefined, "a div should return undefined as provided");
+}); 
+
+module("Data: removeData");
+test("removeData on invalid element", 1, function() {
+	var object = document.createElement('object');
+	var noError = true;
+	try{
+		removeData( object, 'test')
+	}catch(e){ noError = false; }
+	ok( noError, "should not throw an error");
 });
+
+test("removeData on element with data as requested", 1, function() {
+	var r_div = document.createElement('div');
+	r_div[ accessID ] = {test:data};
+	
+	removeData( r_div, 'test');	
+	same( r_div[ accessID ].test, undefined, "a div should have data removed");
+});
+

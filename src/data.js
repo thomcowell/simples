@@ -30,7 +30,7 @@ function readData( elem, key ){
 }   
 
 function removeData( elem, key ){
-	if ( elem.nodeName && noData [elem.nodeName.toLowerCase() ] ) {
+	if ( elem.nodeName && notNoData( elem ) ) {
 		if( elem[ accessID ] && elem[ accessID ][ key ] ){
 			delete elem[ accessID ][ key ];
 		}
