@@ -40,29 +40,26 @@ function removeData( elem, key ){
 function cleanData( elem ){
 	// Clean up the element expando
 	try {
-		delete elem[ expando ];
+		delete elem[ accessID ];
 	} catch( e ) {
 		// IE has trouble directly removing the expando
 		// but it's ok with using removeAttribute
 		if ( elem.removeAttribute ) {
-			elem.removeAttribute( expando );
+			elem.removeAttribute( accessID );
 		}
 	}	
 } 
 
 Simples.extend({
 	data : function( key, value ){   
-		if( typeof key === 'string' && value ){
+		if( typeof key === 'string' && value !== undefined ){
+			var func = value === null ? removeData : addData;
 			this.each(function(){
 				addData( this, key, value );
 			});
+		} else {
+			return readData( this[0], key );
 		}
-	},
-	removeData : function( key ){
-		if( typeof key === 'string' ){
-			this.each(function(){
-				removeData( this, key );
-			})
-		}
+		return this;
 	}
 });
