@@ -1,7 +1,3 @@
-function cleanData( ){
-	
-}
-
 Simples.extend({
 	appendChild : function( child ){                        
 

@@ -6,7 +6,7 @@
 
     <property name="SIMPLE" value="${dist}/simples.js" />
     <property name="SIMPLE_MIN" value="${dist}/simples.min.js" />   
-	<property name="FILE_LIST" value="filetest.xml" />
+	<property name="FILE_LIST" value="filetest.txt" />
 	
 	<available property="qunit" file="test/qunit" />
 	
@@ -20,7 +20,7 @@
 		<exec executable="git" outputproperty="git-qunit" dir="test/qunit" >  
 			<arg line="pull origin master"/>  
 		</exec> 
-		<echo message="git pull sizzle: ${git-qunit}" />
+		<echo message="git pull qunit: ${git-qunit}" />
 	</target>
 
     <target name="simples" depends="qunit-clone,qunit-pull" description="Main simples build, concatenates source files and replaces @VERSION">

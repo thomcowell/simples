@@ -1,3 +1,9 @@
+var div = document.createElement("div");
+div.style.display = "none";
+div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
+
+var a = div.getElementsByTagName("a")[0];
+
 Simples.merge({
 	support : {
 		boxModel : (function(){
@@ -13,4 +19,4 @@ Simples.merge({
 		opacity : /^0.55$/.test( a.style.opacity ),
 		cssFloat: !!a.style.cssFloat
 	}
-})
+});
