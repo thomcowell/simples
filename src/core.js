@@ -183,31 +183,28 @@ Simples.prototype = {
 		                                                     
 		if( this.length === 1){
 
-			return callback.call( this[0] );
-		} else {
-			var response = [];
+			callback.call( this[0] );
+		} else if( this.length > 1 ) {
+			
 			for(var i=0,l=this.length;i<l;i++){
-
-				response.push( callback.call( this[i], i, l ) );
+				
+				callback.call( this[i], i, l );
 			}
-
-			return response.length === 1 ? response[0] : response;
 		}
+		return this;
 	},
 	filter : function( testFn ){
 		
-		var results = new Simples();
-		results.context = this.context;
-		
-		results.length = 0;
+		var newSimples = new Simples();
+		newSimples.context = this.context;
 		
 		this.each(function(i,l){
 			if( testFn.call( this, i, l ) === true ){
-				results[ results.length ] = this;
-				results.length++;
+				newSimples[ newSimples.length ] = this;
+				newSimples.length++;
 			}
 		});           
 		
-		return results;
+		return newSimples;
 	}
 };      
