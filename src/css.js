@@ -10,6 +10,9 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	// cache check for defaultView.getComputedStyle
 	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
 	// normalize float css property
+	fcamelCase = function( all, letter ) {
+		return letter.toUpperCase();
+	},	
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";    
 
 function currentCSS(elem, name) {
@@ -60,10 +63,7 @@ function currentCSS(elem, name) {
 
     } else if (elem.currentStyle) {
 
-        var camelCase = name.replace(RDASH_ALPHA,
-        function(all, letter) {
-            return letter.toUpperCase();
-        });
+        var camelCase = name.replace(RDASH_ALPHA, fcamelCase );
 
         ret = elem.currentStyle[name] || elem.currentStyle[camelCase];
 
@@ -90,11 +90,58 @@ function currentCSS(elem, name) {
     return ret;
 }
 
+function setStyle( elem, name, value ){                       
+	// don't set styles on text and comment nodes
+	if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
+		return undefined;
+	}
+
+	// ignore negative width and height values #1599
+	if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		value = undefined;
+	}
+
+	if ( typeof value === "number" && !REXCLUDE.test(name) ) {
+		value += "px";
+	}
+
+	var style = elem.style || elem, set = value !== undefined;
+
+	// IE uses filters for opacity
+	if ( !Simples.support.opacity && name === "opacity" ) {
+		if ( set ) {
+			// IE has trouble with opacity if it does not have layout
+			// Force it by setting the zoom level
+			style.zoom = 1;
+
+			// Set the alpha filter to set the opacity
+			var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + value * 100 + ")";
+			var filter = style.filter || currentCSS( elem, "filter" ) || "";
+			style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
+		}
+
+		return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + "":"";
+	}
+
+	// Make sure we're using the right name for getting the float value
+	if ( RFLOAT.test( name ) ) {
+		name = styleFloat;
+	}
+
+	name = name.replace( RDASH_ALPHA, fcamelCase); 
+
+	if ( set ) {
+		style[ name ] = value;
+	}
+	
+	return style[ name ]; 
+}
+
 Simples.extend({
 	css : function( name, value ){ 
-		if( value === undefined ){
+		if( value === undefined && typeof name === 'string' ){
 			return currentCSS(this[0], name );  
-		}   
+		}
 
 		// ignore negative width and height values #1599
 		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
@@ -105,18 +152,16 @@ Simples.extend({
 		if( typeof name === 'string' && value ){
 			
 			this.each(function(){
-				this.style[ name ] = value;
+				setStyle( this, name, value );
 			});
 		} else if( name.toString === '[object Object]' ) {
 			
-			for( var key in name ){
-				this.each(function(){  
+			this.each(function(){  
+				for( var key in name ){  
 					// don't set styles on text and comment nodes
-					if ( this && ( this.nodeType !== 3 || this.nodeType !== 8 ) ) {
-						this.style[ key ] = name[ key ];                           
-					}
-				});
-			}
+					setStyle( this, key, name[ key ] );
+				}
+			});
 		}
 		return this;
 	}
