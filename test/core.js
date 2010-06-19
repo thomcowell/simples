@@ -1,5 +1,21 @@
 module("Core");
 
+test("Class String representations", 8, function(){
+	function isClass( obj, ClassName ){
+		return toString.call( obj ) === ClassName;
+	}
+	ok( isClass({0:'red',1:'green'}, ObjectClass ), "Should be "+ObjectClass );
+	ok( isClass([1,2], ArrayClass ), "Should be "+ArrayClass );
+	ok( isClass("ham", StringClass ), "Should be "+StringClass );
+	ok( isClass(12, NumberClass ), "Should be "+NumberClass );
+	ok( isClass(function(){ return false; }, FunctionClass ), "Should be "+FunctionClass ); 
+	ok( isClass(false, BooleanClass ), "Should be "+BooleanClass );
+	ok( isClass(true, BooleanClass ), "Should be "+BooleanClass );
+	
+	var isNLorHC = toString.call( document.getElementsByClassName('row') );
+	ok( isNLorHC === NodeListClass || isNLorHC === HTMLCollectionClass, "Should be "+NodeListClass+' or '+HTMLCollectionClass );
+});
+
 test("isArray", 8, function() {
 	strictEqual( Simples.isArray(), false, 'empty arguments should return false' );
 	strictEqual( Simples.isArray({simples:true}), false, 'passing in an object should return false' );
@@ -347,9 +363,9 @@ test('Simples.filter', 6, function(){
 		} else if( i%5 === 0) {
 			return this;
 		} else if(i%4 === 0 ){
-			return []
+			return [];
 		} else if( i%3 === 0 ){
-			return new Simples()
+			return new Simples();
 		}
 		return {};
 	});
