@@ -203,26 +203,28 @@ function ajax(url, options) {
 }
 
 function serialise(obj) {
-    var arr = [];
 
-    if ( Simples.isObject( obj ) ) {
-        for (var key in obj) {
+    if( arguments.length === 1 ){ 
+		var arr = [];
+		var objClass = toString.call( obj );	
+	    if ( objClass === ObjectClass ) {
+	        for (var key in obj) {
 	
-            arr[ arr.length ] = formatData( key, obj[key] );
+	            arr[ arr.length ] = formatData( key, obj[key] );
+			}
+	    } else if ( objClass === ArrayClass ) {
+	        for (var i = 0, l = obj.length; i < l; i++) {
+	
+	            if ( toString.call( obj[i] ) === ObjectClass ) {
+	
+	                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
+	            }
+	        }                        
 		}
-    } else if ( Simples.isArray( obj ) ) {
-        for (var i = 0, l = obj.length; i < l; i++) {
-	
-            if ( Simples.isObject( obj[i] ) ) {
-	
-                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
-            }
-        }
+		return arr.join('&');
     } else if( arguments.length === 2 ) {
-		obj = formatData( arguments[0], arguments[1] );
+		return formatData( arguments[0], arguments[1] );
 	}
-
-    return typeof( obj ) === 'string' ? obj : arr.join('&');
 }
 
 function formatData(name, value) {
@@ -248,7 +250,7 @@ function formatData(name, value) {
 
 	        str = arr.join('&');
 	    } else if ( objClass === ArrayClass ) {
-			str = formatData( name, value.join(',') )
+			str = formatData( name, value.join(',') );
 		} 
 	}
 	return str;
