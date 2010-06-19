@@ -1,15 +1,10 @@
-// Constants
-var TAG = /\<(\w+)\/?\>/,
-	// TAG_STRIP = /\b[\.|\#\|\[].+/g,
-	FIRST_ID = '#',
-	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
-	SPACE_WITH_BOUNDARY = /\b\s+/g,
-	// Save a reference to some core methods
-	toString = Object.prototype.toString,
+// Save a reference to some core methods
+var toString = Object.prototype.toString,
 	hasOwnProperty = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf,
+// references to class outputs	
 	ArrayClass = '[object Array]',
 	ObjectClass = '[object Object]',
 	NodeListClass = '[object NodeList]', 
@@ -18,8 +13,6 @@ var TAG = /\<(\w+)\/?\>/,
 	FunctionClass = "[object Function]",
 	BooleanClass = "[object Boolean]",
 	HTMLCollectionClass = "[object HTMLCollection]";
-	// Internal Preferences
-	useSimplesObject = true;
 
 function Simples( selector, context ) {
 

@@ -1,3 +1,10 @@
+// Constants
+var TAG = /\<(\w+)\/?\>/,
+	// TAG_STRIP = /\b[\.|\#\|\[].+/g,
+	FIRST_ID = /#/,
+	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
+	SPACE_WITH_BOUNDARY = /\b\s+/g;
+	
 function select( selector, context ){
 
 	var results = {
