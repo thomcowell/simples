@@ -9,69 +9,76 @@ var TAG = /\<(\w+)\/?\>/,
 	hasOwnProperty = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
 	slice = Array.prototype.slice,
-	indexOf = Array.prototype.indexOf;
+	indexOf = Array.prototype.indexOf,
+	ArrayClass = '[object Array]',
+	ObjectClass = '[object Object]',
+	NodeListClass = '[object NodeList]';
 	// Internal Preferences
 	useSimplesObject = true;
 
 function Simples( selector, context ) {
 
-	if( useSimplesObject ){
-
-		if ( !this.each && !this.filter ){	
-			return new Simples( selector, context );  		
-		}
-		
-   		// Handle $(""), $(null), or $(undefined) 		
-		if ( !selector ){
-			return this;
-		}
-		
-		// Handle $(DOMElement)
-		if ( selector.nodeType ) {
-			this.context = this[0] = selector;
-			this.length = 1;
-			return this;
-		}
-		
+	if ( !this.each && !this.filter ){	
+		return new Simples( selector, context );  		
+	}
+	  	
+	// Handle $(""), $(null), or $(undefined) 		
+	if ( !selector ){
+		return this;
+	}
+	
+	// Handle $(DOMElement)
+	if ( selector.nodeType ) {
+		this.context = this[0] = selector;
+		this.length = 1;
+		return this;
+	}
+	
+	// The body element only exists once, optimize finding it
+	if ( selector === "body" && !context ) {
+		this.context = document;
+		this[0] = document.body;
+		this.selector = "body";
+		this.length = 1;
+		return this;
+	}  
+	
+	if( typeof selector === 'string' ){
 		var result = select( selector, context );
 		this.context = result.context;
 		this.selector = result.selector;
-		return merge.call( this, result.elems );
-	}
- 
-	var elements = ( selector.nodeType ) ? [ selector ] : select( selector, context ).elems;
 
-	if( elements.length === 1){  
-		if( !elements[0].prependChild ){
-			elements = merge.call( elements[0], SimplesElement );
-		}
-	} else if( elements.length > 1 ){
-		for(var i=0,l=elements.length;i<l;i++){
-			if( !elements[i].prependChild ){
-				elements[i] = merge.call( elements[i], SimplesElement );
+		merge.call( this, result.elems );
+
+	} else if( toString.call( selector ) === NodeListClass ){
+
+		merge.call( this, slice.call(selector, 0) );		
+    } else if( toString.call( selector ) === ArrayClass ){
+
+		for(var d=0,e=selector.length;d<e;d++){
+			if( selector[d] && selector[d].nodeType ){
+				this[ this.length ] = selector[d];
+				this.length++;
 			}
-		} 
+		}
 		
-		elements = merge.call( new Simples(), elements );
-	} else {
-		elements = undefined;
 	} 
-
-	return elements;
+	
+    return this;
 }
 
 function isArray( obj ){ 
 	if( !obj ){ return false; }
-	return ( toString.call( obj ) === '[object Array]' );
+	return ( toString.call( obj ) === ArrayClass );
 }
 
 function isObject( obj ){
 	if( !obj ){ return false; }
-	return ( toString.call( obj ) === '[object Object]' );
+	return ( toString.call( obj ) === ObjectClass );
 }
 
 function isFunction( obj ) {
-	return ( toString.call(obj) === "[object Function]" );
+	return ( typeof obj === "function" );
 }        
 
 /**
@@ -158,9 +165,6 @@ merge.call( Simples, {
 	isArray : isArray,
 	isObject : isObject,
 	isFunction: isFunction,
-	extendElement : function(){
-		useSimplesObject = false;
-	},
 	setContext : function( context, func ){
 		return function(){
 			return func.apply( context, arguments );
@@ -169,7 +173,10 @@ merge.call( Simples, {
 	noop : function(){}
 });
 
-Simples.prototype = {  
+Simples.prototype = {
+	length : 0,
+	selector : '',
+	version : '@VERSION',  
 	each : function( callback ){
 		                                                     
 		if( this.length === 1){
@@ -188,10 +195,12 @@ Simples.prototype = {
 	filter : function( testFn ){
 		
 		var results = new Simples();
+		results.context = this.context;
+		
 		results.length = 0;
 		
-		this.each(function(){
-			if( testFn.call( this ) ){
+		this.each(function(i,l){
+			if( testFn.call( this, i, l ) === true ){
 				results[ results.length ] = this;
 				results.length++;
 			}

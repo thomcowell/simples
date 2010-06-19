@@ -1,47 +1,47 @@
 module("Core");
 
 test("isArray", 8, function() {
-	same( Simples.isArray(), false, 'empty arguments should return false' );  
-	same( Simples.isArray({simples:true}), false, 'passing in an object should return false' );   
-	same( Simples.isArray( null ), false, 'passing in null should return false' );   
-	same( Simples.isArray( 1 ), false, 'passing in a number should return false' );   		
-	same( Simples.isArray( 'string' ), false, 'passing in a string should return false' );   			
-	same( Simples.isArray( true ), false, 'passing in a booelan should return false' );   
-	same( Simples.isArray( function(){} ), false, 'passing in a function should return false' );   				
-	ok( Simples.isArray(['simples']), 'passing in an array should return true' );   	
+	strictEqual( Simples.isArray(), false, 'empty arguments should return false' );
+	strictEqual( Simples.isArray({simples:true}), false, 'passing in an object should return false' );
+	strictEqual( Simples.isArray( null ), false, 'passing in null should return false' );
+	strictEqual( Simples.isArray( 1 ), false, 'passing in a number should return false' );
+	strictEqual( Simples.isArray( 'string' ), false, 'passing in a string should return false' );
+	strictEqual( Simples.isArray( true ), false, 'passing in a booelan should return false' );
+	strictEqual( Simples.isArray( function(){} ), false, 'passing in a function should return false' );
+	ok( Simples.isArray(['simples']), 'passing in an array should return true' );
 }); 
 
 test("isObject", 8, function() {
-	same( Simples.isObject(), false, 'empty arguments should return false' );  
-	same( Simples.isObject(['simples']), false, 'passing in an array should return false' );   
-	same( Simples.isObject( null ), false, 'passing in null should return false' );   
-	same( Simples.isObject( 1 ), false, 'passing in a number should return false' );   		
-	same( Simples.isObject( 'string' ), false, 'passing in a string should return false' );   			
-	same( Simples.isObject( true ), false, 'passing in a booelan should return false' );   				
-	same( Simples.isObject( function(){} ), false, 'passing in a function should return false' );   					
-	ok( Simples.isObject({simples:true}), 'passing in an object should return true' );   	
+	strictEqual( Simples.isObject(), false, 'empty arguments should return false' );
+	strictEqual( Simples.isObject(['simples']), false, 'passing in an array should return false' );
+	strictEqual( Simples.isObject( null ), false, 'passing in null should return false' );
+	strictEqual( Simples.isObject( 1 ), false, 'passing in a number should return false' );
+	strictEqual( Simples.isObject( 'string' ), false, 'passing in a string should return false' );
+	strictEqual( Simples.isObject( true ), false, 'passing in a booelan should return false' );
+	strictEqual( Simples.isObject( function(){} ), false, 'passing in a function should return false' );
+	ok( Simples.isObject({simples:true}), 'passing in an object should return true' );
 });
 
 test("isFunction", 8, function() {
-	same( Simples.isFunction(), false, 'empty arguments should return false' );  
-	same( Simples.isFunction(['simples']), false, 'passing in an array should return false' );   
-	same( Simples.isFunction( null ), false, 'passing in null should return false' );   
-	same( Simples.isFunction( 1 ), false, 'passing in a number should return false' );   		
-	same( Simples.isFunction( 'string' ), false, 'passing in a string should return false' );   			
-	same( Simples.isFunction( true ), false, 'passing in a booelan should return false' );   				
-	same( Simples.isFunction({simples:true}), false, 'passing in an object should return true' );   	
-	ok( Simples.isFunction( function(){} ), 'passing in a function should return false' );   					
+	strictEqual( Simples.isFunction(), false, 'empty arguments should return false' );
+	strictEqual( Simples.isFunction(['simples']), false, 'passing in an array should return false' );
+	strictEqual( Simples.isFunction( null ), false, 'passing in null should return false' );
+	strictEqual( Simples.isFunction( 1 ), false, 'passing in a number should return false' );
+	strictEqual( Simples.isFunction( 'string' ), false, 'passing in a string should return false' );
+	strictEqual( Simples.isFunction( true ), false, 'passing in a booelan should return false' );
+	strictEqual( Simples.isFunction({simples:true}), false, 'passing in an object should return true' );
+	ok( Simples.isFunction( function(){} ), 'passing in a function should return false' );
 });
 
 test("noop is a empty function", 1, function() {
-	same( Simples.noop(), undefined, 'noop should return undefined' );
+	strictEqual( Simples.noop(), undefined, 'noop should return undefined' );
 });
 
 test("setContext", 4, function() {                                                                           
 	var object = {hammer:true};
 	var context = Simples.setContext( object, function(){ return this; });   
-	equal( typeof context, 'function', 'should be an object');
-	equal( context().toString(), '[object Object]', 'should be an object');
+	strictEqual( typeof context, 'function', 'should be an object');
+	strictEqual( toString.call( context() ), '[object Object]', 'should be an object');
 	same( context(), object, 'should return object' );
 	ok( context().hammer, 'should return object' );
 });
@@ -220,4 +220,131 @@ test('extend works as expected with 3 arguments and null addMethods', 6, functio
 			same( funcs[ key ], SubClass.prototype[ key ], "should have the same functions -> "+ key );
 		}
 	}
+});
+
+module("Core: instantiating an instance of Simples where select isn't called", { 
+	setup : function(){
+		window.old_select = select;
+		window.select = function(){ throw new Error("shouldn't call select in selector.js"); };              
+	},
+	teardown : function(){
+		select = window.old_select;
+	}
+});
+
+test('Simples constructor when instantiated with no selector', 8, function(){   
+	var s_obj = Simples(undefined);
+	ok( s_obj instanceof Simples, "should return an instance of Simples" ); 	
+	equal( s_obj.version, '@VERSION', "should have a version id on instance");
+	
+	strictEqual( Simples("")[0], undefined, "should return empty if empty string" );	   	
+	strictEqual( Simples(null)[0], undefined, "should return empty if null supplied" );	   	 
+	strictEqual( s_obj[0], undefined, "should return empty if undefined or nothing is supplied" );
+	strictEqual( s_obj.context, undefined, "should return undefined context" );
+	equal( s_obj.length, 0, "should return 0 length" );
+	equal( s_obj.selector, "", "should return undefined selector" );		                                                                 
+});
+
+test("Simples constructor when instantiated with a dom node", 5, function(){		
+	var div = document.createElement('div');  
+	var s_obj = Simples( div );                                        
+	ok( s_obj instanceof Simples, "should return an instance of Simples" ); 
+
+	equal( s_obj[0], div, "should return with an Element, when supplied" );  
+	equal( s_obj.context, div, "should set the context to the element" );
+	equal( s_obj.selector, "", "should set the selector to an empty string because no string selector supplied" );	
+	equal( s_obj.length, 1, "should set the selector to an empty string because no string selector supplied" );		
+});
+
+test("Simples constructor when instantiated with the selector as 'body'", 5, function(){ 
+
+	ok( Simples( 'body' ) instanceof Simples, "should return an instance of Simples" );  	
+
+	equal( Simples( 'body' )[0], document.body, "should return with an Element, when supplied" );  
+	equal( Simples( 'body' ).context, document, "should set the context to the element" );
+	equal( Simples( 'body' ).selector, "body", "should set the selector to an empty string because no string selector supplied" );
+	equal( Simples( 'body' ).length, 1, "should set the selector to an empty string because no string selector supplied" );
+});
+
+test('Simples constructor when instantiated with NodeList passed as selector', 4, function(){ 
+	var rows = document.getElementsByClassName('row');
+	var s_obj = Simples( rows );
+	same( s_obj.selector, '', "node list of .row -- should have empty selector");	              
+	same( s_obj.context, undefined, "node list of .row -- should have empty context");
+	same( s_obj.length, rows.length, "node list of .row -- should have the same length as the supplied nodeList" );
+	same( slice.call( s_obj, 0), slice.call( rows ), "node list of .row -- should have the same as nodeList elems");
+});
+
+test('Simples constructor when instantiated with Array passed as selector', 4, function(){
+	function create( tag, opts ){
+		var elem = document.createElement( tag );
+		if( elem && opts ){
+			for( var key in opts ){       
+				if( opts[ key ] && elem[ key ] ){ elem[ key ] = opts[ key ]; }
+			}
+		}
+		return elem;
+	}
+	
+	var elem1 = create('div'), elem2 = create('input',{name:'hammer'});
+	var array = [ "string", elem1, true, elem2, false, {}, 98];
+	var s_obj = Simples( array ); 
+	
+	same( s_obj.selector, '', "node list of .row -- should have empty selector");	              
+	same( s_obj.context, undefined, "node list of .row -- should have empty context");
+	same( s_obj.length, 2, "node list of .row -- should have the same length as the supplied nodeList" );
+	same( slice.call( s_obj ), [elem1, elem2], "node list of .row -- should have the same as nodeList elems");
+});
+
+module("Core: instantiating an instance of Simples"); 
+
+test("Simples constructor when instantiated with a call through to selector", 4, function(){
+	var results = select('#row-wrapper');
+	var s_obj = Simples('#row-wrapper');
+	ok( s_obj instanceof Simples, "should return an instance of Simples" );  		
+ 
+	equal( s_obj[0], results.elems[0], "should return with an Element, when supplied" );  
+	equal( s_obj.context, results.context, "should set the context to the element" );
+	equal( s_obj.selector, results.selector, "should set the selector to an empty string because no string selector supplied" );	                             
+});
+
+test('Simples.each',function(){
+	var s_obj = Simples('.row'), counter = 0, length = s_obj.length;
+    s_obj.each(function(i,l){
+		same( this, s_obj[i], "should be the same dom elem as position on instance" );
+	  	equal(i, counter, "counter should be the same position as passed through");
+		if(l!==length){
+			ok(false, "length should be the same as instance length" );
+		}
+		counter++;
+	});
+});
+
+test('Simples.filter',function(){
+	var s_obj = Simples('div'), counter=0, length = s_obj.length;
+	var results = s_obj.filter(function(i,l){ 
+		if( i !== counter ){
+			ok( false, "i doesn't equal counter ");
+		} 
+		if(l!==length){
+			ok(false, "length should be the same as instance length" );
+		}  
+		counter++;
+		if(i===0){ 
+			return undefined; 
+		} else if( i===(length-1) ){
+			return null;
+		} else if(i%4 === 0) {
+			return this;
+		} else if( this.className.indexOf('row') > -1) {
+			return true;
+		}
+		return false;
+	});
+
+	ok( results instanceof Simples, "should return an instance of Simples");
+	notDeepEqual( results, s_obj, "should return an instance of Simples");	
+	same( results.selector, '', "node list of .row -- should have empty selector");	              
+	same( results.context, document, "node list of .row -- should have empty context");
+	equal( results.length, 7, "should return an instance of Simples");
 });
