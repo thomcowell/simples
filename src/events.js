@@ -6,9 +6,9 @@ function returnTrue() {
 	return true;
 }
 
-function SimplesEvent( event, data ){
+function SimplesEvent( event ){
 	// Allow instantiation without the 'new' keyword
-	if ( !this.preventDefault ) {
+	if ( !(this instanceof SimplesEvent) ) {
 		return new SimplesEvent( event );
 	}
 
@@ -21,9 +21,7 @@ function SimplesEvent( event, data ){
 		this.type = event;
 	}
 	
-	if( data != null ){
-		this.data = data;
-	}
+	this.data = event && event.data ? event.data : null;
 
 	// timeStamp is buggy for some events on Firefox(#3843)
 	// So we won't rely on the native value
@@ -34,8 +32,6 @@ function SimplesEvent( event, data ){
 
 SimplesEvent.prototype = {
 	preventDefault: function() {
-		this.isDefaultPrevented = returnTrue;
-
 		var e = this.originalEvent;
 		if ( !e ) {
 			return;
@@ -49,7 +45,6 @@ SimplesEvent.prototype = {
 		e.returnValue = false;
 	},
 	stopPropagation: function() {
-		this.isPropagationStopped = returnTrue;
 
 		var e = this.originalEvent;
 		if ( !e ) {
@@ -61,14 +56,7 @@ SimplesEvent.prototype = {
 		}
 		// otherwise set the cancelBubble property of the original event to true (IE)
 		e.cancelBubble = true;
-	},
-	stopImmediatePropagation: function() {
-		this.isImmediatePropagationStopped = returnTrue;
-		this.stopPropagation();
-	},
-	isDefaultPrevented: returnFalse,
-	isPropagationStopped: returnFalse,
-	isImmediatePropagationStopped: returnFalse
+	}
 };
 
 var Events = {

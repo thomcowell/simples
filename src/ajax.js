@@ -10,13 +10,24 @@ var DEFAULTS = {
     additionalData: [],
     dataType: 'json',
     async: true,
+	cache:true,
     type: "GET",
     timeout: 5000,
+	xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
+		function() {
+			return new window.XMLHttpRequest();
+		} :
+		function() {
+			try {
+				return new window.ActiveXObject("Microsoft.XMLHTTP");
+			} catch(e) {}
+		},
     // The data type that'll be returned from the server
     // the default is simply to determine what data was returned from the
     // and act accordingly.
     data: null
-},    
+},
+ActiveAjaxRequests = 0,    
 // borrowed from jQuery
 ACCEPTS = {
     xml: "application/xml, text/xml",
@@ -32,7 +43,7 @@ AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 TYPEOF = /number|string/;
 
-function ajaxDefaults(opts) {
+function ajaxSettings(opts) {
     DEFAULTS = Simples.merge(DEFAULTS, opts);
 }
 // A generic function for performming AJAX requests
@@ -49,36 +60,36 @@ function ajax(url, options) {
     }
 
     options = Simples.merge({}, DEFAULTS, options);
+	var type = options.type.toUpperCase(); 
 
     // How long to wait before considering the request to be a timeout
     // Create the request object
-    var xhr = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest();
+    var xhr = options.xhr();
 
     // Open the asynchronous POST request
-    xhr.open(options.type, url, options.async);
+    xhr.open(type, url, options.async);
 
     // Keep track of when the request has been succesfully completed
     var requestDone = false;
 
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-    if (options.type === 'POST') {
+    if (type === 'POST') {
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
         if (options.data !== null && options.data !== "") {
             options.data = serialise(options.data).replace(/&$/, '');
 
-            if (options.additionalData.toString() === "[object Object]" || options.additionalData.length || typeof options.additionalData === 'string') {
+            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === 'string') {
                 options.data += ("&" + serialise(options.additionalData));
             }
         }
 
     }
-
-    var content = ACCEPTS[ options.dataType ];
-    content = content ? content + ',': '';
-    xhr.setRequestHeader("Accept", content + ACCEPTS._default);
-
+	var content = ACCEPTS[ options.dataType ];
+    xhr.setRequestHeader("Accept", content ? content +', '+ACCEPTS._default : ACCEPTS._default );
+	// up ajax Counter
+    ActiveAjaxRequests++;
     // Watch for when the state of the document gets updated
     function onreadystatechange() {
         // Wait until the data is fully loaded,
@@ -106,7 +117,7 @@ function ajax(url, options) {
             } else {
                 options.error(xhr, 'error');
             }
-
+            ActiveAjaxRequests--;
             // Call the completion callback
             options.complete(xhr);
 
@@ -128,7 +139,13 @@ function ajax(url, options) {
     }
 
     // Establish the connection to the server
-    xhr.send(options.data);
+	// Send the data
+	try {
+		xhr.send( (type !== "GET" && s.data) || null );
+	} catch( sendError ) {
+		debugger;
+		onreadystatechange();
+	}
     // non-async requests
     if (!options.async) {
         onreadystatechange();
