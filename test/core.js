@@ -320,7 +320,7 @@ test('Simples.each',function(){
 	});
 });
 
-test('Simples.filter',function(){
+test('Simples.filter', 6, function(){
 	var s_obj = Simples('div'), counter=0, length = s_obj.length;
 	var results = s_obj.filter(function(i,l){ 
 		if( i !== counter ){
@@ -329,22 +329,29 @@ test('Simples.filter',function(){
 		if(l!==length){
 			ok(false, "length should be the same as instance length" );
 		}  
-		counter++;
-		if(i===0){ 
-			return undefined; 
-		} else if( i===(length-1) ){
-			return null;
-		} else if(i%4 === 0) {
-			return this;
-		} else if( this.className.indexOf('row') > -1) {
-			return true;
-		}
-		return false;
+		counter++;     
+		return this.className === "row";
 	});
 
 	ok( results instanceof Simples, "should return an instance of Simples");
 	notDeepEqual( results, s_obj, "should return an instance of Simples");	
 	same( results.selector, '', "node list of .row -- should have empty selector");	              
 	same( results.context, document, "node list of .row -- should have empty context");
-	equal( results.length, 7, "should return an instance of Simples");
+	equal( results.length, 8, "should return an instance of Simples");
+	
+	var badResponses = s_obj.filter(function(i,l){  
+		if(i===0){ 
+			return undefined; 
+		} else if( i===(length-1) ){
+			return null;
+		} else if( i%5 === 0) {
+			return this;
+		} else if(i%4 === 0 ){
+			return []
+		} else if( i%3 === 0 ){
+			return new Simples()
+		}
+		return {};
+	});
+	equal( badResponses.length, 0, "should return an instance of Simples");   
 });
