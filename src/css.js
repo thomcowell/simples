@@ -140,21 +140,21 @@ function setStyle( elem, name, value ){
 Simples.extend({
 	css : function( name, value ){ 
 		if( value === undefined && typeof name === 'string' ){
-			return currentCSS(this[0], name );  
+			return currentCSS( this[0], name );  
 		}
 
 		// ignore negative width and height values #1599
 		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
-
-		var style = elem.style || elem, set = value !== undefined;
-		if( typeof name === 'string' && value ){
+		
+		var nameClass = toString.call( name );
+		if( nameClass === StringClass && value !== undefined ){
 			
 			this.each(function(){
 				setStyle( this, name, value );
 			});
-		} else if( name.toString === '[object Object]' ) {
+		} else if( nameClass === ObjectClass ) {
 			
 			this.each(function(){  
 				for( var key in name ){  
