@@ -1,6 +1,6 @@
 // Constants
 var TAG = /\<(\w+)\/?\>/,
-	// TAG_STRIP = /\b[\.|\#\|\[].+/g,
+	// TAG_STRIP = /\b[\.|\#\|\[].+/g, TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
 	FIRST_ID = /#/,
 	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g;
