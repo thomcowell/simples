@@ -55,10 +55,10 @@ Simples.extend({
 		if( typeof key === 'string' && value !== undefined ){
 			var func = value === null ? removeData : addData;
 			this.each(function(){
-				addData( this, key, value );
+				func( this, key, value );
 			});
 		} else {
-			return readData( this[0], key );
+			return this[0] ? readData( this[0], key ) : null;
 		}
 		return this;
 	}

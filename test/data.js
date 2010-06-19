@@ -87,7 +87,7 @@ test("removeData on invalid element", 1, function() {
 	var object = document.createElement('object');
 	var noError = true;
 	try{
-		removeData( object, 'test')
+		removeData( object, 'test');
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
@@ -105,7 +105,7 @@ test("cleanData on invalid element", 1, function() {
 	var object = document.createElement('object');
 	var noError = true;
 	try{
-		cleanData( object )
+		cleanData( object );
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
@@ -114,7 +114,7 @@ test("cleanData on valid element without data", 1, function() {
 	var div = document.createElement('div');
 	var noError = true;
 	try{
-		cleanData( div )
+		cleanData( div );
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
@@ -127,21 +127,82 @@ test("cleanData on element with data as requested", 1, function() {
 	equal( r_div[ accessID ], undefined, "a div should have data removed");
 });
 
-module("Data: simples");
-var s_obj = new Simples()
-test("on an empty simples object",function(){
-	ok(false, "test not written");
+function spyFn(){
+	window.__spy__ = arguments;
+}
+module("Data: Simples instance", {
+	setup: function(){
+		window.old_addData = addData;
+		window.old_removeData = removeData;
+		window.old_readData = readData;
+		
+	},
+	teardown : function(){
+		addData = window.old_addData;
+		readData = window.old_readData;
+		removeData = window.old_removeData;
+	}
+});
+
+test("on an empty simples object", 4,function(){
+	var s_obj = new Simples(); 
+	same(s_obj.data, Simples.prototype.data, "should have the function prototyped onto Simples");  
+	
+	equal(s_obj.data('hammer'), null, "should return null when reading data"); 
+	same(s_obj.data('hammer', null), s_obj, "should return self and shouldn't throw an exception");    
+	same(s_obj.data('hammer', 'thor\'s'), s_obj, "should return self and shouldn't throw an exception");    
 });
  
-test("on an simples object add data",function(){
-	ok(false, "test not written");
+test("on an simples object with a single element",function(){
+	var div = document.createElement('div');
+	var s_obj = new Simples( div ); 
+	same(s_obj.data, Simples.prototype.data, "should have the function prototyped onto Simples");  
+	
+	equal(s_obj.data('hammer'), null, "should return null when reading data");                              
+	
+	same(s_obj.data('hammer', null), s_obj, "should return self and shouldn't throw an exception");
+	
+	addData( div, 'hammer', 'thor\'s' );
+	same(s_obj.data('hammer', null), s_obj, "should not return anything and shouldn't throw an exception"); 
+	equal( readData(div, 'hammer'), null, "should call the removeData function");
+	  
+	same(s_obj.data('hammer', 'thor\'s'), s_obj, "should return self and shouldn't throw an exception");	
+	s_obj.data('hammer', 'thor\'s');
+	same('thor\'s', readData( div, 'hammer'), "set the data on the element");
+	same('thor\'s', s_obj.data('hammer'), "return the data from the element");	
+	
 });
 
-test("on an simples object read data",function(){
-	ok(false, "test not written");
-});                              
-
-test("on an simples object remove data",function(){
-	ok(false, "test not written");
+test("on an simples object with multiple elements",function(){
+	var s_obj = new Simples('.row'); 
+	same(s_obj.data, Simples.prototype.data, "should have the function prototyped onto Simples");  
+	
+	equal(s_obj.data('hammer'), null, "should return null when reading data");
+	same(s_obj.data('hammer', null), s_obj, "should return self and shouldn't throw an exception");
+	
+	s_obj.each(function(){
+		addData( this, 'hammer', 'thor\'s' );
+		if( !readData( this, 'hammer' ) ){
+			ok(false, "Test not correctly setup");
+		}
+	});
+	
+	same(s_obj.data('hammer', null), s_obj, "should not return anything and shouldn't throw an exception");
+	
+	s_obj.each(function(){
+		equal( readData(this, 'hammer'), null, "should call the removeData function");
+	});
+	  
+	same(s_obj.data('hammer', 'thor\'s'), s_obj, "should return self and shouldn't throw an exception");
+	
+	s_obj.data('hammer', 'thor\'s');
+	s_obj.each(function(){ 
+		same('thor\'s', readData( this, 'hammer'), "set the same data on all the elements");
+	});
+	
+	s_obj.data('hammer', null);
+	addData( s_obj[0], 'hammer', 'head');
+	same('head', s_obj.data('hammer'), "should only return data from the first element");	
+	
 });
 
