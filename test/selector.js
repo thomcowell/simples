@@ -38,19 +38,19 @@ test('getElements with context', 9, function(){
 
 test('create selector', 12, function(){
 	
-	var div1 = select.call( {},'<div/>');   
+	var div1 = select('<div/>');   
 	same( div1.context, document, "should have a context of document");
 	same( div1.selector, '<div/>', "<div/> -- should have a selector of <div/>");	
 	same( div1.elems.length, 1, "should create 1 elements as a div" );
 	same( div1.elems[0].tagName, 'DIV', "should have created the element as a div");
 
-	var div2 = select.call( {}, '<div/>.row');
+	var div2 = select('<div/>.row');
 	same( div2.context, document, "should have a context of document");	
 	same( div2.selector, '<div/>', "<div/>.row -- should have a selector of <div/>");	
 	same( div2.elems.length, 1, "should create 1 elements as a div" );
 	same( div2.elems[0].tagName, 'DIV', "should have created the element as a div"); 
 	
-	var div3 = select.call( {}, '<div></div>');
+	var div3 = select('<div></div>');
 	same( div3.context, document, "should have a context of document");	
 	same( div2.selector, '<div/>', "<div></div> -- should have a selector of <div/>");	
 	same( div3.elems.length, 1, "should create 1 elements as a div" );
@@ -59,96 +59,96 @@ test('create selector', 12, function(){
 });
 
 test('simple selector', 14, function(){
-	var rows = select.call( {}, '.row');
+	var rows = select('.row');
 	same( rows.context, document, "should have a context of document");	
 	same( rows.selector, '.row', ".row -- should have a selector of .row");
 	same( rows.elems.length, 8, ".row -- should find 8 elements with the class rows" );
 	same( rows.elems[0].tagName, 'DIV', ".row -- should have a tagName of div");
 	
-	var id = select.call( {}, '#test-area'); 
+	var id = select('#test-area'); 
 	same( id.context, document, "should have a context of document");
 	same( id.selector, '#test-area', "#test-area -- should have a selector of #test-area");	
 	same( id.elems.length, 1, "#test-area -- should find 1 element with the id test-area" );
 	
-	var body = select.call( {}, 'body');
+	var body = select('body');
 	same( body.context, document, "should have a context of document");	
 	same( body.selector, 'body', "body -- should have a selector of body");	
 	same( body.elems.length, 1, "body -- should find 1 element with the tagName of body");
 	same( body.elems[0].tagName, 'BODY', "body -- should have a tagName of body");
 
-	var none = select.call( {}, 'hammer');
+	var none = select('hammer');
 	same( none.context, document, "should have a context of document");	
 	same( none.selector, 'hammer', "hammer -- should have a selector of hammer");		
 	same( none.elems.length, 0, "hammer -- should have returned no elements");
 	
-	// var input = select.call( {}, 'name=hammer');
+	// var input = select('name=hammer');
 	// same( input.length, 1, "name=hammer -- should find 1 element with the tagName of body");
 	// same( input[0].tagName, 'INPUT', "name=hammer -- should have a tagName of body");  	
 });
 
 test('chained selector', 19, function(){
-	var rows1 = select.call( {}, '#row-wrapper .row');
+	var rows1 = select('#row-wrapper .row');
 	same( rows1.context, document, "should have a context of document");	
 	same( rows1.selector, '#row-wrapper .row', "#row-wrapper .row -- should have a selector of #row-wrapper .row");	
 	same( rows1.elems.length, 8, "#row-wrapper .row -- should find 8 elements with the class row" );
 	same( rows1.elems[0].tagName, 'DIV', "#row-wrapper .row -- should have a tagName of div");
 
-	var rows2 = select.call( {}, '.row .cell');
+	var rows2 = select('.row .cell');
 	same( rows2.context, document, "should have a context of document");	
 	same( rows2.selector, '.row .cell', ".row .cell -- should have a selector of .row .cell");	
 	same( rows2.elems.length, 36, ".row .cell -- should find 36 elements with the class cell" );
 	same( rows2.elems[0].tagName, 'DIV', ".row .cell -- should have a tagName of div");
 
-	var id = select.call( {}, 'body #test-area');
+	var id = select('body #test-area');
 	same( id.context, document, "should have a context of document");	
 	same( id.selector, '#test-area', "body #test-area -- should have a selector of #test-area");	
 	same( id.elems.length, 1, "body #test-area -- should find 1 element with the id test-area" );
 	
-	var body1 = select.call( {}, 'body .row');
+	var body1 = select('body .row');
 	same( body1.context, document, "should have a context of document");	
 	same( body1.selector, 'body .row', "body .row -- should have a selector of body .row");	
 	same( body1.elems.length, 8, "body .row -- should find 8 elements with the className of row");
 	same( body1.elems[0].tagName, 'DIV', "body .row -- should have a tagName of body");
 	
-	var body2 = select.call( {}, 'body h2');
+	var body2 = select('body h2');
 	same( body2.context, document, "should have a context of document");	
 	same( body2.selector, 'body h2', "body h2 -- should have a selector of body h2");	
 	same( body2.elems.length, 2, "body h2 -- should find 2 elements with the tagName of h2");
 	same( body2.elems[0].tagName, 'H2', "body h2 -- should have a tagName of h2");	
 	
-	// var rows = select.call( {}, '#row-wrapper name=row');
+	// var rows = select('#row-wrapper name=row');
 	// same( rows.length, 2, "#row-wrapper name=row -- should find 2 elements with the class cell" );
 	// same( rows[0].tagName, 'INPUT', "#row-wrapper name=row -- should have a tagName of input");	
 });
 
 test('badly constructed selector', 19, function(){
-	var rows1 = select.call( {}, '#row-wrapper.row');
+	var rows1 = select('#row-wrapper.row');
 	same( rows1.selector, '#row-wrapper', "#row-wrapper.row -- should have a selector of #row-wrapper");	
 	same( rows1.elems.length, 1, "#row-wrapper.row -- should find 1 element with the id of row-wrapper" );
 	same( rows1.elems[0].tagName, 'DIV', "#row-wrapper.row -- should have a tagName of div");
 
-	var rows2 = select.call( {}, '.row.cell');    
+	var rows2 = select('.row.cell');    
 	same( rows2.selector, '.row', ".row.cell -- should have a selector of .row");	
 	same( rows2.elems.length, 8, ".row.cell -- should find 8 elements with the class rows" );
 	same( rows2.elems[0].tagName, 'DIV', ".row.cell -- should have a tagName of div");
 
-	var rows3 = select.call( {}, '.row.cell.row#test-area');
+	var rows3 = select('.row.cell.row#test-area');
 	same( rows3.elems.length, 8, ".row.cell.row#test-area -- should find 8 elements with the className of row" );
 	same( rows3.selector, '.row', ".row.cell.row#test-area -- should have a selector of .row.cell.row#test-area");
 	same( rows3.elems[0].className, 'row', ".row.cell.row#test-area -- should have an className of .row.cell.row#test-area");            
 	same( rows3.elems[0].tagName, 'DIV', ".row.cell.row#test-area -- should have a tagName of div");
 		
-	var body1 = select.call( {}, 'body.row');
+	var body1 = select('body.row');
 	same( body1.selector, 'body', "body.row -- should have a selector of body");	
 	same( body1.elems.length, 1, "body.row -- should find 8 elements with the className of row");
 	same( body1.elems[0].tagName, 'BODY', "body.row -- should have a tagName of body");
 
-	var body2 = select.call( {}, 'body#test-area');   
+	var body2 = select('body#test-area');   
 	same( body2.selector, 'body', "body#test-area -- should have a selector of body");
 	same( body2.elems.length, 1, "body#test-area -- should find 1 elements with the tagName of body");
 	same( body2.elems[0].tagName, 'BODY', "body#test-area -- should have a tagName of body");
 		
-	var body3 = select.call( {}, '.row#cell-test');
+	var body3 = select('.row#cell-test');
 	same( body3.selector, '.row', ".row#cell-test -- should have a selector of .row");	
 	same( body3.elems.length, 8, ".row#cell-test -- should find 8 elements with the className of row");
 	same( body3.elems[0].tagName, 'DIV', "body#test-area -- should have a tagName of body");
