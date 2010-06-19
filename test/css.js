@@ -119,10 +119,14 @@ test("css(String, Object)", function() {
 	equals( Simples("#t2037 .hidden").css("display"), "none", "Make sure browser thinks it is hidden" );
 });
 
+test("Simples instance show and hide", function(){
+   ok( false, "tests not written"); 
+});
+
 if(Simples.browser.msie) {
   test("css(String, Object) for MSIE", function() {
     // for #1438, IE throws JS error when filter exists but doesn't have opacity in it
-		Simples('#foo').css("filter", "progid:DXImageTransform.Microsoft.Chroma(color='red');");
+	Simples('#foo').css("filter", "progid:DXImageTransform.Microsoft.Chroma(color='red');");
   	equals( Simples('#foo').css('opacity'), '1', "Assert opacity is 1 when a different filter is set in IE, #1438" );
 
     var filterVal = "progid:DXImageTransform.Microsoft.alpha(opacity=30) progid:DXImageTransform.Microsoft.Blur(pixelradius=5)";
@@ -133,16 +137,184 @@ if(Simples.browser.msie) {
     equals( Simples('#foo').css("filter"), filterVal2, "Setting opacity in IE doesn't clobber other filters" );
     equals( Simples('#foo').css("opacity"), 1, "Setting opacity in IE with other filters works" )
   });
-}
+}   
 
 test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", function () {
 	expect(4);
 
 	var $checkedtest = Simples("#checkedtest");
 	// IE6 was clearing "checked" in Simples.css(elem, "height");
-	Simples.css($checkedtest[0], "height");
+	currentCSS($checkedtest[0], "height");
 	ok( !! Simples(":radio:first", $checkedtest).attr("checked"), "Check first radio still checked." );
 	ok( ! Simples(":radio:last", $checkedtest).attr("checked"), "Check last radio still NOT checked." );
 	ok( !! Simples(":checkbox:first", $checkedtest).attr("checked"), "Check first checkbox still checked." );
 	ok( ! Simples(":checkbox:last", $checkedtest).attr("checked"), "Check last checkbox still NOT checked." );
+}); 
+
+module("CSS: Width and Height");
+
+function testWidth() {
+	expect(7);
+
+	var $div = Simples("#nothiddendiv");
+	$div.width( 30 );
+	equals($div.width(), 30, "Test set to 30 correctly");
+	$div.hide();
+	equals($div.width(), 30, "Test hidden div");
+	$div.show();
+	$div.width( -1 ); // handle negative numbers by ignoring #1599
+	equals($div.width(), 30, "Test negative width ignored");
+	$div.css("padding", "20px");
+	equals($div.width(), 30, "Test padding specified with pixels");
+	$div.css("border", "2px solid #fff");
+	equals($div.width(), 30, "Test border specified with pixels");
+
+	$div.css({ display: "", border: "", padding: "" });
+
+	Simples("#nothiddendivchild").css({ width: 20, padding: "3px", border: "2px solid #fff" });
+	equals(Simples("#nothiddendivchild").width(), 20, "Test child width with border and padding");
+	Simples("#nothiddendiv, #nothiddendivchild").css({ border: "", padding: "", width: "" });
+
+	var blah = Simples("blah");
+	equals( blah.width( val(10) ), blah, "Make sure that setting a width on an empty set returns the set." );
+}
+
+test("width()", function() {
+	testWidth();
 });
+
+test("width() with function args", function() {
+	expect( 2 );
+	
+	var $div = Simples("#nothiddendiv");
+	$div.width( 30 ).width(function(i, width) {
+		equals( width, 30, "Make sure previous value is corrrect." );
+		return width + 1;
+	});
+	
+	equals( $div.width(), 31, "Make sure value was modified correctly." );
+});
+
+function testHeight() {
+	expect(6);
+
+	var $div = Simples("#nothiddendiv");
+	$div.height( 30 );
+	equals($div.height(), 30, "Test set to 30 correctly");
+	$div.hide();
+	equals($div.height(), 30, "Test hidden div");
+	$div.show();
+	$div.height( -1 ); // handle negative numbers by ignoring #1599
+	equals($div.height(), 30, "Test negative height ignored");
+	$div.css("padding", "20px");
+	equals($div.height(), 30, "Test padding specified with pixels");
+	$div.css("border", "2px solid #fff");
+	equals($div.height(), 30, "Test border specified with pixels");
+
+	$div.css({ display: "", border: "", padding: "", height: "1px" });
+
+	var blah = Simples("blah");
+	equals( blah.height( val(10) ), blah, "Make sure that setting a height on an empty set returns the set." );
+}
+
+test("height()", function() {
+	testHeight();
+});
+
+test("height() with function args", function() {
+	expect( 2 );
+	
+	var $div = Simples("#nothiddendiv");
+	$div.height( 30 ).height(function(i, height) {
+		equals( height, 30, "Make sure previous value is corrrect." );
+		return height + 1;
+	});
+	
+	equals( $div.height(), 31, "Make sure value was modified correctly." );
+});
+
+test("innerWidth()", function() {
+	expect(3);
+
+	var $div = Simples("#nothiddendiv");
+	// set styles
+	$div.css({
+		margin: 10,
+		border: "2px solid #fff",
+		width: 30
+	});
+	
+	equals($div.innerWidth(), 30, "Test with margin and border");
+	$div.css("padding", "20px");
+	equals($div.innerWidth(), 70, "Test with margin, border and padding");
+	$div.hide();
+	equals($div.innerWidth(), 70, "Test hidden div");
+	
+	// reset styles
+	$div.css({ display: null, border: null, padding: null, width: null, height: null });
+});
+
+test("innerHeight()", function() {
+	expect(3);
+	
+	var $div = Simples("#nothiddendiv");
+	// set styles
+	$div.css({
+		margin: 10,
+		border: "2px solid #fff",
+		height: 30
+	});
+	
+	equals($div.innerHeight(), 30, "Test with margin and border");
+	$div.css("padding", "20px");
+	equals($div.innerHeight(), 70, "Test with margin, border and padding");
+	$div.hide();
+	equals($div.innerHeight(), 70, "Test hidden div");
+	
+	// reset styles
+	$div.css({ display: "", border: "", padding: "", width: "", height: "" });
+});
+
+test("outerWidth()", function() {
+	expect(6);
+	
+	var $div = Simples("#nothiddendiv");
+	$div.css("width", 30);
+	
+	equals($div.outerWidth(), 30, "Test with only width set");
+	$div.css("padding", "20px");
+	equals($div.outerWidth(), 70, "Test with padding");
+	$div.css("border", "2px solid #fff");
+	equals($div.outerWidth(), 74, "Test with padding and border");
+	$div.css("margin", "10px");
+	equals($div.outerWidth(), 74, "Test with padding, border and margin without margin option");
+	$div.css("position", "absolute");
+	equals($div.outerWidth(true), 94, "Test with padding, border and margin with margin option");
+	$div.hide();
+	equals($div.outerWidth(true), 94, "Test hidden div with padding, border and margin with margin option");
+	
+	// reset styles
+	$div.css({ position: "", display: "", border: "", padding: "", width: "", height: "" });
+});
+
+test("outerHeight()", function() {
+	expect(6);
+	
+	var $div = Simples("#nothiddendiv");
+	$div.css("height", 30);
+	
+	equals($div.outerHeight(), 30, "Test with only width set");
+	$div.css("padding", "20px");
+	equals($div.outerHeight(), 70, "Test with padding");
+	$div.css("border", "2px solid #fff");
+	equals($div.outerHeight(), 74, "Test with padding and border");
+	$div.css("margin", "10px");
+	equals($div.outerHeight(), 74, "Test with padding, border and margin without margin option");
+	equals($div.outerHeight(true), 94, "Test with padding, border and margin with margin option");
+	$div.hide();
+	equals($div.outerHeight(true), 94, "Test hidden div with padding, border and margin with margin option");
+	
+	// reset styles
+	$div.css({ display: "", border: "", padding: "", width: "", height: "" });
+});
+

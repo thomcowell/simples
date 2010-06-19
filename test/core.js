@@ -1,3 +1,9 @@
+Simples.each = function(collection, callback){
+	for(var i=0,l=collection.length;i<l;i++){
+		callback.call( collection[i], i, collection[i] );
+	}
+}
+
 module("Core");
 
 test("Class String representations", 8, function(){

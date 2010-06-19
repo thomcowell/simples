@@ -18,5 +18,6 @@ Simples.merge({
 		})(),
 		opacity : /^0.55$/.test( a.style.opacity ),
 		cssFloat: !!a.style.cssFloat
-	}
+	},
+	browser : {}
 });
