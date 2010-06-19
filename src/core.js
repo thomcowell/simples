@@ -13,7 +13,10 @@ var TAG = /\<(\w+)\/?\>/,
 	ArrayClass = '[object Array]',
 	ObjectClass = '[object Object]',
 	NodeListClass = '[object NodeList]', 
-	StringClass = "[object String]",
+	StringClass = "[object String]", 
+	NumberClass = "[object Number]",
+	FunctionClass = "[object Function]",
+	BooleanClass = "[object Boolean]",
 	HTMLCollectionClass = "[object HTMLCollection]";
 	// Internal Preferences
 	useSimplesObject = true;
@@ -80,7 +83,7 @@ function isObject( obj ){
 }
 
 function isFunction( obj ) {
-	return ( typeof obj === "function" );
+	return ( toString.call( obj ) === FunctionClass );
 }        
 
 /**

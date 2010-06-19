@@ -227,31 +227,35 @@ function serialise(obj) {
 
 function formatData(name, value) {
 
-	var str;
-	if( typeof value === 'string' ) {
+	var str = "";
 
-	    if ( name && value == ( 'number' || 'string' ) ) {
-	        str = encodeURIComponent(name) + '=' + encodeURIComponent(value);
-	    }                            
-	} else if( typeof value === 'function' ){
+	if( typeof name === 'string' ){
+		var objClass = toString.call( value );
+		if( objClass === NumberClass || objClass === StringClass || objClass === BooleanClass) {
+
+	        str = ( encodeURIComponent(name) + '=' + encodeURIComponent(value) );
+		} else if( objClass === FunctionClass ){
 		
-	 	str = formatData( name, value() );
-    } else if ( Simples.isObject( value ) ) {
-        arr = [];
+		 	str = formatData( name, value() );
+	    } else if ( objClass === ObjectClass ) {
+	        var arr = [];
 
-        for (var key in value) { 
-	
-			var result = formatData(name + "[" + key + "]", value[ key ] );
-            if( result ){ arr[ arr.length ] = result; }
-        }
+	        for (var key in value) { 
 
-        str = arr.join('&');
-    }
+				var result = formatData(name + "[" + key + "]", value[ key ] );
+	            if( result ){ arr.push( result ); }
+	        }
+
+	        str = arr.join('&');
+	    } else if ( objClass === ArrayClass ) {
+			str = formatData( name, value.join(',') )
+		} 
+	}
 	return str;
 }
 
 Simples.merge({
     ajax: ajax,
-    ajaxSettings: ajaxDefaults,
+    ajaxSettings: ajaxSettings,
     params: serialise
 });
