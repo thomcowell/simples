@@ -12,13 +12,15 @@ var TAG = /\<(\w+)\/?\>/,
 	indexOf = Array.prototype.indexOf,
 	ArrayClass = '[object Array]',
 	ObjectClass = '[object Object]',
-	NodeListClass = '[object NodeList]';
+	NodeListClass = '[object NodeList]', 
+	StringClass = "[object String]",
+	HTMLCollectionClass = "[object HTMLCollection]";
 	// Internal Preferences
 	useSimplesObject = true;
 
 function Simples( selector, context ) {
 
-	if ( !this.each && !this.filter ){	
+	if ( !(this instanceof Simples) ){	// or this.each !== Simples.prototype.each
 		return new Simples( selector, context );  		
 	}
 	  	
@@ -42,18 +44,18 @@ function Simples( selector, context ) {
 		this.length = 1;
 		return this;
 	}  
-	
-	if( typeof selector === 'string' ){
+	var objClass = toString.call( selector );
+	if( objClass === StringClass ){
 		var result = select( selector, context );
 		this.context = result.context;
 		this.selector = result.selector;
 
 		merge.call( this, result.elems );
 
-	} else if( toString.call( selector ) === NodeListClass ){
+	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
 		merge.call( this, slice.call(selector, 0) );		
-    } else if( toString.call( selector ) === ArrayClass ){
+    } else if( objClass === ArrayClass ){
 
 		for(var d=0,e=selector.length;d<e;d++){
 			if( selector[d] && selector[d].nodeType ){
