@@ -2,51 +2,6 @@ var STRIP_TAB_NEW_LINE = /[\n\t]/g,
 	LAST_SPACE_OPTIONAL = /\s?$/,
 	FIRST_LAST_SPACES = /^\s?|\s?$/g;
 
-var SimplesElement = {
-	cloneNode : function( deep ){
-		this.cloneNode( deep )
-	},
-	/**
-	 * has Native functionality as jQuery
-	 * cloneNode
-	 * text
-	 **/ 
-	wrap : function( selector ){
-		if( typeof selector === 'string' ){
-			
-			selector = select.call({}, selector );
-			selector = selector.length === 1 ? selector : {};
-		}
-		
-		if( selector.nodeType && this.parentNode ){
-
-	        this.parentNode.insertBefore( selector, this );
-	        selector.appendChild(this);
-		}
-		return this;
-	},
-	unwrap : function(){
-		var parent = this.parentNode;
-		if( parent ){
-			var children = this.childNodes;
-			for(var i=0,l=children.length;i<l;i++){
-				
-				parent.insertBefore( children[i], this );
-			}
-			this.remove();
-		}
-		return Simples( children );
-	},
-	replaceWith : function( element ){
-		var parent = this.parentNode;
-		if ( parent && element.nodeType ) {    
-			cleanData( this );
-			parent.replaceChild( element, this );
-		}
-		return element;
-	}
-};
-
 Simples.extend({ 
 	html : function( content ){
 		
@@ -56,9 +11,11 @@ Simples.extend({
 			this.appendChild( content );
 		} else if( typeof content === 'string' ){
 			
-			this.innerHTML = content;
+			this.each(function(){
+				this.innerHTML = content;
+			});
 		} else if( content instanceof Simples ){
-			this.empty();
+			this.empty();        
 			this.appendChild( content );
 		}
 		
@@ -122,23 +79,62 @@ Simples.extend({
 		}
 		return this;
 	},
-	wrap : function( selector ) { 
+	cloneNode : function( deep ){
+		return this[0].cloneNode( deep )
+	},
+	replaceWith : function( element ){
+		var that = this;
+		this.each(function(i){
+			var parent = this.parentNode;
+			if ( parent && element.nodeType ) {    
+				cleanData( this );
+				parent.replaceChild( element, this );
+			}
+			that[i] = element;
+		});
+	},
+	wrap : function( selector ) {
+		var tag, elem; 
 		if( typeof selector === 'string' ){            
 			
-			var tag = TAG.exec( selector || '<div/>' );
-			tag = ( tag !== null && tag.length === 2 ) ? tag[1] : 'div';
-			
+			tag = TAG.exec( selector || '<div/>' );
+			tag = ( tag !== null && tag.length === 2 ) ? tag[1] : null;
+			                               
+		} else if( selector instanceof Simples ){
+		   	domElem = selector[0];
+		}   
+		if( tag || domElem ){
 			this.each(function(){                          
 
-				var elem = document.createElement( tag );
-
-		        this.parentNode.insertBefore(elem, this);
-		        elem.appendChild(this);
-			});                                
-		}
+	            if( this.parentNode ){ 
+					elem = tag ? document.createElement( tag ) : domElem.cloneNode();
+		        	this.parentNode.insertBefore(elem, this);
+		        	elem.appendChild(this);
+				}
+			});			
+		}    
 		
 		return this;
     },
+	unwrap : function(){
+		if( this.length ){
+			results = [];
+			this.each(function(){
+				var parent = this.parentNode;
+				if( parent ){
+					var children = this.childNodes;
+					for(var i=0,l=children.length;i<l;i++){
+
+						parent.insertBefore( children[i], this );
+					}
+					this.remove();
+					results.concat( children );
+				}
+			});
+			return Simples( results );
+		}
+		return this;
+	},
 	empty : function(){             
 		this.each(function(){
 			// Remove element nodes and prevent memory leaks
@@ -172,7 +168,7 @@ Simples.extend({
 			if( !hasClass.call( [ this ], klass ) ){
 				this.className = this.className.replace( LAST_SPACE_OPTIONAL, '') + ' '+klass;
 			} 
-		})
+		});
 		return this;
 	},
 	removeClass : function( klass ){
@@ -192,13 +188,14 @@ Simples.extend({
 				}
 			});
 		} else if( name && value === undefined ){
-			return this[0] ? this[0].getAttribute( name ) : null
+			return this[0] ? this[0].getAttribute( name ) : null;
 		} else if( name && value === null){
 			this.each(function(){
 				if ( this.nodeType === 1 ) {
 					this.removeAttribute( name );
 				}				
-			})
+			});
 		}
+		return this;
 	}
 });
