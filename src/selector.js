@@ -1,5 +1,5 @@
 // Constants
-var TAG = /\<(\w+)\/?\>/,
+var TAG = /\<(\w+)\s?\/?\>/,
 	// TAG_STRIP = /\b[\.|\#\|\[].+/g, 
 	// TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
 	FIRST_ID = '#',
@@ -42,7 +42,7 @@ function select( selector, context ){
 						result = result.concat( getElements( split[i], context[m] ) );
 					}
 					context = result;
-				} else {
+				} else {  
 					context = getElements( split[i], context );
 				}
 			}
@@ -82,8 +82,9 @@ function getElements( selector, context ){
 			}
 			return nodes;
 		} 
-	} else {     
+	} else {
 		// assume that if not id or class must be tag
-		return slice.call( context.getElementsByTagName( selector ), 0 );
+		var find = context.getElementsByTagName( selector );
+		return find ? slice.call( find, 0 ) : [];
 	}
 }

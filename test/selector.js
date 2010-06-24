@@ -36,7 +36,7 @@ test('getElements with context', 9, function(){
 	same( tag[0].className, '', "should return an element with no className");		
 });
 
-test('create selector', 12, function(){
+test('create selector', 16, function(){
 	
 	var div1 = select('<div/>');   
 	same( div1.context, document, "should have a context of document");
@@ -56,6 +56,11 @@ test('create selector', 12, function(){
 	same( div3.elems.length, 1, "should create 1 elements as a div" );
 	same( div3.elems[0].tagName, 'DIV', "should have created the element as a div");
 
+	var div4 = select('<div />');   
+	same( div4.context, document, "should have a context of document");
+	same( div4.selector, '<div />', "<div /> -- should have a selector of <div/>");	
+	same( div4.elems.length, 1, "should create 1 elements as a div" );
+	same( div4.elems[0].tagName, 'DIV', "should have created the element as a div");
 });
 
 test('simple selector', 14, function(){
