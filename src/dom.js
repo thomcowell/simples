@@ -80,7 +80,7 @@ Simples.extend({
 		return this;
 	},
 	cloneNode : function( deep ){
-		return this[0].cloneNode( deep )
+		return this[0].cloneNode( deep );
 	},
 	replaceWith : function( element ){
 		var that = this;

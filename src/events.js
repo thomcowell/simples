@@ -62,10 +62,11 @@ SimplesEvent.prototype = {
 var Events = {
 	register : function( elem, type, original, handled ){
 		if( typeof(callback) === 'function' && elem ){ 
-			elem.events = elem.events || {};
-			elem.events[ type ] = elem.events[ type ] || {};
-
-			elem.events[ type ][ Events.guid++ ] = { original: original, handled: handled };
+			var data = readData( elem, 'events' ) || {};
+			data[ type ] = data[ type ] || {};
+			original.guid = Events.guid++;
+			data[ type ][ Events.guid ] = { original: original, handled: handled, guid: Events.guid };
+			addData( elem, 'events', data );
 			return Events.guid;
 		}
 	}, 
@@ -75,7 +76,8 @@ var Events = {
 			return original;
 		}
 		
-		var evt = elem.events[ type ];
+		var data = readData( elem, 'events' ) || {};
+		var evt = data[ type ] || {};
 		
 		for( var key in evt ){
 
@@ -86,6 +88,8 @@ var Events = {
 				return h;
 			}
 		}
+		addData( elem, 'events', data );
+		
 		return original;
 	},
 	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
@@ -170,7 +174,8 @@ Simples.extend({
 			
 		        this.attachEvent("on" + type, handled);
 		    }
-		});	
+		});
+		return this;	
 	},
 	unbind : function( type, callback ){
 		// Loop over elements
@@ -184,13 +189,15 @@ Simples.extend({
 				this.detachEvent( "on" + type, Events.unregister( this, type, callback ) );
 			}
 		});
+		return this;
 	}, 
 	trigger : function( type, data ){
 		this.each(function(){
-			var evt = this.events ? this.events[ type ] : {};
+			var evt = ( readData( this, 'events' ) || {} )[ type ] || {};
 			for(var key in evt ){
 				evt[ key ].handled.call( SimplesEvent({ type: type, target: this, data: data }) );
 			}
 		});
+		return this;
 	}
 });
