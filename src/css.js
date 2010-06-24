@@ -164,7 +164,7 @@ function getWidthHeight( elem, name, extra ) {
 		}
 	}
 
-	return val;
+	return Math.max(0, Math.round(val));;
 }  
 
 // Create innerHeight, innerWidth, outerHeight and outerWidth methods

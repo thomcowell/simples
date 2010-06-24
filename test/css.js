@@ -120,7 +120,11 @@ test("css(String, Object)", function() {
 });
 
 test("Simples instance show and hide", function(){
-   ok( false, "tests not written"); 
+	var elem = Simples('#foo').css('display','none');
+	elem.show();
+	equals( elem[0].style.display, 'block', 'show should set the display of element to block' );
+	elem.hide();
+	equals( elem[0].style.display, 'none', 'show should set the display of element to block' );
 });
 
 if(Simples.browser.msie) {
@@ -141,19 +145,30 @@ if(Simples.browser.msie) {
 
 test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", function () {
 	expect(4);
+    var checkedtest = getElements("#checkedtest")[0];
+	var radio = Simples('input', checkedtest).filter(function(){
+		if( this.type === 'radio' || this.type === 'RADIO' ){
+			return true;
+		}
+	});
+	var checkbox = Simples('input', checkedtest).filter(function(){
+		if( this.type === 'checkbox' || this.type === 'CHECKBOX' ){
+			return true;
+		}
+	});
 
-	var $checkedtest = Simples("#checkedtest");
 	// IE6 was clearing "checked" in Simples.css(elem, "height");
-	currentCSS($checkedtest[0], "height");
-	ok( !! Simples(":radio:first", $checkedtest).attr("checked"), "Check first radio still checked." );
-	ok( ! Simples(":radio:last", $checkedtest).attr("checked"), "Check last radio still NOT checked." );
-	ok( !! Simples(":checkbox:first", $checkedtest).attr("checked"), "Check first checkbox still checked." );
-	ok( ! Simples(":checkbox:last", $checkedtest).attr("checked"), "Check last checkbox still NOT checked." );
+	currentCSS( checkedtest, "height");
+
+	ok( !! Simples(radio[0]).attr("checked"), "Check first radio still checked." );
+	ok( ! Simples(radio[radio.length - 1]).attr("checked"), "Check last radio still NOT checked." );
+	ok( !! Simples(checkbox[0]).attr("checked"), "Check first checkbox still checked." );
+	ok( ! Simples(checkbox[radio.length - 1]).attr("checked"), "Check last checkbox still NOT checked." );
 }); 
 
 module("CSS: Width and Height");
 
-function testWidth() {
+test("width()", function() {
 	expect(7);
 
 	var $div = Simples("#nothiddendiv");
@@ -176,11 +191,7 @@ function testWidth() {
 	Simples("#nothiddendiv, #nothiddendivchild").css({ border: "", padding: "", width: "" });
 
 	var blah = Simples("blah");
-	equals( blah.width( val(10) ), blah, "Make sure that setting a width on an empty set returns the set." );
-}
-
-test("width()", function() {
-	testWidth();
+	equals( blah.width( 10 ), blah, "Make sure that setting a width on an empty set returns the set." );
 });
 
 test("width() with function args", function() {
@@ -195,7 +206,7 @@ test("width() with function args", function() {
 	equals( $div.width(), 31, "Make sure value was modified correctly." );
 });
 
-function testHeight() {
+test("height()", function() {
 	expect(6);
 
 	var $div = Simples("#nothiddendiv");
@@ -214,11 +225,7 @@ function testHeight() {
 	$div.css({ display: "", border: "", padding: "", height: "1px" });
 
 	var blah = Simples("blah");
-	equals( blah.height( val(10) ), blah, "Make sure that setting a height on an empty set returns the set." );
-}
-
-test("height()", function() {
-	testHeight();
+	equals( blah.height( 10 ), blah, "Make sure that setting a height on an empty set returns the set." );
 });
 
 test("height() with function args", function() {
