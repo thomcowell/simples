@@ -2,6 +2,40 @@ module("Position");
 
 var supportsScroll = false;
 
+function testoffset(name, fn) {
+	
+	test(name, function() {
+		// pause execution for now
+		stop();
+		
+		// load fixture in iframe
+		var iframe = loadFixture(),
+			win = iframe.contentWindow,
+			interval = setInterval( function() {
+				if ( win && win.Simples && win.Simples.isReady ) {
+					clearInterval( interval );
+					// continue
+					start();
+					// call actual tests passing the correct Simples isntance to use
+					fn.call( this, win.Simples, win );
+					document.body.removeChild( iframe );
+					iframe = null;
+				}
+			}, 15 );
+	});
+	
+	function loadFixture() {
+		var src = './data/offset/' + name + '.html?' + parseInt( Math.random()*1000, 10 ),
+			iframe = Simples('<iframe />').css({
+				width: 500, height: 500, position: 'absolute', top: -600, left: -600, visiblity: 'hidden'
+			})[0];
+
+		document.body.appendChild( iframe );
+		iframe.contentWindow.location = src;
+		return iframe;
+	}
+}
+
 testoffset("absolute"/* in iframe */, function($, iframe) {
 	expect(4);
 	
@@ -72,8 +106,8 @@ testoffset("absolute", function( Simples ) {
 	
 	// test #5781
 	var offset = Simples( '#positionTest' ).offset({ top: 10, left: 10 }).offset();
-	equals( offset.top,  10, "Setting offset on element with position absolute but 'auto' values." )
-	equals( offset.left, 10, "Setting offset on element with position absolute but 'auto' values." )
+	equals( offset.top,  10, "Setting offset on element with position absolute but 'auto' values." );
+	equals( offset.left, 10, "Setting offset on element with position absolute but 'auto' values." );
 	
 	
 	// set offset
@@ -110,9 +144,7 @@ testoffset("absolute", function( Simples ) {
 		equals( Simples( this.id ).offset().top,  this.top  + 1, "Simples('" + this.id + "').offset({ top: "  + (this.top  + 1) + " })" );
 		equals( Simples( this.id ).offset().left, this.left + 1, "Simples('" + this.id + "').offset({ left: " + (this.left + 1) + " })" );
 		
-		Simples( this.id )
-			.offset({ left: this.left + 2 })
-			.offset({ top:  this.top  + 2 });
+		Simples( this.id ).offset({ left: this.left + 2 }).offset({ top:  this.top  + 2 });
 		equals( Simples( this.id ).offset().top,  this.top  + 2, "Setting one property at a time." );
 		equals( Simples( this.id ).offset().left, this.left + 2, "Setting one property at a time." );
 		
@@ -412,35 +444,3 @@ test("offsetParent", function(){
 	equals( div[0], document.body, "The body is the offsetParent." );
 	equals( div[1], Simples("#nothiddendiv")[0], "The div is the offsetParent." );
 });
-
-function testoffset(name, fn) {
-	
-	test(name, function() {
-		// pause execution for now
-		stop();
-		
-		// load fixture in iframe
-		var iframe = loadFixture(),
-			win = iframe.contentWindow,
-			interval = setInterval( function() {
-				if ( win && win.Simples && win.Simples.isReady ) {
-					clearInterval( interval );
-					// continue
-					start();
-					// call actual tests passing the correct Simples isntance to use
-					fn.call( this, win.Simples, win );
-					document.body.removeChild( iframe );
-					iframe = null;
-				}
-			}, 15 );
-	});
-	
-	function loadFixture() {
-		var src = './data/offset/' + name + '.html?' + parseInt( Math.random()*1000, 10 ),
-			iframe = Simples('<iframe />').css({
-				width: 500, height: 500, position: 'absolute', top: -600, left: -600, visiblity: 'hidden'
-			}).appendTo('body')[0];
-		iframe.contentWindow.location = src;
-		return iframe;
-	}
-}
