@@ -20,10 +20,9 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	},	
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";    
 
-function currentCSS(elem, name) {
-    var ret,
-    style = elem.style,
-    filter;
+function currentCSS(elem, name, extra) {
+	
+    var ret, style = elem.style, filter;
 
     // IE uses filters for opacity
     if (!Simples.support.opacity && name === "opacity" && elem.currentStyle) {
@@ -141,79 +140,115 @@ function setStyle( elem, name, value ){
 	
 	return style[ name ]; 
 }
- 
-function getWidthHeight( elem, name, extra ) {
-	var which = name === "width" ? cssWidth : cssHeight, 
-		val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
-
-	if ( extra === "border" ) {
-		return val;
-	}
-	
-	for(var i=0,l=which.length;i<l;i++){
-		var append = which[i];
-		if ( !extra ) {
-			val -= parseFloat(currentCSS( elem, "padding" + append, true)) || 0;
-		}
-	
-		if ( extra === "margin" ) {
-			val += parseFloat(currentCSS( elem, "margin" + append, true)) || 0;
-
-		} else {
-			val -= parseFloat(currentCSS( elem, "border" + append + "Width", true)) || 0;
-		}
-	}
-
-	return Math.max(0, Math.round(val));;
-}  
 
 // Create innerHeight, innerWidth, outerHeight and outerWidth methods
-var _dimensions_ = [ "Height", "Width" ]; 
+(function( Simples ){
+	function getWidthHeight( elem, name, extra ){
+		var val;
+		if ( elem.offsetWidth !== 0 ) {
+			val = returnWidthHeight( elem, name, extra );
 
-for(var i=0,l=_dimensions_.length;i<l;i++){
-    var name = _dimensions_[i];
-	var type = name.toLowerCase();
-
-	// innerHeight and innerWidth
-	Simples.prototype["inner" + name] = function() {
-		return this[0] ? getWidthHeight( this[0], type, "padding" ) : null;
-	};
-
-	// outerHeight and outerWidth
-	Simples.prototype["outer" + name] = function( margin ) {
-		return this[0] ? getWidthHeight( this[0], type, margin ? "margin" : "border" ) : null;
-	};
-
-	Simples.prototype[ type ] = function( size ) {
-		// Get window width or height
-		var elem = this[0];
-		if ( !elem ) {
-			return size == null ? null : this;
+		} else {
+			resetCSS( elem, cssShow, function() {
+				val = returnWidthHeight( elem, name, extra );
+			});
 		}
 
-		return ("scrollTo" in elem && elem.document) ? // does it walk and quack like a window?
-			// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
-			elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ "client" + name ] ||
-			elem.document.body[ "client" + name ] :
+		return Math.max(0, Math.round(val) );
+	}
 
-			// Get document width or height
-			(elem.nodeType === 9) ? // is it a document
-				// Either scroll[Width/Height] or offset[Width/Height], whichever is greater
-				Math.max(
-					elem.documentElement["client" + name],
-					elem.body["scroll" + name], elem.documentElement["scroll" + name],
-					elem.body["offset" + name], elem.documentElement["offset" + name]
-				) :
+	function returnWidthHeight( elem, name, extra ) {
+		var which = name === "width" ? cssWidth : cssHeight, 
+			val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
 
-				// Get or set width or height on the element
-				size === undefined ?
-					// Get width or height on the element
-					getWidthHeight( elem, type ) : 
-					// Set the width or height on the element (default to pixels if value is unitless)
-					this.css( type, typeof size === "string" ? size : size + "px" );
-	};
+		if ( extra === "border" ) {
+			return val;
+		}
 
-}  
+		for(var i=0,l=which.length;i<l;i++){
+			var append = which[i];
+			if ( !extra ) {
+				val -= parseFloat(currentCSS( elem, "padding" + append, true)) || 0;
+			}
+
+			if ( extra === "margin" ) {
+				val += parseFloat(currentCSS( elem, "margin" + append, true)) || 0;
+
+			} else {
+				val -= parseFloat(currentCSS( elem, "border" + append + "Width", true)) || 0;
+			}
+		}
+
+		return val;
+	}  
+
+	function resetCSS( elem, options, callback ){
+		var old = {};
+
+		// Remember the old values, and insert the new ones
+		for ( var name in options ) {
+			old[ name ] = elem.style[ name ];
+			elem.style[ name ] = options[ name ];
+		}
+
+		callback.call( elem );
+
+		// Revert the old values
+		for ( name in options ) {
+			elem.style[ name ] = old[ name ];
+		}	
+	}
+	
+	var _dimensions_ = [ "Height", "Width" ]; 
+    
+	function setUpWidthAndHeight( name ){
+		var type = name.toLowerCase();
+
+		// innerHeight and innerWidth
+		Simples.prototype["inner" + name] = function() {
+			return this[0] ? getWidthHeight( this[0], type, "padding" ) : null;
+		};
+
+		// outerHeight and outerWidth
+		Simples.prototype["outer" + name] = function( margin ) {
+			return this[0] ? getWidthHeight( this[0], type, margin ? "margin" : "border" ) : null;
+		};
+
+		Simples.prototype[ type ] = function( size ) {
+			// Get window width or height
+			var elem = this[0];
+			if ( !elem ) {
+				return size == null ? null : this;
+			}
+
+			return ("scrollTo" in elem && elem.document) ? // does it walk and quack like a window?
+				// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
+				elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ "client" + name ] ||
+				elem.document.body[ "client" + name ] :
+
+				// Get document width or height
+				(elem.nodeType === 9) ? // is it a document
+					// Either scroll[Width/Height] or offset[Width/Height], whichever is greater
+					Math.max(
+						elem.documentElement["client" + name],
+						elem.body["scroll" + name], elem.documentElement["scroll" + name],
+						elem.body["offset" + name], elem.documentElement["offset" + name]
+					) :
+
+					// Get or set width or height on the element
+					size === undefined ?
+						// Get width or height on the element
+						getWidthHeight( elem, type ) : 
+						// Set the width or height on the element (default to pixels if value is unitless)
+						this.css( type, typeof size === "string" ? size : size + "px" );
+		};		
+	}
+	
+	for(var i=0,l=_dimensions_.length;i<l;i++){
+	    setUpWidthAndHeight( _dimensions_[i] );
+	}
+	
+})( Simples );  
 
 Simples.extend({
 	css : function( name, value ){ 
@@ -244,13 +279,13 @@ Simples.extend({
 		return this;
 	},
 	show : function(){
-		this.each(function(){
-			setStyle(this, "display", 'block' );
-		});
+		for( var i=0,l=this.length;i<l;i++){
+			this[i].style.display = "block";
+		}
 	},
 	hide : function(){
-		this.each(function(){
-			setStyle(this, "display", 'none' );
-		});
+		for( var i=0,l=this.length;i<l;i++){
+			this[i].style.display = "none";
+		}
 	}
 });

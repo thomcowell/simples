@@ -194,18 +194,6 @@ test("width()", function() {
 	equals( blah.width( 10 ), blah, "Make sure that setting a width on an empty set returns the set." );
 });
 
-test("width() with function args", function() {
-	expect( 2 );
-	
-	var $div = Simples("#nothiddendiv");
-	$div.width( 30 ).width(function(i, width) {
-		equals( width, 30, "Make sure previous value is corrrect." );
-		return width + 1;
-	});
-	
-	equals( $div.width(), 31, "Make sure value was modified correctly." );
-});
-
 test("height()", function() {
 	expect(6);
 
@@ -226,18 +214,6 @@ test("height()", function() {
 
 	var blah = Simples("blah");
 	equals( blah.height( 10 ), blah, "Make sure that setting a height on an empty set returns the set." );
-});
-
-test("height() with function args", function() {
-	expect( 2 );
-	
-	var $div = Simples("#nothiddendiv");
-	$div.height( 30 ).height(function(i, height) {
-		equals( height, 30, "Make sure previous value is corrrect." );
-		return height + 1;
-	});
-	
-	equals( $div.height(), 31, "Make sure value was modified correctly." );
 });
 
 test("innerWidth()", function() {
