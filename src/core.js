@@ -12,7 +12,13 @@ var toString = Object.prototype.toString,
 	NumberClass = "[object Number]",
 	FunctionClass = "[object Function]",
 	BooleanClass = "[object Boolean]",
-	HTMLCollectionClass = "[object HTMLCollection]";
+	HTMLCollectionClass = "[object HTMLCollection]",
+	// The ready event handler
+	DOMContentLoaded,
+	// Has the ready events already been bound?
+	readyBound = false,
+	// The functions to execute on DOM ready
+	readyList = [];
 
 function Simples( selector, context ) {
 
@@ -77,7 +83,11 @@ function isObject( obj ){
 
 function isFunction( obj ) {
 	return ( toString.call( obj ) === FunctionClass );
-}        
+}
+function isEmptyObject( obj ) {
+	for ( var name in obj ) { return false; }
+	return true;
+}       
 
 /**
  * @name merge
@@ -163,13 +173,130 @@ merge.call( Simples, {
 	isArray : isArray,
 	isObject : isObject,
 	isFunction: isFunction,
+	// Has the ready events already been bound?      	
+	isReady : false,       
+	// Handle when the DOM is ready
+	ready : function() {
+		// Make sure that the DOM is not already loaded
+		if ( !Simples.isReady ) {
+			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+			if ( !document.body ) {
+				return setTimeout( Simples.ready, 13 );
+			}
+
+			// Remember that the DOM is ready
+			Simples.isReady = true;
+
+			// If there are functions bound, to execute
+			if ( readyList ) {
+				// Execute all of them
+				var fn, i = 0;
+				while ( (fn = readyList[ i++ ]) ) {
+					fn.call( document, Simples );
+				}
+
+				// Reset the list of functions
+				readyList = null;
+			}
+
+			// Trigger any bound ready events
+			if ( Simples.prototype.triggerHandler ) {
+				Simples( document ).triggerHandler( "ready" );
+			}
+		}
+	},
+	bindReady : function(){
+		if ( readyBound ) {
+			return;
+		}
+
+		readyBound = true;
+
+		// Catch cases where $(document).ready() is called after the
+		// browser event has already occurred.
+		if ( document.readyState === "complete" ) {
+			return Simples.ready();
+		}
+
+		// Mozilla, Opera and webkit nightlies currently support this event
+		if ( document.addEventListener ) {
+			// Use the handy event callback
+			document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+
+			// A fallback to window.onload, that will always work
+			window.addEventListener( "load", Simples.ready, false );
+
+		// If IE event model is used
+		} else if ( document.attachEvent ) {
+			// ensure firing before onload,
+			// maybe late but safe also for iframes
+			document.attachEvent("onreadystatechange", DOMContentLoaded);
+
+			// A fallback to window.onload, that will always work
+			window.attachEvent( "onload", Simples.ready );
+
+			// If IE and not a frame
+			// continually check to see if the document is ready
+			var toplevel = false;
+
+			try {
+				toplevel = window.frameElement == null;
+			} catch(e) {}
+
+			if ( document.documentElement.doScroll && toplevel ) {
+				doScrollCheck();
+			}
+		}
+	},	
 	setContext : function( context, func ){
 		return function(){
 			return func.apply( context, arguments );
 		};
 	},
+	each : function(collection, callback){
+		for(var i=0,l=collection.length;i<l;i++){
+			callback.call( collection[i], i, collection[i] );
+		}
+	},
 	noop : function(){}
 });
+
+// Cleanup functions for the document ready method
+if ( document.addEventListener ) {
+	DOMContentLoaded = function() {
+		document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+		Simples.ready();
+	};
+
+} else if ( document.attachEvent ) {
+	DOMContentLoaded = function() {
+		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+		if ( document.readyState === "complete" ) {
+			document.detachEvent( "onreadystatechange", DOMContentLoaded );
+			Simples.ready();
+		}
+	};
+} 
+
+// The DOM ready check for Internet Explorer
+function doScrollCheck() {
+	if ( Simples.isReady ) {
+		return;
+	}
+
+	try {
+		// If IE is used, use the trick by Diego Perini
+		// http://javascript.nwbox.com/IEContentLoaded/
+		document.documentElement.doScroll("left");
+	} catch(e) {
+		setTimeout( doScrollCheck, 1 );
+		return;
+	}
+
+	// and execute any waiting functions
+	Simples.ready();
+}
+
 
 Simples.prototype = {
 	length : 0,
@@ -202,5 +329,22 @@ Simples.prototype = {
 		});           
 		
 		return newSimples;
+	},
+	ready: function( fn ) {
+		// Attach the listeners
+		Simples.bindReady();
+		
+		// If the DOM is already ready
+		if ( Simples.isReady ) {
+			// Execute the function immediately
+			fn.call( document, Simples );
+
+		// Otherwise, remember the function for later
+		} else if ( readyList ) {
+			// Add the function to the wait list
+			readyList.push( fn );
+		}
+
+		return this;
 	}
 };      
