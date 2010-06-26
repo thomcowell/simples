@@ -20,6 +20,17 @@
 		<script type="text/javascript" charset="utf-8" src="../../../src/css.js"></script>
 		<script type="text/javascript" charset="utf-8" src="../../../src/events.js"></script>		  
 		<script type="text/javascript" charset="utf-8" src="../../../src/position.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			Simples(document).ready(function(){
+				window.scrollTo(1000,1000);
+				Simples('#scroll-1')[0].scrollLeft = 5;
+				Simples('#scroll-1')[0].scrollTop = 5;
+				Simples('.scroll').bind('click',function() {
+					Simples('#marker').css( Simples(this).offset() );
+					return false;
+				});                             
+			});      
+		</script>
 	</head>
 	<body>
 		<div id="scroll-1" class="scroll">
@@ -31,13 +42,4 @@
 		<div id="marker"></div>
 		<p class="instructions">Click the white box to move the marker to it.</p>
 	</body>                                                                                    
-	<script type="text/javascript" charset="utf-8">
-		window.scrollTo(1000,1000);
-		Simples('#scroll-1')[0].scrollLeft = 5;
-		Simples('#scroll-1')[0].scrollTop = 5;
-		Simples('.scroll').bind('click',function() {
-			Simples('#marker').css( Simples(this).offset() );
-			return false;
-		});                             
-	</script>
 </html>

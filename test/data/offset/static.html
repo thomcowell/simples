@@ -17,6 +17,16 @@
 		<script type="text/javascript" charset="utf-8" src="../../../src/css.js"></script>
 		<script type="text/javascript" charset="utf-8" src="../../../src/events.js"></script>		  
 		<script type="text/javascript" charset="utf-8" src="../../../src/position.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			Simples(document).ready(function(){
+				Simples('.static').bind('click',function() {
+					Simples('#marker').css( Simples(this).offset() );
+					var pos = Simples(this).position();
+					Simples(this).css({ position: 'absolute', top: pos.top, left: pos.left });
+					return false;
+				});
+			});
+		</script>
 	</head>
 	<body>
 		<div id="static-1" class="static"><div id="static-1-1" class="static"><div id="static-1-1-1" class="static"></div></div></div>
@@ -24,12 +34,4 @@
 		<div id="marker"></div>
 		<p class="instructions">Click the white box to move the marker to it. Clicking the box also changes the position to absolute (if not already) and sets the position according to the position method.</p>
 	</body>
-	<script type="text/javascript" charset="utf-8">
-		Simples('.static').bind('click',function() {
-			Simples('#marker').css( Simples(this).offset() );
-			var pos = Simples(this).position();
-			Simples(this).css({ position: 'absolute', top: pos.top, left: pos.left });
-			return false;
-		});
-	</script>
 </html>

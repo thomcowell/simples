@@ -45,7 +45,8 @@ testoffset("absolute"/* in iframe */, function($, iframe) {
 	// this insures that the results will be wrong
 	// if the offset method is using the scroll offset
 	// of the parent window
-	var forceScroll = Simples('<div>', { width: 2000, height: 2000 }).appendTo('body');
+	var forceScroll = Simples('<div/>').css({height:2000, width:2000});
+	document.body.appendChild( forceScroll[0] );
 	window.scrollTo(200, 200);
 
 	if ( document.documentElement.scrollTop || document.body.scrollTop ) {
@@ -58,6 +59,7 @@ testoffset("absolute"/* in iframe */, function($, iframe) {
 	tests = [
 		{ id: '#absolute-1', top: 1, left: 1 }
 	];
+
 	Simples.each( tests, function() {
 		equals( Simples( this.id, doc ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
 		equals( Simples( this.id, doc ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
@@ -290,7 +292,7 @@ testoffset("static", function( Simples ) {
 testoffset("fixed", function( Simples ) {
 	expect(28);
 	
-	Simples.offset.initialize();
+	Simples.offset.init();
 	
 	var tests = [
 		{ id: '#fixed-1', top: 1001, left: 1001 },

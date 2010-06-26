@@ -19,6 +19,15 @@
 		<script type="text/javascript" charset="utf-8" src="../../../src/css.js"></script>
 		<script type="text/javascript" charset="utf-8" src="../../../src/events.js"></script>		  
 		<script type="text/javascript" charset="utf-8" src="../../../src/position.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			Simples(document).ready(function(){ 	 
+				window.scrollTo(1000,1000);
+				Simples('.fixed').bind('click',function() {
+					Simples('#marker').css( Simples(this).offset() );
+					return false;
+				});
+			});
+		</script>
 	</head>
 	<body>
 		<div id="fixed-1" class="fixed"></div>
@@ -27,11 +36,4 @@
 		<div id="marker"></div>
 		<p class="instructions">Click the white box to move the marker to it.</p>
 	</body>                                                                                    
-	<script type="text/javascript" charset="utf-8">
-		window.scrollTo(1000,1000);
-		Simples('.fixed').bind('click',function() {
-			Simples('#marker').css( Simples(this).offset() );
-			return false;
-		});
-	</script>
 </html>
