@@ -13,6 +13,7 @@ var toString = Object.prototype.toString,
 	FunctionClass = "[object Function]",
 	BooleanClass = "[object Boolean]",
 	HTMLCollectionClass = "[object HTMLCollection]",
+	WindowClass = "[object Window]",
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -32,7 +33,7 @@ function Simples( selector, context ) {
 	}
 	
 	// Handle $(DOMElement)
-	if ( selector.nodeType ) {
+	if ( selector.nodeType || selector.document ) {
 		this.context = this[0] = selector;
 		this.length = 1;
 		return this;
@@ -45,10 +46,11 @@ function Simples( selector, context ) {
 		this.selector = "body";
 		this.length = 1;
 		return this;
-	}  
+	}
+	  
 	var objClass = toString.call( selector );
 	if( objClass === StringClass ){
-		var result = select( selector, context );
+		var result = selectElements( selector, context );
 		this.context = result.context;
 		this.selector = result.selector;
 
@@ -60,13 +62,13 @@ function Simples( selector, context ) {
     } else if( objClass === ArrayClass ){
 
 		for(var d=0,e=selector.length;d<e;d++){
-			if( selector[d] && selector[d].nodeType ){
+			if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
 				this[ this.length ] = selector[d];
 				this.length++;
 			}
 		}
 		
-	} 
+	}
 	
     return this;
 }

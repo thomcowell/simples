@@ -79,7 +79,7 @@ testoffset("absolute"/* in iframe */, function($, iframe) {
 });
 
 testoffset("absolute", function( Simples ) {
-	expect(178);
+	expect(82);
 	
 	// get offset tests
 	var tests = [
@@ -136,33 +136,15 @@ testoffset("absolute", function( Simples ) {
 		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
 		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
 		
-		var top = this.top, left = this.left;
-		
-		Simples( this.id ).offset(function(i, val){
-			equals( val.top, top, "Verify incoming top position." );
-			equals( val.left, left, "Verify incoming top position." );
-			return { top: top + 1, left: left + 1 };
-		});
-		equals( Simples( this.id ).offset().top,  this.top  + 1, "Simples('" + this.id + "').offset({ top: "  + (this.top  + 1) + " })" );
-		equals( Simples( this.id ).offset().left, this.left + 1, "Simples('" + this.id + "').offset({ left: " + (this.left + 1) + " })" );
-		
 		Simples( this.id ).offset({ left: this.left + 2 }).offset({ top:  this.top  + 2 });
 		equals( Simples( this.id ).offset().top,  this.top  + 2, "Setting one property at a time." );
 		equals( Simples( this.id ).offset().left, this.left + 2, "Setting one property at a time." );
-		
-		Simples( this.id ).offset({ top: this.top, left: this.left, using: function( props ) {
-			Simples( this ).css({
-				top:  props.top  + 1,
-				left: props.left + 1
-			});
-		}});
-		equals( Simples( this.id ).offset().top,  this.top  + 1, "Simples('" + this.id + "').offset({ top: "  + (this.top  + 1) + ", using: fn })" );
-		equals( Simples( this.id ).offset().left, this.left + 1, "Simples('" + this.id + "').offset({ left: " + (this.left + 1) + ", using: fn })" );
+
 	});
 });
 
 testoffset("relative", function( Simples ) {
-	expect(60);
+	expect(36);
 	
 	// IE is collapsing the top margin of 1px
 	var ie = Simples.browser.msie && parseInt( Simples.browser.version, 10 ) < 8;
@@ -210,20 +192,11 @@ testoffset("relative", function( Simples ) {
 		Simples( this.id ).offset({ top: this.top, left: this.left });
 		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
 		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
-		
-		Simples( this.id ).offset({ top: this.top, left: this.left, using: function( props ) {
-			Simples( this ).css({
-				top:  props.top  + 1,
-				left: props.left + 1
-			});
-		}});
-		equals( Simples( this.id ).offset().top,  this.top  + 1, "Simples('" + this.id + "').offset({ top: "  + (this.top  + 1) + ", using: fn })" );
-		equals( Simples( this.id ).offset().left, this.left + 1, "Simples('" + this.id + "').offset({ left: " + (this.left + 1) + ", using: fn })" );
 	});
 });
 
 testoffset("static", function( Simples ) {
-	expect(80);
+	expect(48);
 	
 	// IE is collapsing the top margin of 1px
 	var ie = Simples.browser.msie && parseInt( Simples.browser.version, 10 ) < 8;
@@ -277,20 +250,11 @@ testoffset("static", function( Simples ) {
 		Simples( this.id ).offset({ top: this.top, left: this.left });
 		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
 		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
-		
-		Simples( this.id ).offset({ top: this.top, left: this.left, using: function( props ) {
-			Simples( this ).css({
-				top:  props.top  + 1,
-				left: props.left + 1
-			});
-		}});
-		equals( Simples( this.id ).offset().top,  this.top  + 1, "Simples('" + this.id + "').offset({ top: "  + (this.top  + 1) + ", using: fn })" );
-		equals( Simples( this.id ).offset().left, this.left + 1, "Simples('" + this.id + "').offset({ left: " + (this.left + 1) + ", using: fn })" );
 	});
 });
 
 testoffset("fixed", function( Simples ) {
-	expect(28);
+	expect(16);
 	
 	Simples.offset.init();
 	
@@ -328,15 +292,6 @@ testoffset("fixed", function( Simples ) {
 			Simples( this.id ).offset({ top: this.top, left: this.left });
 			equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
 			equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
-		
-			Simples( this.id ).offset({ top: this.top, left: this.left, using: function( props ) {
-				Simples( this ).css({
-					top:  props.top  + 1,
-					left: props.left + 1
-				});
-			}});
-			equals( Simples( this.id ).offset().top,  this.top  + 1, "Simples('" + this.id + "').offset({ top: "  + (this.top  + 1) + ", using: fn })" );
-			equals( Simples( this.id ).offset().left, this.left + 1, "Simples('" + this.id + "').offset({ left: " + (this.left + 1) + ", using: fn })" );
 		} else {
 			// need to have same number of assertions
 			ok( true, 'Fixed position is not supported' );
@@ -358,7 +313,7 @@ testoffset("table", function( Simples ) {
 });
 
 testoffset("scroll", function( Simples, win ) {
-	expect(16);
+	expect(18);
 	
 	var ie = Simples.browser.msie && parseInt( Simples.browser.version, 10 ) < 8;
 	
@@ -378,8 +333,8 @@ testoffset("scroll", function( Simples, win ) {
 	equals( Simples('#scroll-1-1').scrollTop(), 0, "Simples('#scroll-1-1').scrollTop()" );
 	equals( Simples('#scroll-1-1').scrollLeft(), 0, "Simples('#scroll-1-1').scrollLeft()" );
 	
-	// equals( Simples('body').scrollTop(), 0, "Simples('body').scrollTop()" );
-	// equals( Simples('body').scrollLeft(), 0, "Simples('body').scrollTop()" );
+	equals( Simples('body').scrollTop(), 0, "Simples('body').scrollTop()" );
+	equals( Simples('body').scrollLeft(), 0, "Simples('body').scrollTop()" );   
 	
 	win.name = "test";
 
@@ -389,7 +344,7 @@ testoffset("scroll", function( Simples, win ) {
 
 		ok( true, "Browser doesn't support scroll position." );
 		ok( true, "Browser doesn't support scroll position." );
-	} else {
+	} else {   
 		equals( Simples(win).scrollTop(), 1000, "Simples(window).scrollTop()" );
 		equals( Simples(win).scrollLeft(), 1000, "Simples(window).scrollLeft()" );
 	
@@ -427,7 +382,7 @@ test("offsetParent", function(){
 	equals( body.length, 1, "Only one offsetParent found." );
 	equals( body[0], document.body, "The body is its own offsetParent." );
 
-	var header = Simples("#qunit-header").offsetParent();
+	var header = Simples("#qunit-banner").offsetParent();
 	equals( header.length, 1, "Only one offsetParent found." );
 	equals( header[0], document.body, "The body is the offsetParent." );
 

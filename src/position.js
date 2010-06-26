@@ -213,18 +213,18 @@ Simples.extend({
 	},
 
 	offsetParent: function() {
-		var arr = Simples();
+		var newObj = Simples();
 		this.each(function() {
 			var offsetParent = this.offsetParent || document.body;
 			while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && currentCSS(offsetParent, "position") === "static") ) {
 				offsetParent = offsetParent.offsetParent;
 			}  
 			if( offsetParent !== null || offsetParent !== undefined ){
-				arr[arr.length] = offsetParent;
-				arr.length++;
+				newObj[newObj.length] = offsetParent;
+				newObj.length++;
 			}
 		});
-		return arr;
+		return newObj;
 	}       
 });
 
@@ -240,12 +240,11 @@ function getWindow( elem ) {
 (function( Simples ){
 	var _scrolls_ = ["Left", "Top"];
 	for(var i=0,l=_scrolls_.length;i<l;i++){
-		(function( name ){ 		
+		(function( name, i ){ 		
 			var method = "scroll" + name;
 
 			Simples.prototype[ method ] = function(val) {
 				var elem = this[0], win;
-
 				if ( !elem ) {
 					return null;
 				}
@@ -256,8 +255,11 @@ function getWindow( elem ) {
 						win = getWindow( this );
 
 						if ( win ) {
-			
-							win.scrollTo( !i ? val : Simples(win).scrollLeft(), i ? val : Simples(win).scrollTop() );
+							win.scrollTo(
+								!i ? val : Simples(win).scrollLeft(),
+								 i ? val : Simples(win).scrollTop()
+							);
+
 						} else {
 							this[ method ] = val;
 						}
@@ -266,12 +268,9 @@ function getWindow( elem ) {
 					win = getWindow( elem );
 
 					// Return the scroll offset
-					return win ? ("pageXOffset" in win) ? win[ i ? "pageYOffset" : "pageXOffset" ] :
-						Simples.support.boxModel && win.document.documentElement[ method ] ||
-							win.document.body[ method ] :
-						elem[ method ];
+					return win ? ( ("pageXOffset" in win) ? win[ i ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ method ] || win.document.body[ method ] ) : elem[ method ];
 				}
 			};
-		})( _scrolls_[i] );
+		})( _scrolls_[i], i );
 	}            
 })( Simples );
