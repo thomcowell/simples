@@ -1,1 +1,1 @@
-intro,core,support,data,ajax,selector,dom,css,event,position,animation,outro
+intro,core,support,data,ajax,selector,dom,css,events,position,animation,outro

@@ -3,6 +3,7 @@ files = File.new('filelist.txt').read.gsub(/\n/, "").split(',')
 
 date = `git log -1 | grep Date: | sed 's/[^:]*: *//'`.gsub(/\n/, "")
 version = `cat version.txt`.gsub(/\n/, "")
+current_year = Time.now.year.to_s
 
 task :default => :jquery
 
@@ -15,6 +16,7 @@ task :jquery => [:init] do
 	sh "mkdir -p dist"
 
 	sh "cat " + files.map {|file| "src/" + file + ".js"}.join(" ") +
-		" | sed 's/Date:./&" + date + "/' | " +
-		" sed s/@VERSION/" + version + "/ > dist/simples.js"
+		" | sed 's/Date:./&" + date + "/'" +
+		" | sed s/@CURRENT_YEAR/" + current_year + "/" +
+		" | sed s/@VERSION/" + version + "/ > dist/simples.js"
 end
