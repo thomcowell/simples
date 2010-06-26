@@ -4,9 +4,10 @@ var TAG = /\<(\w+)\s?\/?\>/,
 	// TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
 	FIRST_ID = '#',
 	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
-	SPACE_WITH_BOUNDARY = /\b\s+/g;
+	SPACE_WITH_BOUNDARY = /\b\s+/g,
+	COMMA_WITH_BOUNDARY = /\s?\,\s?/g;
 	
-function select( selector, context ){
+function selectElements( selector, context ){
 
 	var results = {
 		context : context,
@@ -15,20 +16,40 @@ function select( selector, context ){
 	};
 
     if ( typeof( selector ) === 'string' ) {
+		// if it is a multi select split and short cut the process
+		if( COMMA_WITH_BOUNDARY.test( selector ) ){ 
+
+			var get = selector.split( COMMA_WITH_BOUNDARY ), els = [];
+
+			for(var x=0,y=get.length;x<y;x++){ 
+				var e = selectElements( get[x], context );
+
+				els = els.concat( e.elems );
+				console.log( e, e.elems, isArray( e.elems ), els );
+			}
+
+			return {
+				context : ( context && context.nodeType === 9 ? context : document ),
+				selector : selector,
+				elems : els
+			};
+		}
 		// clean up selector           
         selector = selector.replace( TAG_STRIP, '');
-		// get last id in selector
+		// get last id in selector 
 		var index = selector.lastIndexOf( FIRST_ID );
 		selector = selector.substring( index > 0 ? index : 0 );
 		// check selector if structured to create element
 		var tag = TAG.exec( selector );
 		if( tag !== null && tag.length > 1 ){
-
-			results.context = document;
-			results.selector = tag[0];
-            results.elems = [ document.createElement( tag[1] ) ];
-		} else {
-			results.selector = selector; 
+			return {
+				context : document,
+				selector : tag[0],
+				elems : [ document.createElement( tag[1] ) ]
+			};
+		} else { 
+			// reset the selector to one used
+			results.selector = selector;
 			// allow another document to be used for context where getting by id
 			results.context = context = selector.indexOf('#') === 0 ? ( context && context.nodeType === 9 ? context : document ) : ( context || document );
 
@@ -47,18 +68,16 @@ function select( selector, context ){
 					context = getElements( split[i], context );
 				}
 			}
-
 			results.elems = context;
 		}
-    }                      
-
- 	return results;
+    }
+	return results;
 }
 
 function getElements( selector, context ){
 
 	context = context || document;
-	tag = selector.substring(1);
+	var tag = selector.substring(1);
 
 	if ( selector.indexOf('#') === 0) {
         // Native function
