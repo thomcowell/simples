@@ -25,6 +25,8 @@ function Simples( selector, context ) {
 
 	if ( !(this instanceof Simples) ){	// or this.each !== Simples.prototype.each
 		return new Simples( selector, context );  		
+	} else if( selector instanceof Simples ){
+		return selector;
 	}
 	  	
 	// Handle $(""), $(null), or $(undefined) 		

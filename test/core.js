@@ -312,6 +312,25 @@ test('Simples constructor when instantiated with Array passed as selector', 4, f
 	same( slice.call( s_obj ), [elem1, elem2], "node list of .row -- should have the same as nodeList elems");
 });
 
+test("Simples constructor when instantiated with a Simples Object", 3, function(){
+	var results = Simples( document.getElementById('row-wrapper' ) );
+	results.__hammer__ = true;
+	var s_obj = Simples( results );
+	ok( s_obj instanceof Simples, "should return an instance of Simples" );  		
+    ok( results.__hammer__, "should be the same object");
+	same( s_obj[0], results[0], "should return with an Element, when supplied" );  
+});
+    
+test("Simples constructor when instantiated with Window", 5, function(){
+	var s_obj = Simples( window );
+	ok( s_obj instanceof Simples, "should return an instance of Simples" );  		
+
+	same( s_obj[0], window, "should return with Window, when supplied" );
+	equal( s_obj.context, window, "should set the context to the Window" );
+	equal( s_obj.selector, "", "should set the selector to an empty string because no string selector supplied" );	
+	equal( s_obj.length, 1, "should set the length to 1" );  
+});
+
 module("Core: instantiating an instance of Simples"); 
 
 test("Simples constructor when instantiated with a call through to selector", 4, function(){
