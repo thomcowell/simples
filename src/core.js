@@ -35,7 +35,7 @@ function Simples( selector, context ) {
 	}
 	
 	// Handle $(DOMElement)
-	if ( selector.nodeType || selector.document ) {
+	if ( selector.nodeType || ( selector.document && selector.document.nodeType ) ) {
 		this.context = this[0] = selector;
 		this.length = 1;
 		return this;
@@ -52,7 +52,7 @@ function Simples( selector, context ) {
 	  
 	var objClass = toString.call( selector );
 	if( objClass === StringClass ){
-		var result = selectElements( selector, context );
+		var result = SimplesSelector( selector, context );
 		this.context = result.context;
 		this.selector = result.selector;
 

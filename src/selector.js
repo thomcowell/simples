@@ -7,7 +7,7 @@ var TAG = /\<(\w+)\s?\/?\>/,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g;
 	
-function selectElements( selector, context ){
+function SimplesSelector( selector, context ){
 
 	var results = {
 		context : context,
@@ -21,13 +21,11 @@ function selectElements( selector, context ){
 
 			var get = selector.split( COMMA_WITH_BOUNDARY ), els = [];
 
-			for(var x=0,y=get.length;x<y;x++){ 
-				var e = selectElements( get[x], context );
-
-				els = els.concat( e.elems );
-				console.log( e, e.elems, isArray( e.elems ), els );
+			for(var x=0,y=get.length;x<y;x++){
+				
+				els = els.concat( SimplesSelector( get[x], context ).elems );
 			}
-
+            // return interface
 			return {
 				context : ( context && context.nodeType === 9 ? context : document ),
 				selector : selector,

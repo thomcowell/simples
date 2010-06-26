@@ -240,11 +240,11 @@ test('extend works as expected with 3 arguments and null addMethods', 6, functio
 
 module("Core: instantiating an instance of Simples where select isn't called", { 
 	setup : function(){
-		window.old_select = selectElements;
-		window.selectElements = function(){ throw new Error("shouldn't call select in selector.js"); };              
+		window.old_select = SimplesSelector;
+		window.SimplesSelector = function(){ throw new Error("shouldn't call select in selector.js"); };              
 	},
 	teardown : function(){
-		selectElements = window.old_select;
+		SimplesSelector = window.old_select;
 	}
 });
 
@@ -334,7 +334,7 @@ test("Simples constructor when instantiated with Window", 5, function(){
 module("Core: instantiating an instance of Simples"); 
 
 test("Simples constructor when instantiated with a call through to selector", 4, function(){
-	var results = selectElements('#row-wrapper');
+	var results = SimplesSelector('#row-wrapper');
 	var s_obj = Simples('#row-wrapper');
 	ok( s_obj instanceof Simples, "should return an instance of Simples" );  		
  

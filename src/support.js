@@ -24,7 +24,7 @@ Simples.merge({
 
 		return { browser: match[1] || "", version: match[2] || "0" };
 	},
-	browser: {}
+	browser : {}
 });
 
 browserMatch = Simples.uaMatch( userAgent );
