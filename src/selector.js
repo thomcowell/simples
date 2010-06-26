@@ -28,8 +28,9 @@ function select( selector, context ){
 			results.selector = tag[0];
             results.elems = [ document.createElement( tag[1] ) ];
 		} else {
-			results.selector = selector;
-			results.context = context = selector.indexOf('#') === 0 ? document : ( context || document );
+			results.selector = selector; 
+			// allow another document to be used for context where getting by id
+			results.context = context = selector.indexOf('#') === 0 ? ( context && context.nodeType === 9 ? context : document ) : ( context || document );
 
 			var split = selector.split( SPACE_WITH_BOUNDARY );     
 
@@ -61,7 +62,7 @@ function getElements( selector, context ){
 
 	if ( selector.indexOf('#') === 0) {
         // Native function
-		var id = document.getElementById( tag ); 
+		var id = ( context && context.nodeType === 9 ? context : document ).getElementById( tag ); 
 		// test to make sure id is the own specified, because of name being read as id in some browsers
 		return id && id.id === tag ? [ id ] : [];
 
