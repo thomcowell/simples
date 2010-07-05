@@ -1,4 +1,4 @@
-var accessID = 'simplesData',
+var accessID = 'simplesData'+ new Date().getTime(),
 	// The following elements throw uncatchable exceptions if you
 	// attempt to add data properties to them.
 	noData = {
@@ -8,7 +8,7 @@ var accessID = 'simplesData',
 	};
 	
 function notNoData( elem ){
-	return !noData[ elem.nodeName.toLowerCase() ];
+	return !( elem === window || noData[ elem.nodeName.toLowerCase() ] );
 }
 
 function addData( elem, key, value ){

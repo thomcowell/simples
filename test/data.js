@@ -1,19 +1,22 @@
 module("Data");
-test("noData", 4, function() {
+test("noData", 6, function() {
 	var div = document.createElement('div');
 	var embed = document.createElement('embed');
 	var object = document.createElement('object');
 	var applet = document.createElement('applet');
 	
-	ok( notNoData(div), "a div should return undefined");
-	equal( notNoData( embed ), false, "a embed should return true");
-	equal( notNoData( object ), false, "a object should return true");
-	equal( notNoData( applet ), false, "a applet should return true");	
+	ok( notNoData(div), "a div should return true");          
+	ok( notNoData( document ), "a document should return true");	    
+	ok( !notNoData( window ), "a window should return false");   
+	ok( !notNoData( embed ), "a embed should return false");
+	ok( !notNoData( object ), "a object should return false");
+	ok( !notNoData( applet ), "a applet should return false");	
 });
 
 module("Data: addData");
 var data = {ham:'sandwich',"super":true};
-test("addData to element with no accessId", 2, function() { 
+test("addData to element with no accessId", 3, function() { 
+	ok( /simplesData\d+/.test(accessID), "accessID is as expected" )
 	var div = document.createElement('div');
 	addData( div, 'test', data);
 
