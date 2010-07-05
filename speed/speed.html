@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">        
+	<meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  	<title>Simples Speed Tests</title>
+    <script type="text/javascript" charset="utf-8">
+    	function _log_( msg ){
+
+			var p = document.createElement('p'); 
+			p.innerText = msg;
+
+			document.body.appendChild( p );
+		}
+
+		function _test_( fn, count, msg, that, args ){ 
+			var log = _log_;
+			count = count || 1000000;
+			that = that || window;   
+			fn = typeof fn === "function" ? fn : function(){ console.log("error"); };
+			var t1 = new Date().getTime();
+			for( var i=0; i< count; i++){
+				fn.apply( that, args );
+			}
+			var t2 = new Date().getTime();
+
+		   	log( 'tested '+ msg + ' ' + count + ' times in ' +(t2 - t1)+'ms' );
+
+		}
+    </script>
+  </head>
+  <body>
+
+	<!-- Library Files -->
+	<script type="text/javascript" charset="utf-8" src="../src/core.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/support.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/data.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/ajax.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/selector.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/dom.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/css.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/events.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/position.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../src/animation.js"></script>
+
+	<!-- Speed Test Files -->
+	<script type="text/javascript" charset="utf-8" src="string-vs-typeof.js"></script>
+</body>                                                          
+</html>
+	
