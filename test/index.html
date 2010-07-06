@@ -13,7 +13,20 @@
 	<link rel="stylesheet" href="qunit/qunit/qunit.css" type="text/css" media="screen">
 	<link rel="Stylesheet" media="screen" href="data/testsuite.css" />
 	<script type="text/javascript" src="qunit/qunit/qunit.js"></script>
-	
+	<script type="text/javascript" charset="utf-8">
+		/**
+		 * Add random number to url to stop IE from caching
+		 *
+		 * @example url("data/test.html")
+		 * @result "data/test.html?10538358428943"
+		 *
+		 * @example url("data/test.php?foo=bar")
+		 * @result "data/test.php?foo=bar&10538358345554"
+		 */
+		function url(value) {
+			return value + (/\?/.test(value) ? "&" : "?") + new Date().getTime() + "" + parseInt(Math.random()*100000);
+		}
+	</script>
   </head>
   <body>
 	<h2 id="qunit-banner"></h2> 

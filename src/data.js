@@ -8,7 +8,7 @@ var accessID = 'simplesData'+ new Date().getTime(),
 	};
 	
 function notNoData( elem ){
-	return !( elem === window || noData[ elem.nodeName.toLowerCase() ] );
+	return !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 }
 
 function addData( elem, key, value ){

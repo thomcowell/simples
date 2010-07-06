@@ -13,7 +13,7 @@ if ( !all || !all.length || !a ) {
 	return;
 }
 var fragment = document.createDocumentFragment(), testDiv = document.createElement("div");
-testDiv.innerHTML = "<input type='radio' name='radiotest' checked='checked'/>";;
+testDiv.innerHTML = "<input type='radio' name='radiotest' checked='checked'/>";
 fragment.appendChild( testDiv.firstChild );
 
 // Technique from Juriy Zaytsev
@@ -121,4 +121,4 @@ Simples(document).ready(function(){
 // nulling out support varaibles as finished
 root = div = script = id = testDiv = null;
 
-})( Simples )
+})( Simples );
