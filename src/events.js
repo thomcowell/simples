@@ -71,7 +71,7 @@ SimplesEvent.prototype = {
 };
 
 var SimplesEvents = {
-	register : function( elem, type, callback ){
+	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
 		}
@@ -85,7 +85,7 @@ var SimplesEvents = {
 			elem = window;
 		}
 
-		if( typeof( callback ) === 'function' && notNoData( elem ) ){ 
+		if( isFunction( callback ) && notNoData( elem ) ){ 
 			var data = readData( elem, 'events' ) || {};
 			
 			if( !callback.guid ){
@@ -95,7 +95,11 @@ var SimplesEvents = {
 			
 			var guid = callback.guid, 
 				handled = callback.handled;   
-
+            
+			if( data[ guid ] === undefined ){
+				data[ guid ] = handled;
+			}
+			
 			data[ type ] = data[ type ] || [];
 			data[ type ].push( {handled:handled, guid:guid} );
 			
@@ -109,29 +113,31 @@ var SimplesEvents = {
 			
 		        elem.attachEvent("on" + type, handled);
 		    }
-			return guid; 
 		}
-		return;
 	}, 
-	unregister : function( elem, type, original ){
-			
-		if( typeof( orignal ) !== 'function' ){
-			return elem;
+	detach : function( elem, type, callback ){
+		
+		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
+			return;
 		}
 		
 		if ( callback === false ) {
 			callback = returnFalse;
 		}
-		
+
 		var data = readData( elem, 'events' ) || {};
 		var evt = data[ type ] || {};
-		
-		for( var i=0,l=evt.length;i<l;i++ ){
+		if( callback === undefined ){
+			delete data[ type ];
+		} else {
+         	for( var i=0,l=evt.length;i<l;i++ ){
 
-			if( evt[ i ].guid === original.guid ){
-			
-				original = evt[ i ].handled;
-			    evt.splice( i, 1);
+				if( evt[ i ].guid === original.guid ){
+
+					original = evt[ i ].handled;
+				    evt.splice( i, 1);
+					break;
+				}
 			}
 		}
 		
@@ -202,7 +208,7 @@ var SimplesEvents = {
 
 	    return event;
 	},       
-	guid : 1,
+	guid : 1e6,
 	handler : function( elem, callback ){ 
 		
 	    return function( event ) {
@@ -213,19 +219,23 @@ var SimplesEvents = {
 };
 
 Simples.extend({
-	bind : function( type, callback ){
-		// Loop over elements 
-		this.each(function(){
-			// Register each original event and the handled event to allow better detachment
-			SimplesEvents.register( this, type, callback );
-		});
+	bind : function( type, callback ){ 
+		if( typeof type === "string" ){
+			// Loop over elements 
+			this.each(function(){
+				// Register each original event and the handled event to allow better detachment
+				SimplesEvents.attach( this, type, callback );
+			});
+		}
 		return this;	
 	},
 	unbind : function( type, callback ){
-		// Loop over elements
-		this.each(function(){  
-			SimplesEvents.unregister( this, type, callback );
-		});
+		if( typeof type === "string" ){
+			// Loop over elements
+			this.each(function(){  
+				SimplesEvents.detach( this, type, callback );
+			});
+		}
 		return this;
 	}, 
 	trigger : function( type, data ){
@@ -234,7 +244,7 @@ Simples.extend({
 				
 				// Trigger an inline bound script
 				try {
-					if ( elem[ "on" + type ] && elem[ "on" + type ].apply( elem, data ) === false ) {
+					if ( this[ "on" + type ] && this[ "on" + type ].apply( elem, data ) === false ) {
 						// exit as the script has return false and will not propigate any further
 						return false;
 					}
@@ -242,9 +252,10 @@ Simples.extend({
 				// prevent IE from throwing an error for some elements with some event types, see #3533
 				} catch (inlineError) {}
 				// Use browser event generators
+				var e;
 				if( this.dispatchEvent ){
 					// Build Event
-					var e = document.createEvent("Events");
+					e = document.createEvent("Events");
 					e.initEvent(type, true, false);
 					if (data){
 						e.data = data;              
@@ -252,8 +263,8 @@ Simples.extend({
 					// Dispatch the event to the ELEMENT
 					this.dispatchEvent(e);
 				} else if( this.fireEvent ) {
-					var e = document.createEventObject();
 					if (data){
+						e = document.createEventObject();
 						e.data = data;              
 					}
 					this.fireEvent( "on"+type, e );
