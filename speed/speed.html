@@ -10,28 +10,35 @@
   	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
   	<title>Simples Speed Tests</title>
     <script type="text/javascript" charset="utf-8">
-    	function _log_( msg ){
+		var perfTester = (function(){ 
+			var messages = [];
+    		return {
+				test : function( fn, count, msg, that, args ){
+					count = count || 1000000;
+					that = that || window;   
+					fn = typeof fn === "function" ? fn : function(){ window.console ? window.console.log("error") : alert('error'); };
+					var t1 = new Date().getTime();
+					for( var i=0; i< count; i++){
+						fn.apply( that, args );
+					}
+					var t2 = new Date().getTime();
 
-			var p = document.createElement('p'); 
-			p.innerText = msg;
+				   	messages.push( 'tested '+ msg + ' ' + count + ' times in ' +(t2 - t1)+'ms' );
+				},
+				log : function( msg ){
+					messages.push( msg );
+				},
+				write : function(){
+					for( var i=0,l=messages.length;i<l;i++){
+						var p = document.createElement('p'); 
+						p.innerText = messages[i];
 
-			document.body.appendChild( p );
-		}
-
-		function _test_( fn, count, msg, that, args ){ 
-			var log = _log_;
-			count = count || 1000000;
-			that = that || window;   
-			fn = typeof fn === "function" ? fn : function(){ console.log("error"); };
-			var t1 = new Date().getTime();
-			for( var i=0; i< count; i++){
-				fn.apply( that, args );
-			}
-			var t2 = new Date().getTime();
-
-		   	log( 'tested '+ msg + ' ' + count + ' times in ' +(t2 - t1)+'ms' );
-
-		}
+						document.body.appendChild( p );
+					} 
+					messages = [];
+				}
+			};
+		})( window );
     </script>
   </head>
   <body>

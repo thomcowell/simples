@@ -1,5 +1,9 @@
-(function($){                        
-    var log = _log_, test = _test_;
+(function($){   
+	
+	// Test to determine whether the toString call is faster than the typeof and checks
+	// Browser 	| typeof:toString per 50000 calls average ms
+	// Safari 	| 62:92                      
+    var test = perfTester.test;
 
 
 	var toString = (function(){
@@ -45,7 +49,8 @@
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]";
 	
-	log( 'Testing typeOf and toString - '+count+' times' );
+	perfTester.log( 'Testing typeOf and toString - '+count+' times' );
+	perfTester.write();
 	setTimeout( function(){
 		test( isObject, count, 'isObject', window, [{ham:'sandwich'}] );
 		test( toString, count, 'toString - Object', window, [{ham:'sandwich'}, ObjectClass ] );
@@ -58,6 +63,7 @@
 		test( isFunction, count, 'isFunction', window, [function(){}] );
 		test( toString, count, 'toString - Function', window, [function(){}, FunctionClass] );		   	
 		test( isWindow, count, 'isWindow', window, [window] );
-		test( toString, count, 'toString - Window', window, [window, WindowClass] );
+		test( toString, count, 'toString - Window', window, [window, WindowClass] ); 
+		perfTester.write();
 	}, 500);
 })( Simples );
