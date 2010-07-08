@@ -58,3 +58,16 @@ test("serialise - when passing in 1 argument as an array",5,function(){
 	equal( serialise([1,true,false,"there",function(){ return 'red'; }]), "", "an array not of objects value should be represented" );
 });
 
+// test("Simples.ajax", 3, function(){
+// 	Simples.ajax({
+// 		url: url("data/name.html"),
+// 		beforeSend: function(){ ok(true, "beforeSend"); },
+// 		success: function(){ ok(true, "success"); },
+// 		error: function(){ ok(false, "error"); },
+// 		complete: function(){
+// 		  ok(true, "complete");
+// 		  setTimeout(function(){ start(); }, 13);
+// 		}
+// 	});
+// });     
+

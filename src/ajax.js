@@ -1,4 +1,3 @@
-
 // ======= AJAX ========== //
 // Constants
 var DEFAULTS = {
@@ -7,12 +6,12 @@ var DEFAULTS = {
     complete: function() {},
     error: function() {},
     success: function() {},
-    additionalData: [],
     dataType: 'json',
     async: true,
 	cache:true,
     type: "GET",
     timeout: 5000,
+	beforeSend : Simples.noop,
 	xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
 		function() {
 			return new window.XMLHttpRequest();
@@ -43,9 +42,6 @@ AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 TYPEOF = /number|string/;
 
-function ajaxSettings(opts) {
-    DEFAULTS = Simples.merge(DEFAULTS, opts);
-}
 // A generic function for performming AJAX requests
 // It takes one argument, which is an object that contains a set of options
 // All of which are outline in the comments, below
@@ -71,7 +67,10 @@ function ajax(url, options) {
 
     // Keep track of when the request has been succesfully completed
     var requestDone = false;
-
+	// Call beforeSend and pass in xhr if response is false return from call 
+    if( options.beforeSend( xhr ) === false ){
+		return;
+	}
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     if (type === 'POST') {
@@ -151,72 +150,72 @@ function ajax(url, options) {
         onreadystatechange();
     }
 
-    // Determine the success of the HTTP response
-    function httpSuccess(xhr) {
-        try {
-            // If no server status is provided, and we're actually
-            // requesting a local file, then it was successful
-            return ! xhr.status && location.protocol == "file:" ||
+}
 
-            // Any status in the 200 range is good
-            (xhr.status >= 200 && xhr.status < 300) ||
+// Determine the success of the HTTP response
+function httpSuccess(xhr) {
+    try {
+        // If no server status is provided, and we're actually
+        // requesting a local file, then it was successful
+        return ! xhr.status && location.protocol == "file:" ||
 
-            // Successful if the document has not been modified
-            xhr.status == 304 ||
+        // Any status in the 200 range is good
+        (xhr.status >= 200 && xhr.status < 300) ||
 
-            // Safari returns an empty status if the file has not been modified
-            navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
-        } catch(e) {}
+        // Successful if the document has not been modified
+        xhr.status == 304 ||
 
-        // If checking the status failed, then assume that the request failed too
-        return false;
+        // Safari returns an empty status if the file has not been modified
+        navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
+    } catch(e) {}
+
+    // If checking the status failed, then assume that the request failed too
+    return false;
+}
+
+// httpData parsing is from jQuery 1.4
+function httpData(xhr, type, dataFilter) {
+
+    var ct = xhr.getResponseHeader("content-type") || "",
+    xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
+    data = xml ? xhr.responseXML: xhr.responseText;
+
+    if (xml && data.documentElement.nodeName === "parsererror") {
+        throw "parsererror";
     }
 
-    // httpData parsing is from jQuery 1.4
-    function httpData(xhr, type, dataFilter) {
+    if (typeof dataFilter === 'function') {
+        data = dataFilter(data, type);
+    }
 
-        var ct = xhr.getResponseHeader("content-type") || "",
-        xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
-        data = xml ? xhr.responseXML: xhr.responseText;
+    // The filter can actually parse the response
+    if (typeof data === "string") {
+        // Get the JavaScript object, if JSON is used.
+        if (type === "json" || !type && ct.indexOf("json") >= 0) {
+            // Make sure the incoming data is actual JSON
+            // Logic borrowed from http://json.org/json2.js
+            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
 
-        if (xml && data.documentElement.nodeName === "parsererror") {
-            throw "parsererror";
-        }
-
-        if (typeof dataFilter === 'function') {
-            data = dataFilter(data, type);
-        }
-
-        // The filter can actually parse the response
-        if (typeof data === "string") {
-            // Get the JavaScript object, if JSON is used.
-            if (type === "json" || !type && ct.indexOf("json") >= 0) {
-                // Make sure the incoming data is actual JSON
-                // Logic borrowed from http://json.org/json2.js
-                if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
-
-                    // Try to use the native JSON parser first
-                    if (window.JSON && window.JSON.parse) {
-                        data = window.JSON.parse(data);
-
-                    } else {
-                        data = ( new Function("return " + data) )();
-                    }
+                // Try to use the native JSON parser first
+                if (window.JSON && window.JSON.parse) {
+                    data = window.JSON.parse(data);
 
                 } else {
-                    throw "Invalid JSON: " + data;
+                    data = ( new Function("return " + data) )();
                 }
 
-                // If the type is "script", eval it in global context
-            } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
-
-                eval.call(window, data);
+            } else {
+                throw "Invalid JSON: " + data;
             }
-        }
 
-        return data;
+            // If the type is "script", eval it in global context
+        } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
+
+            eval.call(window, data);
+        }
     }
 
+    return data;
 }
 
 function serialise(obj) {
@@ -275,6 +274,11 @@ function formatData(name, value) {
 
 Simples.merge({
     ajax: ajax,
-    ajaxSettings: ajaxSettings,
+    ajaxSettings: function(opts) {
+		if( isObject( opts ) ){
+		     DEFAULTS = Simples.merge(DEFAULTS, opts);   
+		}
+		return DEFAULTS;
+	},
     params: serialise
 });

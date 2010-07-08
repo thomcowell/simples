@@ -128,29 +128,35 @@ var SimplesEvents = {
 		var data = readData( elem, 'events' ) || {};
 		var evt = data[ type ] || {};
 		if( callback === undefined ){
+			for( var i=0,l=evt.length;i<l;i++ ){ 
+				// check whether it is a W3C browser or not
+				if ( this.removeEventListener ) {
+					// remove event listener and unregister element event
+					this.removeEventListener( type, evt[ i ].handled, false );
+				} else if ( this.detachEvent ) {                                             
+
+					this.detachEvent( "on" + type, evt[ i ].handled );
+				}                                   
+			}
 			delete data[ type ];
 		} else {
          	for( var i=0,l=evt.length;i<l;i++ ){
 
 				if( evt[ i ].guid === original.guid ){
+					// check whether it is a W3C browser or not
+					if ( this.removeEventListener ) {
+						// remove event listener and unregister element event
+						this.removeEventListener( type, evt[ i ].handled, false );
+					} else if ( this.detachEvent ) {                                             
 
-					original = evt[ i ].handled;
+						this.detachEvent( "on" + type, evt[ i ].handled );
+					}
 				    evt.splice( i, 1);
-					break;
 				}
 			}
 		}
 		
-		// addData( elem, 'events', data );
-		
-		// check whether it is a W3C browser or not
-		if ( this.removeEventListener ) {
-			// remove event listener and unregister element event
-			this.removeEventListener( type, original, false );
-		} else if ( this.detachEvent ) {                                             
-			
-			this.detachEvent( "on" + type, original );
-		}
+		addData( elem, 'events', data );
 	},
 	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	fix : function( event ){
@@ -213,7 +219,7 @@ var SimplesEvents = {
 		
 	    return function( event ) {
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
-	        callback.apply( this, arguments );
+	        return callback.apply( this, arguments );
 	    };
 	}
 };
@@ -245,7 +251,7 @@ Simples.extend({
 				// Trigger an inline bound script
 				try {
 					if ( this[ "on" + type ] && this[ "on" + type ].apply( elem, data ) === false ) {
-						// exit as the script has return false and will not propigate any further
+						// exit as the script has return false and will not propagate any further
 						return false;
 					}
 
@@ -255,7 +261,7 @@ Simples.extend({
 				var e;
 				if( this.dispatchEvent ){
 					// Build Event
-					e = document.createEvent("Events");
+					e = document.createEvent("HTMLEvents");
 					e.initEvent(type, true, false);
 					if (data){
 						e.data = data;              
