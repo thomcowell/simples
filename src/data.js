@@ -1,4 +1,4 @@
-var accessID = 'simplesData'+ new Date().getTime(),
+var accessID = 'simples'+ new Date().getTime(),
 	// The following elements throw uncatchable exceptions if you
 	// attempt to add data properties to them.
 	noData = {
@@ -37,18 +37,30 @@ function removeData( elem, key ){
 	}	
 } 
 
-function cleanData( elem ){
-	// Clean up the element expando
-	try {
-		delete elem[ accessID ];
-	} catch( e ) {
-		// IE has trouble directly removing the expando
-		// but it's ok with using removeAttribute
-		if ( elem.removeAttribute ) {
-			elem.removeAttribute( accessID );
-		}
+function cleanData( elem ){ 
+	// Remove element nodes and prevent memory leaks   
+	var elems = slice.call( elem.getElementsByTagName("*") );
+	if( notNoData( elem ) ){
+		elems.push( elem );
 	}	
-} 
+	var i=elems.length;
+	while( i ){ 
+		// decrement to ensure correct array position
+		i--;
+		if ( elems[ i ].nodeType === 1 ) { 
+			// Clean up the element expando
+			try {
+				delete elems[ i ][ accessID ];
+			} catch( e ) {
+				// IE has trouble directly removing the expando
+				// but it's ok with using removeAttribute
+				if ( elems[ i ].removeAttribute ) {
+					elems[ i ].removeAttribute( accessID );
+				}
+			}
+		}                        
+	} 
+}
 
 Simples.extend({
 	data : function( key, value ){   
