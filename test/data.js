@@ -16,7 +16,7 @@ test("noData", 6, function() {
 module("Data: addData");
 var data = {ham:'sandwich',"super":true};
 test("addData to element with no accessId", 3, function() { 
-	ok( /simplesData\d+/.test(accessID), "accessID is as expected" )
+	ok( /simples\d+/.test(accessID), "accessID is as expected" )
 	var div = document.createElement('div');
 	addData( div, 'test', data);
 
@@ -105,26 +105,24 @@ test("removeData on element with data as requested", 1, function() {
 
 module("Data: cleanData");
 test("cleanData on invalid element", 1, function() {
-	var object = document.createElement('object');
 	var noError = true;
 	try{
-		cleanData( object );
+		cleanData( document.createElement('object') );
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
                 
 test("cleanData on valid element without data", 1, function() {
-	var div = document.createElement('div');
 	var noError = true;
 	try{
-		cleanData( div );
+		cleanData( document.createElement('div') );
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
 
 test("cleanData on element with data as requested", 1, function() {
 	var r_div = document.createElement('div');
-	r_div[ accessID ] = {test:data};
+	r_div[ accessID ] = { test:data };
 	
 	cleanData( r_div );	
 	equal( r_div[ accessID ], undefined, "a div should have data removed");
