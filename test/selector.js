@@ -17,8 +17,8 @@ test('getElements with only selector', 9, function(){
 	same( tag[0].className, '', "should return an element with no className");		
 });  
 
-test('getElements with context', 9, function(){
-	var body = document.getElementsByTagName('body')[0];
+test('getElements with context', 16, function(){
+	var body = document.body;
 	
 	var id = getElements( '#test-area', body );
 	same( id.length, 1, "should return an aray with 1 element");
@@ -31,9 +31,18 @@ test('getElements with context', 9, function(){
 	same( className[0].className, 'row', "should return an element with the same className");
 	
 	var tag = getElements( 'h2', body );
-	same( tag.length, 2, "should return an aray with 8 elements");
+	same( tag.length, 2, "should return an aray with 2 elements");
 	same( tag[0].tagName, 'H2', "should return a div");
-	same( tag[0].className, '', "should return an element with no className");		
+	same( tag[0].className, '', "should return an element with no className");
+	
+	var tag = getElements( '[name=checkedtestcheckboxes]', body );
+	same( tag.length, 2, "should return an aray with 2 elements");
+	same( tag[0].type, 'checkbox', "should return a type of checkbox");
+	same( tag[0].tagName, 'INPUT', "should return a tagName of input");
+	ok( tag[0].checked, "should return checked");	       
+	same( tag[1].type, 'checkbox', "should return a type of checkbox");
+	same( tag[1].tagName, 'INPUT', "should return a tagName of input");
+	ok( !tag[1].checked, "should return checked");	  	 	
 });
 
 test('create selector', 16, function(){
@@ -58,7 +67,7 @@ test('create selector', 16, function(){
 
 	var div4 = SimplesSelector('<div />');   
 	same( div4.context, document, "should have a context of document");
-	same( div4.selector, '<div />', "<div /> -- should have a selector of <div/>");	
+	same( div4.selector, '<div />', "<div /> -- should have a selector of <div />");	
 	same( div4.elems.length, 1, "should create 1 elements as a div" );
 	same( div4.elems[0].tagName, 'DIV', "should have created the element as a div");
 });

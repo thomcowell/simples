@@ -3,8 +3,9 @@ var TAG = /\<(\w+)\s?\/?\>/,
 	// TAG_STRIP = /\b[\.|\#\|\[].+/g, 
 	// TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
 	FIRST_ID = '#',
+	// ATTR_NAME_IS = /\[name\=([^\]]+)\]/,
 	// Is it a simple selector
-	isSimple = /^.[^:#\[\.,]*$/,	
+	// isSimple = /^.[^:#\[\.,]*$/,
 	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g;
@@ -51,7 +52,7 @@ function SimplesSelector( selector, context ){
 			// reset the selector to one used
 			results.selector = selector;
 			// allow another document to be used for context where getting by id
-			results.context = context = selector.indexOf('#') === 0 ? ( context && context.nodeType === 9 ? context : document ) : ( context || document );
+			results.context = context = ( selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0 ) ? ( context && context.nodeType === 9 ? context : document ) : ( context || document );
 
 			var split = selector.split( SPACE_WITH_BOUNDARY );     
 
@@ -91,8 +92,7 @@ function getElements( selector, context ){
          	return slice.call( context.getElementsByClassName( tag ), 0 );
 		} else {
 			// For IE which doesn't support getElementsByClassName
-			var elems = context.getElementsByTagName('*'),
-				nodes = [];
+			var elems = context.getElementsByTagName('*'), nodes = [];
 			// Loop over elements to test for correct class
 			for(var i=0,l=elems.length;i<l;i++){
 				// Detect whether this element has the class specified
@@ -101,7 +101,24 @@ function getElements( selector, context ){
 				}
 			}
 			return nodes;
-		} 
+		}
+	} else if( selector.indexOf('[name=') === 0 ){
+		var name = selector.substring(6).replace(/].*/,'');
+		context = context && context.nodeType === 9 ? context : document;
+		if( context.getElementsByName ){
+			return slice.call( context.getElementsByName( name ) );
+		} else {
+			// For IE which doesn't support getElementsByClassName
+			var elems = context.getElementsByName('*'), nodes = [];
+			// Loop over elements to test for correct class
+			for(var i=0,l=elems.length;i<l;i++){
+				// Detect whether this element has the class specified
+				if( (" " + ( elems[i].name || elems[i].getAttribute("name") ) + " ").indexOf( name ) > -1 ) {
+					nodes.push( elems[i] );
+				}
+			}
+			return nodes;
+		}
 	} else {
 		// assume that if not id or class must be tag
 		var find = context.getElementsByTagName( selector );
