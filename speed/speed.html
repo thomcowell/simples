@@ -12,6 +12,13 @@
     <script type="text/javascript" charset="utf-8">
 		var perfTester = (function(){ 
 			var messages = [];
+			    
+			function writeMsg( msg ){
+				var p = document.createElement('p'); 
+				p.innerText = msg;
+
+				document.body.appendChild( p );
+			}
     		return {
 				test : function( fn, count, msg, that, args ){
 					count = count || 1000000;
@@ -28,20 +35,82 @@
 				log : function( msg ){
 					messages.push( msg );
 				},
-				write : function(){
-					for( var i=0,l=messages.length;i<l;i++){
-						var p = document.createElement('p'); 
-						p.innerText = messages[i];
-
-						document.body.appendChild( p );
-					} 
-					messages = [];
+				write : function( msg ){
+					if( typeof msg === "string" ){
+						writeMsg( msg );
+					} else {
+						for( var i=0,l=messages.length;i<l;i++){
+							writeMsg( messages[i] );
+						} 
+						messages = [];
+					}
 				}
 			};
 		})( window );
     </script>
   </head>
   <body>
+	<div id='test-area'>
+		<div id="row-wrapper">
+
+			<input name="row" type="hidden"/>
+			<input name="row" type="hidden"/>
+
+			<div class="row">
+				<div id="cell-test"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+			<div class="row">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"><span id="row-element"></span></div>
+				<div class="cell"></div>
+			</div>
+		</div>
+	</div>
 
 	<!-- Library Files -->
 	<script type="text/javascript" charset="utf-8" src="../src/core.js"></script>
@@ -57,6 +126,8 @@
 
 	<!-- Speed Test Files -->
 	<script type="text/javascript" charset="utf-8" src="string-vs-typeof.js"></script>
+	<script type="text/javascript" charset="utf-8" src="switch-vs-if-indexof.js"></script>
+	
 </body>                                                          
 </html>
 	
