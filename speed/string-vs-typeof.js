@@ -49,21 +49,19 @@
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]";
 	
-	perfTester.log( 'Testing typeOf and toString - '+count+' times' );
+	perfTester.write( 'Testing typeOf and toString - '+count+' times' );
+	test( isObject, count, 'isObject', window, [{ham:'sandwich'}] );
+	test( toString, count, 'toString - Object', window, [{ham:'sandwich'}, ObjectClass ] );
+	test( isArray, count, 'isArray', window, [[1,2,3]] );
+	test( toString, count, 'toString - Array', window, [[1,2,3], ArrayClass ] );
+	test( isNodeList, count, 'isNodeList', window, [document.getElementsByTagName('p')] );
+	test( toString, count, 'toString - NodeList', window, [document.getElementsByTagName('p'), NodeListClass] );
+	test( isDomNode, count, 'isDomNode', window, [document.createElement('p')] );
+	test( toString, count, 'toString - DomNode', window, [document.createElement('p'), NodeListClass] ); 
+	test( isFunction, count, 'isFunction', window, [function(){}] );
+	test( toString, count, 'toString - Function', window, [function(){}, FunctionClass] );		   	
+	test( isWindow, count, 'isWindow', window, [window] );
+	test( toString, count, 'toString - Window', window, [window, WindowClass] );
 	perfTester.write();
-	setTimeout( function(){
-		test( isObject, count, 'isObject', window, [{ham:'sandwich'}] );
-		test( toString, count, 'toString - Object', window, [{ham:'sandwich'}, ObjectClass ] );
-		test( isArray, count, 'isArray', window, [[1,2,3]] );
-		test( toString, count, 'toString - Array', window, [[1,2,3], ArrayClass ] );
-		test( isNodeList, count, 'isNodeList', window, [document.getElementsByTagName('p')] );
-		test( toString, count, 'toString - NodeList', window, [document.getElementsByTagName('p'), NodeListClass] );
-		test( isDomNode, count, 'isDomNode', window, [document.createElement('p')] );
-		test( toString, count, 'toString - DomNode', window, [document.createElement('p'), NodeListClass] ); 
-		test( isFunction, count, 'isFunction', window, [function(){}] );
-		test( toString, count, 'toString - Function', window, [function(){}, FunctionClass] );		   	
-		test( isWindow, count, 'isWindow', window, [window] );
-		test( toString, count, 'toString - Window', window, [window, WindowClass] ); 
-		perfTester.write();
-	}, 500);
+	
 })( Simples );
