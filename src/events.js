@@ -20,7 +20,7 @@ function SimplesEvent( event ){
 	} else {
 		this.type = event;
 	}
-
+    
 	// timeStamp is buggy for some events on Firefox(#3843)
 	// So we won't rely on the native value
 	this.timeStamp = new Date().getTime();
@@ -86,22 +86,19 @@ var SimplesEvents = {
 		}
 
 		if( isFunction( callback ) && notNoData( elem ) ){ 
+			
 			var data = readData( elem, 'events' ) || {};
 			
 			if( !callback.guid ){
-				callback.guid = Events.guid++;
-				callback.handled = this.handler( callback ); 
+				callback.guid = ++this.guid;
+				callback.handled = this.handler( callback );
 			}
 			
 			var guid = callback.guid, 
-				handled = callback.handled;   
-            
-			if( data[ guid ] === undefined ){
-				data[ guid ] = handled;
-			}
+				handled = callback.handled;
 			
 			data[ type ] = data[ type ] || [];
-			data[ type ].push( {handled:handled, guid:guid} );
+			data[ type ].push( {handler:handled, guid:guid} );
 			
 			addData( elem, 'events', data );
 			
@@ -126,37 +123,55 @@ var SimplesEvents = {
 		}
 
 		var data = readData( elem, 'events' ) || {};
-		var evt = data[ type ] || {};
-		if( callback === undefined ){
-			for( var i=0,l=evt.length;i<l;i++ ){ 
+		var evt = data[ type ] = data[ type ] || [];
+		
+		// clear out data for functions
+       	for( var i=0,l=evt.length;i<l;i++ ){
+			if( callback === undefined || evt[ i ].guid === callback.guid ){
 				// check whether it is a W3C browser or not
-				if ( this.removeEventListener ) {
+				if ( elem.removeEventListener ) {
 					// remove event listener and unregister element event
-					this.removeEventListener( type, evt[ i ].handled, false );
+					elem.removeEventListener( type, evt[ i ].handler, false );
 				} else if ( this.detachEvent ) {                                             
 
-					this.detachEvent( "on" + type, evt[ i ].handled );
-				}                                   
-			}
-			delete data[ type ];
-		} else {
-         	for( var i=0,l=evt.length;i<l;i++ ){
-
-				if( evt[ i ].guid === original.guid ){
-					// check whether it is a W3C browser or not
-					if ( this.removeEventListener ) {
-						// remove event listener and unregister element event
-						this.removeEventListener( type, evt[ i ].handled, false );
-					} else if ( this.detachEvent ) {                                             
-
-						this.detachEvent( "on" + type, evt[ i ].handled );
-					}
-				    evt.splice( i, 1);
+					elem.detachEvent( "on" + type, evt[ i ].handler );
 				}
+			    evt.splice( i, 1);
 			}
+		}                                 
+		
+		if( data[ type ].length === 0 ){ 
+			delete data[ type ];
+		}
+
+		addData( elem, 'events', data );
+	},
+	trigger : function( elem, type, data ){
+		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
+			return;
 		}
 		
-		addData( elem, 'events', data );
+		if ( !(elem && elem.nodeName && !notNoData( elem ) ) ) {
+			// Use browser event generators
+			var e;
+			if( elem.dispatchEvent ){
+				// Build Event
+				e = document.createEvent("HTMLEvents");
+				e.initEvent(type, true, false);
+				if (data){
+					e.data = data;              
+				}
+				// Dispatch the event to the ELEMENT
+				elem.dispatchEvent(e);
+			} else if( elem.fireEvent ) {
+				if (data){
+					e = document.createEventObject();
+					e.data = data;
+					e.eventType = "on"+type;
+				}
+				elem.fireEvent( "on"+type, e );
+			} 
+		}		
 	},
 	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	fix : function( event ){
@@ -215,9 +230,10 @@ var SimplesEvents = {
 	    return event;
 	},       
 	guid : 1e6,
-	handler : function( elem, callback ){ 
+	handler : function( callback ){ 
 		
 	    return function( event ) {
+
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
 	        return callback.apply( this, arguments );
 	    };
@@ -225,8 +241,8 @@ var SimplesEvents = {
 };
 
 Simples.extend({
-	bind : function( type, callback ){ 
-		if( typeof type === "string" ){
+	bind : function( type, callback ){
+		if( typeof type === "string" && ( isFunction( callback ) || callback === false ) ){
 			// Loop over elements 
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment
@@ -236,47 +252,23 @@ Simples.extend({
 		return this;	
 	},
 	unbind : function( type, callback ){
-		if( typeof type === "string" ){
+		if( typeof type === "string"  && ( callback === undefined || isFunction( callback ) || callback === false ) ){
 			// Loop over elements
-			this.each(function(){  
+			this.each(function(){
+				// Register each original event and the handled event to allow better detachment    
 				SimplesEvents.detach( this, type, callback );
 			});
 		}
 		return this;
 	}, 
 	trigger : function( type, data ){
-		this.each(function(){
-			if ( !(this && this.nodeName && !notNoData( this ) ) ) { 
-				
-				// Trigger an inline bound script
-				try {
-					if ( this[ "on" + type ] && this[ "on" + type ].apply( elem, data ) === false ) {
-						// exit as the script has return false and will not propagate any further
-						return false;
-					}
-
-				// prevent IE from throwing an error for some elements with some event types, see #3533
-				} catch (inlineError) {}
-				// Use browser event generators
-				var e;
-				if( this.dispatchEvent ){
-					// Build Event
-					e = document.createEvent("HTMLEvents");
-					e.initEvent(type, true, false);
-					if (data){
-						e.data = data;              
-					}
-					// Dispatch the event to the ELEMENT
-					this.dispatchEvent(e);
-				} else if( this.fireEvent ) {
-					if (data){
-						e = document.createEventObject();
-						e.data = data;              
-					}
-					this.fireEvent( "on"+type, e );
-				} 
-			}
-		});
+		if( typeof type === "string"){ 
+			// Loop over elements
+			this.each(function(){
+				// Register each original event and the handled event to allow better detachment    
+				SimplesEvents.trigger( this, type, data );
+			});
+		}
 		return this;
 	}
 });

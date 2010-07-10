@@ -26,7 +26,8 @@ function Simples( selector, context ) {
 	if ( !(this instanceof Simples) ){	// or this.each !== Simples.prototype.each
 		return new Simples( selector, context );  		
 	} else if( selector instanceof Simples ){
-		return selector;
+		merge.call( this, slice.call( selector, 0 ) );
+		return this;
 	}
 	  	
 	// Handle $(""), $(null), or $(undefined) 		

@@ -37,10 +37,10 @@ function removeData( elem, key ){
 	}	
 } 
 
-function cleanData( elem ){ 
+function cleanData( elem, andSelf ){ 
 	// Remove element nodes and prevent memory leaks   
 	var elems = slice.call( elem.getElementsByTagName("*") );
-	if( notNoData( elem ) ){
+	if( notNoData( elem ) && andSelf !== false ){
 		elems.push( elem );
 	}	
 	var i=elems.length;
