@@ -2,77 +2,31 @@ var STRIP_TAB_NEW_LINE = /[\n\t]/g,
 	LAST_SPACE_OPTIONAL = /\s?$/,
 	FIRST_LAST_SPACES = /^\s?|\s?$/g;
 
-function setUpOptions( elem, type, content ){
-	switch( type ){
-		case 'append':
-			return {
-				node : elem,
-				fnName : 'appendChild'
-			};
-		case 'prepend':
-			return {
-				node : elem,
-				fnName : 'insertBefore',
-				position : elem.firstChild
-			};
-		case 'after':
-			return {
-				node : elem.parentNode,
-				fnName : 'insertBefore',
-				position : elem.nextSibling
-			};
-		case 'before':
-			return {
-				node : elem.parentNode,
-				fnName : 'insertBefore',
-				reverse : true,
-				position : elem
-			};   
-		case 'wrap':
-			return {
-				node : elem.parentNode,
-				fnName : 'insertBefore',
-				position : elem
-			};			
-		case 'replaceWith':
-			cleanData( elem );
-			return {
-				node : elem.parentNode,
-				fnName : 'replaceChild',
-				position : elem
-			}
-	};
-	return {};
-};
-
 Simples.extend({
-	insert : function( type, children ){
-		var o = setUpOptions( this[0], type ), fnName = o.fnName;
-		
-		if( o.fnName && typeof children === "string" ){
+	domManip : function( children, reverse, insertFn ){
+        if( !isFunction( insertFn ) ){ return this; }
+		if( typeof children === "string" ){
 			this.each(function(){
 				
-				var o = setUpOptions( this, type ),
-					div = document.createElement('div');
-                
-				if( o.node ){
-					div.innerHTML = children;
-					children = div.childNodes;
+				var div = document.createElement('div');
 
-	               	for(var i=children.length;i>=0;i--){
-						o.node[ o.fnName ]( children[i], o.position );
-					}
+				div.innerHTML = children;
+				children = div.childNodes;
+
+               	for(var i=children.length;i>=0;i--){
+					insertFn.call( this, children[i] );
 				}
 			});
-		} else if ( o.fnName && children instanceof Simples ){
+		} else if ( children instanceof Simples ){
 			var i=0,l=children.length;
-			while(l>-1){
-				o.node[ o.fnName ]( children[i], o.position );
+			while(l){
 				l--;
+				insertFn.call( this, children[l] );
 			}			
-		} else if ( o.fnName && children && children.nodeType === 1 ){
-			o.node[ o.fnName ]( children, o.position );
+		} else if ( children && children.nodeType === 1 ){
+			insertFn.call( this[0], children[i] );
 		}
+		return this;
 	},
 	html : function( content ){
 		if( typeof content === 'string' ){
@@ -80,56 +34,95 @@ Simples.extend({
 				this.innerHTML = content;
 			});
 		} else {
-			this.empty().insert( 'append', content );
+			this.empty().append( content );
 		}
 		return this;
 	},
-	append : function( child ){
-		return this.insert( 'append', child );
-	},
-	prepend : function( child ){
-		return this.insert( 'prepend', child );
-	},  
-	after : function( child ){
-		return this.insert( 'after', child );
-	},
-	before : function( child ){
-		return this.insert( 'before', child ); 	                                                                             
-	},
-	replaceWith : function( child ){
-		return this.insert( 'replaceWith', child );
-	},  
-	clone : function( deep ){
-		var results = new Simples();
-		this.each(function(i){
-			results[i] = this.cloneNode( deep );
-			results.length = i+1;
+	append : function( value ){
+		return this.domManip( value, false, function( node ){
+			if ( this.nodeType === 1 ) {
+				this.appendChild( node );
+			}
 		});
-		return results;
 	},
-	wrap : function( selector ) {
-		var tag, elem; 
+	prepend : function( value ){
+		return this.domManip( value, true, function( node ){
+			if ( this.nodeType === 1 ) {
+				this.insertBefore( node, this.firstChild );
+			}
+		});
+	},  
+	after : function( value ){
+		return this.domManip( value, true, function( node ){
+			if ( this && this.parentNode ) {
+				this.parentNode.insertBefore( node, this.nextSibling );
+			}
+		});
+	},
+	before : function( value ){
+		return this.domManip( value, false, function( node ){
+			if ( this && this.parentNode ) {
+				this.parentNode.insertBefore( node, this );
+			}
+		});
+	},
+	replaceWith : function( value ){
+		this.each(function(){
+			var next = this.nextSibling, parent = this.parentNode;
+			cleanData( this );
+			parent.removeChild( this );
+			if( next ){
+				Simples( next ).before( value );
+			} else {
+				Simples( parent ).append( value );
+			}
+		});
+	},  
+	clone : function(){
+		var results = [];
+		var noCloneEvent = Simples.support.noCloneEvent;
+		this.each(function(i){
+			if( noCloneEvent ){
+				var html = this.outerHTML, ownerDocument = this.ownerDocument;
+
+				if ( !html ) {
+					var div = ownerDocument.createElement("div");
+					div.appendChild( this.cloneNode(true) );
+					html = div.innerHTML;
+				}
+
+				var elem = ownerDocument.createElement("div");
+				elem.innerHTML = html;
+				cleanData( elem );
+
+				results.concat( slice.call( elem.childNodes ) );
+			} else {
+				results.push( this.cloneNode( true ) );
+			}
+		});
+		return Simples( results );
+	},
+	wrap : function( selector ) {		
+		var tag, domElem;
 		if( typeof selector === 'string' ){            
 			
 			tag = TAG.exec( selector || '<div/>' );
-			tag = ( tag !== null && tag.length === 2 ) ? tag[1] : null;
-			                               
+			domElem = document.createElement( ( tag !== null && tag.length === 2 ) ? tag[1] : null );
 		} else if( selector instanceof Simples ){
 		   	domElem = selector[0];
 		} else if( selector && selector.nodeType === 1 ){
 			domElem = selector;
 		}
-		   
-		if( tag || domElem ){
-			this.each(function(){                          
-
-	            if( this.parentNode ){ 
-					elem = tag ? document.createElement( tag ) : domElem.cloneNode();
-		        	this.parentNode.insertBefore(elem, this);
-		        	elem.appendChild(this);
-				}
-			});			
-		}    
+		
+		if( !domElem ){ return this; }
+		
+		this.each(function(){
+			if( this.parentNode && this.nodeType && this.nodeType !== 9 ){
+				var elem = Simples( domElem ).clone()[0];
+				this.parentNode.insertBefore( elem, this );
+				elem.appendChild( this );
+			}
+		});
 		
 		return this;
     },
@@ -154,10 +147,9 @@ Simples.extend({
 	},
 	empty : function(){             
 		this.each(function(){
-			
-			
-				cleanElemData( this );
-
+			if ( this.nodeType === 1 ) {
+				cleanData( this, false );
+			}
 			// Remove any remaining nodes
 			while ( this.firstChild ) {
 				this.removeChild( this.firstChild );
@@ -168,7 +160,7 @@ Simples.extend({
 		this.each(function(){
 			if ( this.parentNode ) { 
 				if ( this.nodeType === 1 ) {
-					cleanData( this.getElementsByTagName("*") );
+					cleanData( this );
 				}
 				
 				this.parentNode.removeChild( this );
