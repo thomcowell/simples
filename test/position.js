@@ -59,21 +59,19 @@ testoffset("absolute"/* in iframe */, function($, iframe) {
 	tests = [
 		{ id: '#absolute-1', top: 1, left: 1 }
 	];
-
-	Simples.each( tests, function() {
-		equals( Simples( this.id, doc ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
-		equals( Simples( this.id, doc ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
-	});
-
+    for( var i=0,l=tests.length;i<l;i++)(function(i){
+     	equals( Simples( tests[i].id, doc ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+		equals( Simples( tests[i].id, doc ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
+	})(i);
 
 	// get position
 	tests = [
 		{ id: '#absolute-1', top: 0, left: 0 }
 	];
-	Simples.each( tests, function() {
-		equals( Simples( this.id, doc ).position().top,  this.top,  "Simples('" + this.id + "').position().top" );
-		equals( Simples( this.id, doc ).position().left, this.left, "Simples('" + this.id + "').position().left" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+     	equals( Simples( tests[i].id, doc ).position().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+		equals( Simples( tests[i].id, doc ).position().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
+	})(i);
 	
 	forceScroll.remove();
 });
@@ -88,6 +86,12 @@ testoffset("absolute", function( Simples ) {
 		{ id: '#absolute-1-1-1', top:  9, left:  9 },
 		{ id: '#absolute-2',     top: 20, left: 20 }
 	];
+	
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+     	equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
+	})(i);
+	
 	Simples.each( tests, function() {
 		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
 		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
@@ -101,10 +105,11 @@ testoffset("absolute", function( Simples ) {
 		{ id: '#absolute-1-1-1', top:  1, left:  1 },
 		{ id: '#absolute-2',     top: 19, left: 19 }
 	];
-	Simples.each( tests, function() {
-		equals( Simples( this.id ).position().top,  this.top,  "Simples('" + this.id + "').position().top" );
-		equals( Simples( this.id ).position().left, this.left, "Simples('" + this.id + "').position().left" );
-	});
+	
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+     	equals( Simples( tests[i].id ).position().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+		equals( Simples( tests[i].id ).position().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
+	})(i);
 	
 	// test #5781
 	var offset = Simples( '#positionTest' ).offset({ top: 10, left: 10 }).offset();
@@ -130,17 +135,16 @@ testoffset("absolute", function( Simples ) {
 		{ id: '#absolute-1',     top:  0, left:  0 },
 		{ id: '#absolute-1',     top: -1, left: -1 },
 		{ id: '#absolute-1',     top:  1, left:  1 }
-	];
-	Simples.each( tests, function() {
-		Simples( this.id ).offset({ top: this.top, left: this.left });
-		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
-		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
+	]; 
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		Simples( tests[i].id ).offset({ top: tests[i].top, left: tests[i].left });
+		equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset({ top: "  + tests[i].top  + " })" );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset({ left: " + tests[i].left + " })" );
 		
-		Simples( this.id ).offset({ left: this.left + 2 }).offset({ top:  this.top  + 2 });
-		equals( Simples( this.id ).offset().top,  this.top  + 2, "Setting one property at a time." );
-		equals( Simples( this.id ).offset().left, this.left + 2, "Setting one property at a time." );
-
-	});
+		Simples( tests[i].id ).offset({ left: tests[i].left + 2 }).offset({ top:  tests[i].top  + 2 });
+		equals( Simples( tests[i].id ).offset().top,  tests[i].top  + 2, "Setting one property at a time." );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left + 2, "Setting one property at a time." );
+	})(i);
 });
 
 testoffset("relative", function( Simples ) {
@@ -155,10 +159,10 @@ testoffset("relative", function( Simples ) {
 		{ id: '#relative-1-1', top: ie ?  13 :  15, left: 15 },
 		{ id: '#relative-2',   top: ie ? 141 : 142, left: 27 }
 	];
-	Simples.each( tests, function() {
-		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
-		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
+	})(i);
 	
 	
 	// get position
@@ -167,10 +171,10 @@ testoffset("relative", function( Simples ) {
 		{ id: '#relative-1-1', top: ie ?   4 :   5, left:  5 },
 		{ id: '#relative-2',   top: ie ? 140 : 141, left: 26 }
 	];
-	Simples.each( tests, function() {
-		equals( Simples( this.id ).position().top,  this.top,  "Simples('" + this.id + "').position().top" );
-		equals( Simples( this.id ).position().left, this.left, "Simples('" + this.id + "').position().left" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		equals( Simples( tests[i].id ).position().top,  tests[i].top,  "Simples('" + tests[i].id + "').position().top" );
+		equals( Simples( tests[i].id ).position().left, tests[i].left, "Simples('" + tests[i].id + "').position().left" );
+	})(i);
 	
 	
 	// set offset
@@ -188,11 +192,11 @@ testoffset("relative", function( Simples ) {
 		{ id: '#relative-1',   top:  -1, left:  -1 },
 		{ id: '#relative-1',   top:   7, left:   7 }
 	];
-	Simples.each( tests, function() {
-		Simples( this.id ).offset({ top: this.top, left: this.left });
-		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
-		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		Simples( tests[i].id ).offset({ top: tests[i].top, left: tests[i].left });
+		equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset({ top: "  + tests[i].top  + " })" );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset({ left: " + tests[i].left + " })" );
+	})(i);
 });
 
 testoffset("static", function( Simples ) {
@@ -208,10 +212,10 @@ testoffset("static", function( Simples ) {
 		{ id: '#static-1-1-1', top: ie ?  20 :  23, left: 23 },
 		{ id: '#static-2',     top: ie ? 121 : 122, left:  7 }
 	];
-	Simples.each( tests, function() {
-		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
-		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
+	})(i);
 	
 	
 	// get position
@@ -221,10 +225,10 @@ testoffset("static", function( Simples ) {
 		{ id: '#static-1-1-1', top: ie ?  19 :  22, left: 22 },
 		{ id: '#static-2',     top: ie ? 120 : 121, left:  6 }
 	];
-	Simples.each( tests, function() {
-		equals( Simples( this.id ).position().top,  this.top,  "Simples('" + this.top  + "').position().top" );
-		equals( Simples( this.id ).position().left, this.left, "Simples('" + this.left +"').position().left" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		equals( Simples( tests[i].id ).position().top,  tests[i].top,  "Simples('" + tests[i].top  + "').position().top" );
+		equals( Simples( tests[i].id ).position().left, tests[i].left, "Simples('" + tests[i].left +"').position().left" );
+	})(i);
 	
 	
 	// set offset
@@ -246,11 +250,11 @@ testoffset("static", function( Simples ) {
 		{ id: '#static-1',     top:  -2, left:  -2 },
 		{ id: '#static-1',     top:   7, left:   7 }
 	];
-	Simples.each( tests, function() {
-		Simples( this.id ).offset({ top: this.top, left: this.left });
-		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
-		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
-	});
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
+		Simples( tests[i].id ).offset({ top: tests[i].top, left: tests[i].left });
+		equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset({ top: "  + tests[i].top  + " })" );
+		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset({ left: " + tests[i].left + " })" );
+	})(i);
 });
 
 testoffset("fixed", function( Simples ) {
@@ -263,20 +267,20 @@ testoffset("fixed", function( Simples ) {
 		{ id: '#fixed-2', top: 1021, left: 1021 }
 	];
 
-	Simples.each( tests, function() {
+	for( var i=0,l=tests.length;i<l;i++)(function(i){
 		if ( !supportsScroll ) {
 			ok( true, "Browser doesn't support scroll position." );
 			ok( true, "Browser doesn't support scroll position." );
 
 		} else if ( Simples.offset.supportsFixedPosition ) {
-			equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
-			equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
+			equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
+			equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
 		} else {
 			// need to have same number of assertions
 			ok( true, 'Fixed position is not supported' );
 			ok( true, 'Fixed position is not supported' );
 		}
-	});
+	})(i);
 	
 	tests = [
 		{ id: '#fixed-1', top: 100, left: 100 },
@@ -287,11 +291,11 @@ testoffset("fixed", function( Simples ) {
 		{ id: '#fixed-2', top:  -5, left:  -5 }
 	];
 	
-	Simples.each( tests, function() {
+	for( var i=0,l=tests.length;i<l;i++)(function(i){ 
 		if ( Simples.offset.supportsFixedPosition ) {
-			Simples( this.id ).offset({ top: this.top, left: this.left });
-			equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset({ top: "  + this.top  + " })" );
-			equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset({ left: " + this.left + " })" );
+			Simples( tests[i].id ).offset({ top: tests[i].top, left: tests[i].left });
+			equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset({ top: "  + tests[i].top  + " })" );
+			equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset({ left: " + tests[i].left + " })" );
 		} else {
 			// need to have same number of assertions
 			ok( true, 'Fixed position is not supported' );
@@ -299,7 +303,7 @@ testoffset("fixed", function( Simples ) {
 			ok( true, 'Fixed position is not supported' );
 			ok( true, 'Fixed position is not supported' );
 		}
-	});
+	})(i);
 });
 
 testoffset("table", function( Simples ) {

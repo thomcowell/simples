@@ -257,11 +257,6 @@ merge.call( Simples, {
 			return func.apply( context, arguments );
 		};
 	},
-	each : function(collection, callback){
-		for(var i=0,l=collection.length;i<l;i++){
-			callback.call( collection[i], i, collection[i] );
-		}
-	},
 	noop : function(){}
 });
 
