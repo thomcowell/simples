@@ -211,5 +211,17 @@ Simples.extend({
 			});
 		}
 		return this;
+	},
+	/* TODO: Rename me as I don't indicate functionality */
+	get : function( name ){
+		var isWhat = toString.call( name ), results = [];
+		this.each(function(){
+			var elem = ( isWhat === StringClass ) ? this[ name ] : ( isWhat === FunctionClass ) ? name.call( this )  : null;
+			if( elem ){
+				elem = elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ];
+				results = results.concat( elem );
+			}
+		}); 
+		return Simples( results );
 	}
 });

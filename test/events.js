@@ -15,7 +15,7 @@ test("bind() and unbind() setup data correctly", 4, function() {
 	same( readData( Simples("#firstp")[0], "events"), {}, "Event handler unbound when using data.");
 });
 
-test("check event bound correctly", 3, function(){ 
+test("check event bound bind() and unbind() and trigger() correctly", 3, function(){ 
 	// test binding is working
 	var counter = 0;
    	var first = function(event) {
@@ -65,182 +65,36 @@ test("bind(), no data", 1, function() {
 	Simples("#firstp").bind("click", handler).trigger("click").unbind('click');
 });
 
-test("bind/one/unbind(Object)", function(){
-	expect(6);
-	
-	var clickCounter = 0, mouseoverCounter = 0;
-	function handler(event) {
-		if (event.type == "click")
-			clickCounter++;
-		else if (event.type == "mouseover")
-			mouseoverCounter++;
-	};
-	
-	function handlerWithData(event) {
-		if (event.type == "click")
-			clickCounter += event.data;
-		else if (event.type == "mouseover")
-			mouseoverCounter += event.data;
-	};
-	
-	function trigger(){
-		$elem.trigger("click").trigger("mouseover");
-	}
-	
-	var $elem = Simples("#firstp")
-		// Regular bind
-		.bind({
-			click:handler,
-			mouseover:handler
-		})
-		// Bind with data
-		.one({
-			click:handlerWithData,
-			mouseover:handlerWithData
-		}, 2 );
-	
-	trigger();
-	
-	equals( clickCounter, 3, "bind(Object)" );
-	equals( mouseoverCounter, 3, "bind(Object)" );
-	
-	trigger();
-	equals( clickCounter, 4, "bind(Object)" );
-	equals( mouseoverCounter, 4, "bind(Object)" );
-	
-	Simples("#firstp").unbind({
-		click:handler,
-		mouseover:handler
-	});
-
-	trigger();
-	equals( clickCounter, 4, "bind(Object)" );
-	equals( mouseoverCounter, 4, "bind(Object)" );
-});
-
-test("bind(), iframes", function() {
+test("bind(), iframes", 169, function() {
 	// events don't work with iframes, see #939 - this test fails in IE because of contentDocument
-	var doc = Simples("#loadediframe").contents();
+	var doc = Simples("#loadediframe").get(function(){
+		return this.contentDocument || this.contentWindow.document;
+	})[0];
 	
 	Simples("div", doc).bind("click", function() {
 		ok( true, "Binding to element inside iframe" );
-	}).click().unbind('click');
+	}).trigger('click').unbind('click');
 });
 
-test("bind(), trigger change on select", function() {
-	expect(3);
+test("bind(), trigger change on select", 3, function() {
 	var counter = 0;
 	function selectOnChange(event) {
-		equals( event.data, counter++, "Event.data is not a global event object" );
+		equals( Simples( event.target ).data( "pos" ), counter++, "Event.data is not a global event object" );
 	};
 	Simples("#form select").each(function(i){
-		Simples(this).bind('change', i, selectOnChange);
+		Simples(this).data('pos', i).bind('change', selectOnChange);
 	}).trigger('change');
 });
 
-test("bind(), namespaced events, cloned events", function() {
-	expect(6);
-
-	Simples("#firstp").bind("custom.test",function(e){
-		ok(true, "Custom event triggered");
-	});
-
-	Simples("#firstp").bind("click",function(e){
-		ok(true, "Normal click triggered");
-	});
-
-	Simples("#firstp").bind("click.test",function(e){
-		ok(true, "Namespaced click triggered");
-	});
-
-	// Trigger both bound fn (2)
-	Simples("#firstp").trigger("click");
-
-	// Trigger one bound fn (1)
-	Simples("#firstp").trigger("click.test");
-
-	// Remove only the one fn
-	Simples("#firstp").unbind("click.test");
-
-	// Trigger the remaining fn (1)
-	Simples("#firstp").trigger("click");
-
-	// Remove the remaining fn
-	Simples("#firstp").unbind(".test");
-
-	// Trigger the remaining fn (0)
-	Simples("#firstp").trigger("custom");
+test("bind()only on real nodes", 1, function() {
 
 	// using contents will get comments regular, text, and comment nodes
-	Simples("#nonnodes").contents().bind("tester", function () {
-		equals(this.nodeType, 1, "Check node,textnode,comment bind just does real nodes" );
+	Simples("#nonnodes").get("childNodes").bind("tester", function () {
+		equals( this.nodeType, 1, "Check node,textnode,comment bind just does real nodes" );
 	}).trigger("tester");
-
-	// Make sure events stick with appendTo'd elements (which are cloned) #2027
-	Simples("<a href='#fail' class='test'>test</a>").click(function(){ return false; }).appendTo("p");
-	ok( Simples("a.test:first").triggerHandler("click") === false, "Handler is bound to appendTo'd elements" );
 });
 
-test("bind(), multi-namespaced events", function() {
-	expect(6);
-	
-	var order = [
-		"click.test.abc",
-		"click.test.abc",
-		"click.test",
-		"click.test.abc",
-		"click.test",
-		"custom.test2"
-	];
-	
-	function check(name, msg){
-		same(name, order.shift(), msg);
-	}
-
-	Simples("#firstp").bind("custom.test",function(e){
-		check("custom.test", "Custom event triggered");
-	});
-
-	Simples("#firstp").bind("custom.test2",function(e){
-		check("custom.test2", "Custom event triggered");
-	});
-
-	Simples("#firstp").bind("click.test",function(e){
-		check("click.test", "Normal click triggered");
-	});
-
-	Simples("#firstp").bind("click.test.abc",function(e){
-		check("click.test.abc", "Namespaced click triggered");
-	});
-	
-	// Those would not trigger/unbind (#5303)
-	Simples("#firstp").trigger("click.a.test");
-	Simples("#firstp").unbind("click.a.test");
-
-	// Trigger both bound fn (1)
-	Simples("#firstp").trigger("click.test.abc");
-
-	// Trigger one bound fn (1)
-	Simples("#firstp").trigger("click.abc");
-
-	// Trigger two bound fn (2)
-	Simples("#firstp").trigger("click.test");
-
-	// Remove only the one fn
-	Simples("#firstp").unbind("click.abc");
-
-	// Trigger the remaining fn (1)
-	Simples("#firstp").trigger("click");
-
-	// Remove the remaining fn
-	Simples("#firstp").unbind(".test");
-
-	// Trigger the remaining fn (1)
-	Simples("#firstp").trigger("custom");
-});
-
-test("bind(), with same function", function() {
-	expect(2)
+test("bind(), with same function", 2, function() {
 
 	var count = 0 ,  func = function(){
 		count++;
@@ -257,7 +111,7 @@ test("bind(), with same function", function() {
 	equals(count, 1, "Verify that removing events still work." );
 });
 
-test("bind(), make sure order is maintained", function() {
+test("bind(), make sure order is maintained", 1, function() {
 	expect(1);
 
 	var elem = Simples("#firstp"), log = [], check = [];
@@ -275,25 +129,6 @@ test("bind(), make sure order is maintained", function() {
 	equals( log.join(","), check.join(","), "Make sure order was maintained." );
 
 	elem.unbind("click");
-});
- 
-test("bind(), with different this object", function() {
-	expect(4);
-	var thisObject = { myThis: true },
-		data = { myData: true },
-		handler1 = function( event ) {
-			equals( this, thisObject, "bind() with different this object" );
-		},
-		handler2 = function( event ) {
-			equals( this, thisObject, "bind() with different this object and data" );
-			equals( event.data, data, "bind() with different this object and data" );
-		};
-	
-	Simples("#firstp")
-		.bind("click", Simples.proxy(handler1, thisObject)).click().unbind("click", handler1)
-		.bind("click", data, Simples.proxy(handler2, thisObject)).click().unbind("click", handler2);
-
-	ok( !readData(Simples("#firstp")[0], "events"), "Event handler unbound when using different this object and data." );
 });
 
 test("bind(name, false), unbind(name, false)", function() {
@@ -316,7 +151,7 @@ test("bind(name, false), unbind(name, false)", function() {
 });
 
 test("bind()/trigger()/unbind() on plain object", function() {
-	expect( 2 );
+	expect( 1 );
 
 	var obj = {};
 
@@ -330,22 +165,15 @@ test("bind()/trigger()/unbind() on plain object", function() {
 		ok( true, "Custom event run." );
 	});
 
-	ok( Simples(obj).data("events"), "Object has events bound." );
+	same( Simples(obj).data("events"), null, "Object has events bound." );
 
 	// Should trigger 1
 	Simples(obj).trigger("test");
 
 	Simples(obj).unbind("test");
-
-	// Should trigger 0
-	Simples(obj).trigger("test");
-
-	// Make sure it doesn't complain when no events are found
-	Simples(obj).unbind("test");
 });
 
-test("unbind(type)", function() {
-	expect( 0 );
+test("unbind(type)", 0, function() {
 	
 	var $elem = Simples("#firstp"),
 		message;
@@ -355,28 +183,28 @@ test("unbind(type)", function() {
 	}
 	
 	message = "unbind passing function";
-	$elem.bind('error1', error).unbind('error1',error).triggerHandler('error1');
+	$elem.bind('error1', error).unbind('error1',error).trigger('error1');
 	
 	message = "unbind all from event";
-	$elem.bind('error1', error).unbind('error1').triggerHandler('error1');
+	$elem.bind('error1', error).unbind('error1').trigger('error1');
 	
 	message = "unbind all";
-	$elem.bind('error1', error).unbind().triggerHandler('error1');
+	$elem.bind('error1', error).unbind().trigger('error1');
 	
 	message = "unbind many with function";
 	$elem.bind('error1 error2',error)
 		 .unbind('error1 error2', error )
-		 .trigger('error1').triggerHandler('error2');
+		 .trigger('error1').trigger('error2');
 
 	message = "unbind many"; // #3538
 	$elem.bind('error1 error2',error)
 		 .unbind('error1 error2')
-		 .trigger('error1').triggerHandler('error2');
+		 .trigger('error1').trigger('error2');
 	
 	message = "unbind without a type or handler";
 	$elem.bind("error1 error2.test",error)
 		 .unbind()
-		 .trigger("error1").triggerHandler("error2");
+		 .trigger("error1").trigger("error2");
 });
 
 test("unbind(eventObject)", function() {
@@ -387,7 +215,7 @@ test("unbind(eventObject)", function() {
 
 	function assert( expected ){
 		num = 0;
-		$elem.trigger('foo').triggerHandler('bar');
+		$elem.trigger('foo').trigger('bar');
 		equals( num, expected, "Check the right handlers are triggered" );
 	}
 	
@@ -396,8 +224,8 @@ test("unbind(eventObject)", function() {
 		.bind('foo', function(){
 			num += 1;
 		})
-		.bind('foo', function(e){
-			$elem.unbind( e )
+		.bind('foo', function(e){ 
+			$elem.unbind( e.type, e.handler );
 			num += 2;
 		})
 		// Neither this one
@@ -413,38 +241,6 @@ test("unbind(eventObject)", function() {
 	
 	$elem.unbind();	
 	assert( 0 );
-});
-
-test("trigger() shortcuts", function() {
-	expect(6);
-	Simples('<li><a href="#">Change location</a></li>').prependTo('#firstUL').find('a').bind('click', function() {
-		var close = Simples('spanx', this); // same with Simples(this).find('span');
-		equals( close.length, 0, "Context element does not exist, length must be zero" );
-		ok( !close[0], "Context element does not exist, direct access to element must return undefined" );
-		return false;
-	}).click();
-	
-	Simples("#check1").click(function() {
-		ok( true, "click event handler for checkbox gets fired twice, see #815" );
-	}).click();
-	
-	var counter = 0;
-	Simples('#firstp')[0].onclick = function(event) {
-		counter++;
-	};
-	Simples('#firstp').click();
-	equals( counter, 1, "Check that click, triggers onclick event handler also" );
-	
-	var clickCounter = 0;
-	Simples('#simon1')[0].onclick = function(event) {
-		clickCounter++;
-	};
-	Simples('#simon1').click();
-	equals( clickCounter, 1, "Check that click, triggers onclick event handler on an a tag also" );
-	
-	Simples('<img />').load(function(){
-		ok( true, "Trigger the load event, using the shortcut .load() (#2819)");
-	}).load();
 });
 
 test("trigger() bubbling", function() {
@@ -486,9 +282,7 @@ test("trigger(type, [data], [fn])", function() {
 
 	var handler = function(event, a, b, c) {
 		equals( event.type, "click", "check passed data" );
-		equals( a, 1, "check passed data" );
-		equals( b, "2", "check passed data" );
-		equals( c, "abc", "check passed data" );
+		same( event.data, [ 1, "2", "abc"], "check passed data" );
 		return "test";
 	};
 
@@ -504,13 +298,13 @@ test("trigger(type, [data], [fn])", function() {
 	$elem.bind("click", handler).trigger("click", [1, "2", "abc"]);
 
 	// Simulate a "native" click
-	$elem[0].click = function(){
+	$elem[0].onclick = function(){
 		ok( false, "Native call was triggered" );
 	};
 
 	// Trigger only the handlers (no native)
 	// Triggers 5
-	equals( $elem.triggerHandler("click", [1, "2", "abc"]), "test", "Verify handler response" );
+	equals( $elem.trigger("click", [1, "2", "abc"]), "test", "Verify handler response" );
 
 	var pass = true;
 	try {
@@ -528,7 +322,8 @@ test("trigger(type, [data], [fn])", function() {
 	}
 	ok( pass, "Trigger on a table with a colon in the even type, see #3533" );
 
-	var form = Simples("<form action=''></form>").appendTo("body");
+	var form = Simples("<form action=''></form>");
+	Simples('body').append( form );
 
 	// Make sure it can be prevented locally
 	form.submit(function(){
@@ -634,10 +429,10 @@ test("trigger(eventObject, [data], [fn])", function() {
 });
 
 test("Simples.Event.currentTarget", function(){
-	expect(1);
+	expect(2);
 	
 	var counter = 0,
-		$elem = Simples('<button>a</button>').click(function(e){
+		$elem = Simples('<button>a</button>').bind("click", function(e){
 		equals( e.currentTarget, this, "Check currentTarget on "+(counter++?"native":"fake") +" event" );
 	});
 	
@@ -646,4 +441,6 @@ test("Simples.Event.currentTarget", function(){
 	
 	// Cleanup
 	$elem.unbind();
+	
+	same( readData( $elem[0], "events"), {}, "should have no events" );
 });

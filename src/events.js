@@ -111,7 +111,27 @@ var SimplesEvents = {
 		        elem.attachEvent("on" + type, handled);
 		    }
 		}
-	}, 
+	},
+	clearEvent : function( elem, type, events, callback ){
+		events = events || [];
+		var results = [];
+		// clear out data for functions
+       	for( var i=0,l=events.length;i<l;i++ ){
+			if( callback === undefined || events[ i ].guid === callback.guid ){
+				// check whether it is a W3C browser or not
+				if ( elem.removeEventListener ) {
+					// remove event listener and unregister element event
+					elem.removeEventListener( type, events[ i ].handler, false );
+				} else if ( elem.detachEvent ) {
+
+					elem.detachEvent( "on" + type, events[ i ].handler );
+				}
+			} else {
+				results.push( events[ i ] );
+			}
+		}
+		return results;
+	},
 	detach : function( elem, type, callback ){
 		
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
@@ -123,25 +143,18 @@ var SimplesEvents = {
 		}
 
 		var data = readData( elem, 'events' ) || {};
-		var evt = data[ type ] = data[ type ] || [];
-		
-		// clear out data for functions
-       	for( var i=0,l=evt.length;i<l;i++ ){
-			if( callback === undefined || evt[ i ].guid === callback.guid ){
-				// check whether it is a W3C browser or not
-				if ( elem.removeEventListener ) {
-					// remove event listener and unregister element event
-					elem.removeEventListener( type, evt[ i ].handler, false );
-				} else if ( this.detachEvent ) {                                             
-
-					elem.detachEvent( "on" + type, evt[ i ].handler );
+		if( type === undefined ){
+			for( type in data ){
+				data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
+				if( data[ type ].length === 0 ){
+					delete data[ type ];
 				}
-			    evt.splice( i, 1);
 			}
-		}                                 
-		
-		if( data[ type ].length === 0 ){ 
-			delete data[ type ];
+		} else {
+			data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
+			if( data[ type ].length === 0 ){
+				delete data[ type ];
+			}
 		}
 
 		addData( elem, 'events', data );
@@ -235,7 +248,12 @@ var SimplesEvents = {
 	    return function( event ) {
 
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
-	        return callback.apply( this, arguments );
+			event.handler = callback;
+
+	        if ( callback.apply( this, arguments ) === false ) { 
+				event.preventDefault();
+				event.stopPropagation();
+			}
 	    };
 	}
 };
@@ -252,13 +270,11 @@ Simples.extend({
 		return this;	
 	},
 	unbind : function( type, callback ){
-		if( typeof type === "string"  && ( callback === undefined || isFunction( callback ) || callback === false ) ){
-			// Loop over elements
-			this.each(function(){
-				// Register each original event and the handled event to allow better detachment    
-				SimplesEvents.detach( this, type, callback );
-			});
-		}
+		// Loop over elements
+		this.each(function(){
+			// Register each original event and the handled event to allow better detachment    
+			SimplesEvents.detach( this, type, callback );
+		});
 		return this;
 	}, 
 	trigger : function( type, data ){
