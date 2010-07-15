@@ -213,7 +213,7 @@ Simples.extend({
 		return this;
 	},
 	/* TODO: Rename me as I don't indicate functionality */
-	get : function( name ){
+	traverse : function( name ){
 		var isWhat = toString.call( name ), results = [];
 		this.each(function(){
 			var elem = ( isWhat === StringClass ) ? this[ name ] : ( isWhat === FunctionClass ) ? name.call( this )  : null;
@@ -223,5 +223,8 @@ Simples.extend({
 			}
 		}); 
 		return Simples( results );
+	},
+	eq : function( i ){
+		return Simples( this[ i ] );
 	}
 });

@@ -67,7 +67,7 @@ test("bind(), no data", 1, function() {
 
 test("bind(), iframes", 169, function() {
 	// events don't work with iframes, see #939 - this test fails in IE because of contentDocument
-	var doc = Simples("#loadediframe").get(function(){
+	var doc = Simples("#loadediframe").traverse(function(){
 		return this.contentDocument || this.contentWindow.document;
 	})[0];
 	
@@ -89,7 +89,7 @@ test("bind(), trigger change on select", 3, function() {
 test("bind()only on real nodes", 1, function() {
 
 	// using contents will get comments regular, text, and comment nodes
-	Simples("#nonnodes").get("childNodes").bind("tester", function () {
+	Simples("#nonnodes").traverse("childNodes").bind("tester", function () {
 		equals( this.nodeType, 1, "Check node,textnode,comment bind just does real nodes" );
 	}).trigger("tester");
 });
