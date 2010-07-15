@@ -207,9 +207,7 @@ test("unbind(type)", 0, function() {
 		 .trigger("error1").trigger("error2");
 });
 
-test("unbind(eventObject)", function() {
-	expect(4);
-	
+test("unbind(eventObject)", 4, function() {
 	var $elem = Simples("#firstp"),
 		num;
 
@@ -225,7 +223,7 @@ test("unbind(eventObject)", function() {
 			num += 1;
 		})
 		.bind('foo', function(e){ 
-			$elem.unbind( e.type, e.handler );
+			$elem.unbind( e );
 			num += 2;
 		})
 		// Neither this one
@@ -243,9 +241,7 @@ test("unbind(eventObject)", function() {
 	assert( 0 );
 });
 
-test("trigger() bubbling", function() {
-	expect(14);
-
+test("trigger() bubbling", 14, function() {
 	var doc = 0, html = 0, body = 0, main = 0, ap = 0;
 
 	Simples(document).bind("click", function(e){ if ( e.target !== document) { doc++; } });

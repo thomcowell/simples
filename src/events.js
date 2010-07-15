@@ -143,6 +143,12 @@ var SimplesEvents = {
 		}
 
 		var data = readData( elem, 'events' ) || {};
+		
+		if( type && type.type ){
+			callback = type.originalFn;
+			type = type.type;
+		}
+		
 		if( type === undefined ){
 			for( type in data ){
 				data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
@@ -186,7 +192,7 @@ var SimplesEvents = {
 			} 
 		}		
 	},
-	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
+	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement originalFn keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	fix : function( event ){
 		 if( event[ accessID ] ){
 			return event;
@@ -248,7 +254,7 @@ var SimplesEvents = {
 	    return function( event ) {
 
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
-			event.handler = callback;
+			event.originalFn = callback;
 
 	        if ( callback.apply( this, arguments ) === false ) { 
 				event.preventDefault();
