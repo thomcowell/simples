@@ -254,9 +254,11 @@ var SimplesEvents = {
 	    return function( event ) {
 
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
-			event.originalFn = callback;
+			event.originalFn = callback; 
+			
+			event.result = callback.apply( this, arguments )
 
-	        if ( callback.apply( this, arguments ) === false ) { 
+	        if ( event.result === false ) { 
 				event.preventDefault();
 				event.stopPropagation();
 			}

@@ -273,8 +273,7 @@ test("trigger() bubbling", 14, function() {
 	equals( ap, 1, "ap bubble" );
 });
 
-test("trigger(type, [data], [fn])", function() {
-	expect(14);
+test("trigger(type, [data], [fn])", 8, function() {
 
 	var handler = function(event, a, b, c) {
 		equals( event.type, "click", "check passed data" );
@@ -284,45 +283,40 @@ test("trigger(type, [data], [fn])", function() {
 
 	var $elem = Simples("#firstp");
 
-	// Simulate a "native" click
-	$elem[0].click = function(){
-		ok( true, "Native call was triggered" );
-	};
-
 	// Triggers handlrs and native
 	// Trigger 5
 	$elem.bind("click", handler).trigger("click", [1, "2", "abc"]);
 
 	// Simulate a "native" click
 	$elem[0].onclick = function(){
-		ok( false, "Native call was triggered" );
+		ok( true, "Native call was triggered" );
 	};
 
 	// Trigger only the handlers (no native)
 	// Triggers 5
-	equals( $elem.trigger("click", [1, "2", "abc"]), "test", "Verify handler response" );
+	$elem.trigger("click", [1, "2", "abc"]);
 
 	var pass = true;
-	try {
-		Simples('#form input:first').hide().trigger('focus');
-	} catch(e) {
+	try { 
+		Simples('#form input').eq(0).hide().trigger('focus');
+	} catch(e) { 
 		pass = false;
 	}
 	ok( pass, "Trigger focus on hidden element" );
 	
 	pass = true;
 	try {
-		Simples('table:first').bind('test:test', function(){}).trigger('test:test');
+		Simples('table').eq(0).bind('test:test', function(){}).trigger('test:test');
 	} catch (e) {
 		pass = false;
 	}
 	ok( pass, "Trigger on a table with a colon in the even type, see #3533" );
 
-	var form = Simples("<form action=''></form>");
+	var form = Simples("<form/>").attr('action','');
 	Simples('body').append( form );
 
 	// Make sure it can be prevented locally
-	form.submit(function(){
+	form.bind("submit", function(){
 		ok( true, "Local bind still works." );
 		return false;
 	});
@@ -332,7 +326,7 @@ test("trigger(type, [data], [fn])", function() {
 
 	form.unbind("submit");
 
-	Simples(document).submit(function(){
+	Simples(document).bind("submit",function(){
 		ok( true, "Make sure bubble works up to document." );
 		return false;
 	});
@@ -345,13 +339,14 @@ test("trigger(type, [data], [fn])", function() {
 	form.remove();
 });
 
-test("trigger(eventObject, [data], [fn])", function() {
-	expect(25);
+test("trigger(eventObject, [data], [fn])", 15, function() {
 	
-	var $parent = Simples('<div id="par" />').hide().appendTo('body'),
-		$child = Simples('<p id="child">foo</p>').appendTo( $parent );
+	var $parent = Simples('<div>').attr('id', 'par').hide(),
+		$child = Simples('<p>').attr('id','child').html('foo');
+		Simples('body').append( $parent );
+		$parent.append( $child );
 	
-	var event = Simples.Event("noNew");	
+	var event = SimplesEvent("noNew");	
 	ok( event != window, "Instantiate Simples.Event without the 'new' keyword" );
 	equals( event.type, "noNew", "Verify its type" );
 	
@@ -377,13 +372,7 @@ test("trigger(eventObject, [data], [fn])", function() {
 		equals( e.secret, 'boo!', 'Verify event object\'s custom attribute when passed passing an event object' );
 	});
 	
-	// test with an event object
-	event = new Simples.Event("foo");
-	event.secret = 'boo!';
-	$child.trigger(event);
-	
-	// test with a literal object
-	$child.trigger({type:'foo', secret:'boo!'});
+	$child.trigger("foo");
 	
 	$parent.unbind();
 
@@ -393,11 +382,10 @@ test("trigger(eventObject, [data], [fn])", function() {
 	
 	$parent.bind('foo', error );
 	
-	$child.bind('foo',function(e, a, b, c ){
-		equals( arguments.length, 4, "Check arguments length");
-		equals( a, 1, "Check first custom argument");
-		equals( b, 2, "Check second custom argument");
-		equals( c, 3, "Check third custom argument");
+	var event;
+	$child.bind('foo',function( e ){
+		equals( arguments.length, 1, "Check arguments length");
+		same( e.data, [1,2,3], "Check event.data");
 		
 		equals( e.isDefaultPrevented(), false, "Verify isDefaultPrevented" );
 		equals( e.isPropagationStopped(), false, "Verify isPropagationStopped" );
@@ -405,7 +393,7 @@ test("trigger(eventObject, [data], [fn])", function() {
 		
 		// Skips both errors
 		e.stopImmediatePropagation();
-		
+		event = e;
 		return "result";
 	});
 	
@@ -413,12 +401,11 @@ test("trigger(eventObject, [data], [fn])", function() {
 	// in which event handlers are iterated.
 	//$child.bind('foo', error );
 	
-	event = new Simples.Event("foo");
-	$child.trigger( event, [1,2,3] ).unbind();
-	equals( event.result, "result", "Check event.result attribute");
+	$child.trigger( "foo", [1,2,3] ).unbind();
 	
+	equals( event.result, "result", "Check event.result attribute");
 	// Will error if it bubbles
-	$child.triggerHandler('foo');
+	$child.trigger('foo');
 	
 	$child.unbind();
 	$parent.unbind().remove();
