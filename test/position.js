@@ -36,8 +36,7 @@ function testoffset(name, fn) {
 	}
 }
 
-testoffset("absolute"/* in iframe */, function($, iframe) {
-	expect(4);
+testoffset("absolute"/* in iframe */, 4, function($, iframe) {
 	
 	var doc = iframe.document, tests;
 	
@@ -76,8 +75,7 @@ testoffset("absolute"/* in iframe */, function($, iframe) {
 	forceScroll.remove();
 });
 
-testoffset("absolute", function( Simples ) {
-	expect(82);
+testoffset("absolute", 82, function( Simples ) {
 	
 	// get offset tests
 	var tests = [
@@ -87,16 +85,10 @@ testoffset("absolute", function( Simples ) {
 		{ id: '#absolute-2',     top: 20, left: 20 }
 	];
 	
-	for( var i=0,l=tests.length;i<l;i++)(function(i){
+	for( var i=0,l=tests.length;i<l;i++ ) (function(i){
      	equals( Simples( tests[i].id ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
 		equals( Simples( tests[i].id ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
 	})(i);
-	
-	Simples.each( tests, function() {
-		equals( Simples( this.id ).offset().top,  this.top,  "Simples('" + this.id + "').offset().top" );
-		equals( Simples( this.id ).offset().left, this.left, "Simples('" + this.id + "').offset().left" );
-	});
-	
 	
 	// get position
 	tests = [
@@ -257,9 +249,8 @@ testoffset("static", function( Simples ) {
 	})(i);
 });
 
-testoffset("fixed", function( Simples ) {
-	expect(16);
-	
+testoffset("fixed", 16, function( Simples ) {
+
 	Simples.offset.init();
 	
 	var tests = [
@@ -306,8 +297,7 @@ testoffset("fixed", function( Simples ) {
 	})(i);
 });
 
-testoffset("table", function( Simples ) {
-	expect(4);
+testoffset("table", 4, function( Simples ) {
 	
 	equals( Simples('#table-1').offset().top, 6, "Simples('#table-1').offset().top" );
 	equals( Simples('#table-1').offset().left, 6, "Simples('#table-1').offset().left" );
@@ -316,8 +306,7 @@ testoffset("table", function( Simples ) {
 	equals( Simples('#th-1').offset().left, 10, "Simples('#th-1').offset().left" );
 });
 
-testoffset("scroll", function( Simples, win ) {
-	expect(16);
+testoffset("scroll", 16, function( Simples, win ) {
 	
 	var ie = Simples.browser.msie && parseInt( Simples.browser.version, 10 ) < 8;
 	
@@ -365,22 +354,20 @@ testoffset("scroll", function( Simples, win ) {
 	equals( Simples(document).scrollLeft(), 0, "Simples(window).scrollLeft() other document" );
 });
 
-testoffset("body", function( Simples ) {
-	expect(2);
+testoffset("body", 2, function( Simples ) {
 	
 	equals( Simples('body').offset().top, 1, "Simples('#body').offset().top" );
 	equals( Simples('body').offset().left, 1, "Simples('#body').offset().left" );
 });
 
-test("Chaining offset(coords) returns Simples object", function() {
-	expect(2);
+test("Chaining offset(coords) returns Simples object", 2, function() {
+
 	var coords = { top:  1, left:  1 };
 	equals( Simples("#absolute-1").offset(coords).selector, "#absolute-1", "offset(coords) returns Simples object" );
 	equals( Simples("#non-existent").offset(coords).selector, "#non-existent", "offset(coords) with empty Simples set returns Simples object" );
 });
 
-test("offsetParent", function(){
-	expect(11);
+test("offsetParent", 11, function(){
 
 	var body = Simples("body").offsetParent();
 	equals( body.length, 1, "Only one offsetParent found." );

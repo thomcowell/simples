@@ -120,15 +120,23 @@ var SimplesEvents = {
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
 		}
-		
-		if ( callback === false ) {
+
+		if( type && type.type ){
+			callback = type.originalFn;
+			type = type.type;
+		} else if ( callback === false ) {
 			callback = returnFalse;
 		}
-
+		   
 		var data = readData( elem, 'events' ) || {};
-		var evt = data[ type ] || {};
-		if( callback === undefined ){
-			delete data[ type ];
+		
+		if( type === undefined ){
+			for( type in data ){
+				data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
+				if( data[ type ].length === 0 ){
+					delete data[ type ];
+				}
+			}
 		} else {
          	for( var i=0,l=evt.length;i<l;i++ ){
 
