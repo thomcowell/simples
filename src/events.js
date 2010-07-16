@@ -137,17 +137,15 @@ var SimplesEvents = {
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
 		}
-		
-		if ( callback === false ) {
-			callback = returnFalse;
-		}
 
-		var data = readData( elem, 'events' ) || {};
-		
 		if( type && type.type ){
 			callback = type.originalFn;
 			type = type.type;
+		} else if ( callback === false ) {
+			callback = returnFalse;
 		}
+		   
+		var data = readData( elem, 'events' ) || {};
 		
 		if( type === undefined ){
 			for( type in data ){
