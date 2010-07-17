@@ -7,12 +7,12 @@ var accessID = 'simples'+ new Date().getTime(),
 		"applet": true
 	};
 	
-function notNoData( elem ){
-	return !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
+function canDoData( elem ){
+	return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 }
 
 function addData( elem, key, value ){
-	if ( elem.nodeName && notNoData( elem ) ) {
+	if ( canDoData( elem ) ) {
 		if( !elem[ accessID ] ){
 			elem[ accessID ] = elem[ accessID ] || {};
 		}
@@ -21,7 +21,7 @@ function addData( elem, key, value ){
 }
 
 function readData( elem, key ){
-	if ( elem.nodeName && notNoData( elem ) ) {
+	if ( canDoData( elem ) ) {
 		if( elem[ accessID ] ){
 			return elem[ accessID ][ key ];
 		}
@@ -30,7 +30,7 @@ function readData( elem, key ){
 }   
 
 function removeData( elem, key ){
-	if ( elem.nodeName && notNoData( elem ) ) {
+	if ( canDoData( elem ) ) {
 		if( elem[ accessID ] && elem[ accessID ][ key ] ){
 			delete elem[ accessID ][ key ];
 		}
@@ -39,8 +39,9 @@ function removeData( elem, key ){
 
 function cleanData( elem, andSelf ){ 
 	// Remove element nodes and prevent memory leaks   
-	var elems = slice.call( elem.getElementsByTagName("*") );
-	if( notNoData( elem ) && andSelf !== false ){
+	var canClean = canDoData( elem );
+	var elems = canClean ? slice.call( elem.getElementsByTagName("*") ) : [];
+	if( canClean && andSelf !== false ){
 		elems.push( elem );
 	}	
 	var i=elems.length;

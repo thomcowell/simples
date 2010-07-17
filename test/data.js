@@ -5,12 +5,12 @@ test("noData", 6, function() {
 	var object = document.createElement('object');
 	var applet = document.createElement('applet');
 	
-	ok( notNoData(div), "a div should return true");          
-	ok( notNoData( document ), "a document should return true");	    
-	ok( !notNoData( window ), "a window should return false");   
-	ok( !notNoData( embed ), "a embed should return false");
-	ok( !notNoData( object ), "a object should return false");
-	ok( !notNoData( applet ), "a applet should return false");	
+	ok( canDoData(div), "a div should return true");          
+	ok( canDoData( document ), "a document should return true");	    
+	ok( !canDoData( window ), "a window should return false");   
+	ok( !canDoData( embed ), "a embed should return false");
+	ok( !canDoData( object ), "a object should return false");
+	ok( !canDoData( applet ), "a applet should return false");	
 });
 
 module("Data: addData");

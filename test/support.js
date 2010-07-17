@@ -17,7 +17,7 @@ test("test that broswer values are returned", 3, function() {
 	ok( parseFloat( Simples.browser.version ) > 0, "Is a number" );
 	var browsers = ["mozilla","webkit","msie","opera"];
 	for(var i=0,l=browsers.length;i<l;i++){
-		if( Simples.browser.hasOwnProperty( browsers[i] ) ){
+		if( hasOwn.call( Simples.browser, browsers[i] ) ){
 			ok( Simples.browser[ browsers[i] ], "Should have a browser type identified.")
 		}
 	}

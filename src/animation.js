@@ -128,7 +128,7 @@ Simples.merge(Simples, {
 		FRAME_RATE = opts.frameRate || FRAME_RATE;
 		if( opts.tweens ){
 			for( var key in opts.tweens ){
-				if( !hasOwnProperty.call( TWEENS, key ) ){
+				if( !hasOwn.call( TWEENS, key ) ){
 					TWEENS[ key ] = opts.tweens[ key ];
 				}
 			}

@@ -65,7 +65,7 @@ test("bind(), no data", 1, function() {
 	Simples("#firstp").bind("click", handler).trigger("click").unbind('click');
 });
 
-test("bind(), iframes", 169, function() {
+test("bind(), iframes", 170, function() {
 	// events don't work with iframes, see #939 - this test fails in IE because of contentDocument
 	var doc = Simples("#loadediframe").traverse(function(){
 		return this.contentDocument || this.contentWindow.document;
@@ -339,7 +339,7 @@ test("trigger(type, [data], [fn])", 8, function() {
 	form.remove();
 });
 
-test("trigger(eventObject, [data], [fn])", 15, function() {
+test("trigger(eventObject, [data], [fn])", 14, function() {
 	
 	var $parent = Simples('<div>').attr('id', 'par').hide(),
 		$child = Simples('<p>').attr('id','child').html('foo');
@@ -402,8 +402,7 @@ test("trigger(eventObject, [data], [fn])", 15, function() {
 	//$child.bind('foo', error );
 	
 	$child.trigger( "foo", [1,2,3] ).unbind();
-	
-	equals( event.result, "result", "Check event.result attribute");
+
 	// Will error if it bubbles
 	$child.trigger('foo');
 	

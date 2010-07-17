@@ -85,7 +85,7 @@ var SimplesEvents = {
 			elem = window;
 		}
 
-		if( isFunction( callback ) && notNoData( elem ) ){ 
+		if( isFunction( callback ) && canDoData( elem ) ){ 
 			
 			var data = readData( elem, 'events' ) || {};
 			
@@ -168,7 +168,7 @@ var SimplesEvents = {
 			return;
 		}
 		
-		if ( !(elem && elem.nodeName && !notNoData( elem ) ) ) {
+		if ( canDoData( elem ) ) {
 			// Use browser event generators
 			var e;
 			if( elem.dispatchEvent ){
@@ -253,10 +253,8 @@ var SimplesEvents = {
 
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
 			event.originalFn = callback; 
-			
-			event.result = callback.apply( this, arguments )
 
-	        if ( event.result === false ) { 
+	        if ( callback.apply( this, arguments ) === false ) { 
 				event.preventDefault();
 				event.stopPropagation();
 			}
