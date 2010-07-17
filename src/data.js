@@ -37,7 +37,7 @@ function removeData( elem, key ){
 	}	
 } 
 
-function cleanData( elem ){ 
+function cleanData( elem, andSelf ){ 
 	// Remove element nodes and prevent memory leaks   
 	var canClean = canDoData( elem );
 	var elems = canClean ? slice.call( elem.getElementsByTagName("*") ) : [];

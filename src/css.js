@@ -280,12 +280,18 @@ Simples.extend({
 	},
 	show : function(){
 		for( var i=0,l=this.length;i<l;i++){
-			this[i].style.display = "block";
+			if ( this[i].style ) {
+				this[i].style.display = "block";
+			}
 		}
+		return this;
 	},
 	hide : function(){
 		for( var i=0,l=this.length;i<l;i++){
-			this[i].style.display = "none";
+			if ( this[i].style ) {
+				this[i].style.display = "none";
+			}
 		}
+		return this;
 	}
 });
