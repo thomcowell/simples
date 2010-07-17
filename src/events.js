@@ -85,7 +85,8 @@ var SimplesEvents = {
 			elem = window;
 		}
 
-		if( isFunction( callback ) && notNoData( elem ) ){ 
+		if( isFunction( callback ) && canDoData( elem ) ){ 
+
 			var data = readData( elem, 'events' ) || {};
 			
 			if( !callback.guid ){
@@ -149,15 +150,26 @@ var SimplesEvents = {
 			}
 		}
 		
-		// addData( elem, 'events', data );
-		
-		// check whether it is a W3C browser or not
-		if ( this.removeEventListener ) {
-			// remove event listener and unregister element event
-			this.removeEventListener( type, original, false );
-		} else if ( this.detachEvent ) {                                             
-			
-			this.detachEvent( "on" + type, original );
+		if ( canDoData( elem ) ) {
+			// Use browser event generators
+			var e;
+			if( elem.dispatchEvent ){
+				// Build Event
+				e = document.createEvent("HTMLEvents");
+				e.initEvent(type, true, false);
+				if (data){
+					e.data = data;              
+				}
+				// Dispatch the event to the ELEMENT
+				elem.dispatchEvent(e);
+			} else if( elem.fireEvent ) {
+				if (data){
+					e = document.createEventObject();
+					e.data = data;
+					e.eventType = "on"+type;
+				}
+				elem.fireEvent( "on"+type, e );
+			} 
 		}
 	},
 	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
@@ -221,7 +233,12 @@ var SimplesEvents = {
 		
 	    return function( event ) {
 			event = arguments[0] = SimplesEvents.fix( event || window.event );
-	        callback.apply( this, arguments );
+			event.originalFn = callback; 
+
+	        if ( callback.apply( this, arguments ) === false ) { 
+				event.preventDefault();
+				event.stopPropagation();
+			}
 	    };
 	}
 };

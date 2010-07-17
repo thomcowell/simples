@@ -1,9 +1,10 @@
 // Save a reference to some core methods
 var toString = Object.prototype.toString,
-	hasOwnProperty = Object.prototype.hasOwnProperty,
+	hasOwn = Object.prototype.hasOwnProperty,
 	push = Array.prototype.push,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf,
+	trim = String.prototype.trim,
 // references to class outputs	
 	ArrayClass = '[object Array]',
 	ObjectClass = '[object Object]',
@@ -57,10 +58,9 @@ function Simples( selector, context ) {
 		this.selector = result.selector;
 
 		merge.call( this, result.elems );
-
 	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
-		merge.call( this, slice.call(selector, 0) );		
+		merge.call( this, slice.call(selector, 0) );
     } else if( objClass === ArrayClass ){
 
 		for(var d=0,e=selector.length;d<e;d++){
@@ -110,13 +110,13 @@ function merge( first /* obj1, obj2..... */) {
 		// if object apply directly to target with same keys
 		if( isObject( arguments[i] ) ){
 			for (var key in arguments[i]) {
-                if ( hasOwnProperty.call( arguments[i], key ) ) {
+                if ( hasOwn.call( arguments[i], key ) ) {
                     target[key] = arguments[i][key];
                 }
             }
 		} else if( isArray( arguments[i] ) ){
          	// if array apply directly to target with numerical keys
-			if ( !hasOwnProperty.call( target, 'length' ) ){ target.length = 0; }
+			if ( !hasOwn.call( target, 'length' ) ){ target.length = 0; }
 			for( var a=0,b=arguments[i].length;a<b;a++){
 				target[ target.length ] = arguments[i][a]; 
 				target.length++;
@@ -145,7 +145,7 @@ function extend(subClass, superClass, addMethods) {
 	} else if( arguments.length === 2 ){
 		addMethods = arguments[1];      
 	// if no addMethods are specified no superClass structure is created, to ensure superClass structure pass in an empty object
-	} else if( arguments.length === 3 ) {                      
+	} else if( arguments.length === 3 ) {
 		// Standard extend behaviour expected
 		var F = function() {};
 
@@ -163,7 +163,7 @@ function extend(subClass, superClass, addMethods) {
 	// Detect whether addMethods is an object to extend onto subClass
 	if( isObject( addMethods ) ){
 		for (var key in addMethods) {
-	        if ( hasOwnProperty.call( addMethods, key ) ) {
+	        if ( hasOwn.call( addMethods, key ) ) {
 	            subClass.prototype[key] = addMethods[key];
 	        }
 	    }
@@ -256,6 +256,20 @@ merge.call( Simples, {
 		return function(){
 			return func.apply( context, arguments );
 		};
+	},
+	// Use native String.trim function wherever possible
+	trim: trim ?
+	function( text ) {
+		return text == null ?
+			"" :
+			trim.call( text );
+	} :
+
+	// Otherwise use our own trimming functionality
+	function( text ) {
+		return text == null ?
+			"" :
+			text.toString().replace( trimLeft, "" ).replace( trimRight, "" );
 	},
 	noop : function(){}
 });

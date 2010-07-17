@@ -139,9 +139,7 @@ testoffset("absolute", 82, function( Simples ) {
 	})(i);
 });
 
-testoffset("relative", function( Simples ) {
-	expect(36);
-	
+testoffset("relative", 36, function( Simples ) {
 	// IE is collapsing the top margin of 1px
 	var ie = Simples.browser.msie && parseInt( Simples.browser.version, 10 ) < 8;
 	
@@ -191,9 +189,7 @@ testoffset("relative", function( Simples ) {
 	})(i);
 });
 
-testoffset("static", function( Simples ) {
-	expect(48);
-	
+testoffset("static", 48, function( Simples ) {
 	// IE is collapsing the top margin of 1px
 	var ie = Simples.browser.msie && parseInt( Simples.browser.version, 10 ) < 8;
 	
