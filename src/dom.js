@@ -1,5 +1,6 @@
 var STRIP_TAB_NEW_LINE = /[\n\t]/g,
 	LAST_SPACE_OPTIONAL = /\s?$/,
+	FIRST_SPACE = /^\s+/,
 	FIRST_LAST_SPACES = /^\s?|\s?$/g;
 
 Simples.extend({
@@ -171,7 +172,7 @@ Simples.extend({
 	hasClass : function( className ){
 		className = " " + className + " ";
 		for ( var i = 0, l = this.length; i < l; i++ ) {
-			if ( (" " + this[i].className + " ").replace(STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1 ) {
+			if ( (" " + this[i].className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1 ) {
 				return true;
 			}
 		}
@@ -180,17 +181,15 @@ Simples.extend({
 	addClass : function( className ){
 		this.each(function(){
 			if( !Simples(this).hasClass( className ) ){
-				this.className = this.className.replace( LAST_SPACE_OPTIONAL, '') + ' '+className;
+				this.className = ( this.className.replace( STRIP_TAB_NEW_LINE, " ").replace( LAST_SPACE_OPTIONAL, '') + ' '+className ).replace( FIRST_SPACE,'');
 			} 
 		});
 		return this;
 	},
 	removeClass : function( className ){
 		this.each(function(){
-			if( Simples(this).hasClass( className ) ){   
-				className = ' ' + this.className.replace( STRIP_TAB_NEW_LINE, '' ) +' '.replace( ' '+className+' ', ' ' );
-				this.className = className.replace( FIRST_LAST_SPACES, '' );
-			}  
+			className = (' ' + this.className.replace( STRIP_TAB_NEW_LINE, ' ' ) +' ').replace( ' '+className+' ', ' ' );
+			this.className = className.replace( FIRST_LAST_SPACES, '' );
 		});
 		return this;		
 	},
