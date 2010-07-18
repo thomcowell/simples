@@ -2,9 +2,9 @@ module("Position");
 
 var supportsScroll = false;
 
-function testoffset(name, fn) {
+function testoffset(name, expects, fn) {
 	
-	test(name, function() {
+	test(name, expects, function() {
 		// pause execution for now
 		stop();
 		
