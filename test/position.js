@@ -58,19 +58,19 @@ testoffset("absolute"/* in iframe */, 4, function($, iframe) {
 	tests = [
 		{ id: '#absolute-1', top: 1, left: 1 }
 	];
-    for( var i=0,l=tests.length;i<l;i++)(function(i){
-     	equals( Simples( tests[i].id, doc ).offset().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
-		equals( Simples( tests[i].id, doc ).offset().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
-	})(i);
+    for( var i=0,l=tests.length;i<l;i++)(function(that){
+     	equals( Simples( that.id, doc ).offset().top,  that.top,  "Simples('" + that.id + "').offset().top" );
+		equals( Simples( that.id, doc ).offset().left, that.left, "Simples('" + that.id + "').offset().left" );
+	})(tests[i]);
 
 	// get position
 	tests = [
 		{ id: '#absolute-1', top: 0, left: 0 }
 	];
-	for( var i=0,l=tests.length;i<l;i++)(function(i){
-     	equals( Simples( tests[i].id, doc ).position().top,  tests[i].top,  "Simples('" + tests[i].id + "').offset().top" );
-		equals( Simples( tests[i].id, doc ).position().left, tests[i].left, "Simples('" + tests[i].id + "').offset().left" );
-	})(i);
+	for( var i=0,l=tests.length;i<l;i++)(function(that){
+     	equals( Simples( that.id, doc ).position().top,  that.top,  "Simples('" + that.id + "').offset().top" );
+		equals( Simples( that.id, doc ).position().left, that.left, "Simples('" + that.id + "').offset().left" );
+	})(tests[i]);
 	
 	forceScroll.remove();
 });

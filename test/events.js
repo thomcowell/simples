@@ -65,7 +65,7 @@ test("bind(), no data", 1, function() {
 	Simples("#firstp").bind("click", handler).trigger("click").unbind('click');
 });
 
-test("bind(), iframes", 170, function() {
+test("bind(), iframes", function() {
 	// events don't work with iframes, see #939 - this test fails in IE because of contentDocument
 	var doc = Simples("#loadediframe").traverse(function(){
 		return this.contentDocument || this.contentWindow.document;
@@ -112,8 +112,6 @@ test("bind(), with same function", 2, function() {
 });
 
 test("bind(), make sure order is maintained", 1, function() {
-	expect(1);
-
 	var elem = Simples("#firstp"), log = [], check = [];
 
 	for ( var i = 0; i < 100; i++ ) (function(i){
@@ -131,9 +129,7 @@ test("bind(), make sure order is maintained", 1, function() {
 	elem.unbind("click");
 });
 
-test("bind(name, false), unbind(name, false)", function() {
-	expect(3);
-
+test("bind(name, false), unbind(name, false)", 3, function() {
 	var main = 0;
 	Simples("#main").bind("click", function(e){ main++; });
 	Simples("#ap").trigger("click");
@@ -150,9 +146,7 @@ test("bind(name, false), unbind(name, false)", function() {
 	equals( main, 1, "Verify that the trigger happened correctly." );
 });
 
-test("bind()/trigger()/unbind() on plain object", function() {
-	expect( 1 );
-
+test("bind()/trigger()/unbind() on plain object", 1, function() {
 	var obj = {};
 
 	// Make sure it doesn't complain when no events are found
