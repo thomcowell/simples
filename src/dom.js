@@ -188,53 +188,57 @@ Simples.extend({
 		return this;		
 	},
 	attr : function(name, value){
-		var special = SPECIAL_URL.test( name ),
-			nameClass = toString.call( name );
+		var nameClass = toString.call( name );
 			
 		if( nameClass === ObjectClass ){
 			for( var key in name ){
 				this.attr( key, name[key] );
 			}
-		} else if( nameClass === StringClass && value ){
-			this.each(function(){                                  
-				if ( this.nodeType === 3 || this.nodeType === 8 || ( name === "type" && IMMUTABLE_ATTR.test( this.nodeName ) ) ) {
-					return undefined;
-				}
-				if ( this.nodeType === 1 && !special && name in this ) { 
-					this[ name ] = value;
-				} else if( name === "style" && !Simples.support.style ){
-					elem.style.cssText = "" + value;
+		} else if( nameClass === StringClass ){
+			if( value === undefined ){                
+
+				var elem = this[0];
+				if( !elem ){ return null; }     
+
+				if ( elem.nodeName.toUpperCase() === "FORM" && elem.getAttributeNode(name) ) {
+					// browsers index elements by id/name on forms, give priority to attributes.				
+					return elem.getAttributeNode( name ).nodeValue;
+				} else if ( name === "style" && !Simples.support.style ){
+					// get style correctly
+					return elem.style.cssText;				
+				} else if( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ){
+					// These attributes don't require special treatment
+					return elem[ name ];
 				} else {
-					this.setAttribute(name, ""+value);
+					// it must be this
+					return elem.getAttribute( name );
 				}
-			});
-		} else if( nameClass === StringClass && value === undefined ){                
-			var elem;
-			for(var i=0,l=this.length;i<l;i++){
-				if ( this.nodeType !== 3 && this.nodeType !== 8 ) {
-					elem = this[i];
-					break;
-				}
-			}     
-			if( !elem ){ return null; }     
-			// browsers index elements by id/name on forms, give priority to attributes.
-			if ( elem.nodeName.toUpperCase() === "FORM" && elem.getAttributeNode(name) ) {
-				return elem.getAttributeNode( name ).nodeValue;
-			} else if( elem.nodeType === 1 && !special && name in elem ){
-				// These attributes require special treatment				
-				return elem[ name ]; 
-			} else if ( name === "style" && !Simples.support.style ){
-				return elem.style.cssText;
-			} else {
-				return elem.getAttribute( name );
+				return null;
+			} else if( value === null){
+				this.each(function(){
+					if ( this.nodeType === 1 ) {
+						this.removeAttribute( name );
+					}				
+				});
+			} else { 
+				if( typeof value == ( 'function' || 'object' ) ){ return this; }
+				this.each(function(){                                  
+					if ( this.nodeType === 3 || this.nodeType === 8 || ( name === "type" && IMMUTABLE_ATTR.test( this.nodeName ) ) ) {
+						return undefined;
+					}
+
+					if( name === "style" && !Simples.support.style ){
+						// get style correctly
+						elem.style.cssText = "" + value;
+					} else if ( this.nodeType === 1 && !SPECIAL_URL.test( name ) && name in this ) { 
+						// These attributes don't require special treatment 
+						this[ name ] = ""+value;
+					} else { 
+						// it must be this
+						this.setAttribute(name, ""+value);
+					}
+				});			
 			}
-			return null;
-		} else if( nameClass === StringClass && value === null){
-			this.each(function(){
-				if ( this.nodeType === 1 ) {
-					this.removeAttribute( name );
-				}				
-			});
 		}
 		return this;
 	},
