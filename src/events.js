@@ -85,7 +85,7 @@ var SimplesEvents = {
 			elem = window;
 		}
 
-		if( isFunction( callback ) && canDoData( elem ) ){ 
+		if( toString.call( callback ) === FunctionClass && canDoData( elem ) ){ 
 			
 			var data = readData( elem, 'events' ) || {};
 			
@@ -174,7 +174,7 @@ var SimplesEvents = {
 			if( elem.dispatchEvent ){
 				// Build Event
 				e = document.createEvent("HTMLEvents");
-				e.initEvent(type, true, false);
+				e.initEvent(type, true, true);
 				if (data){
 					e.data = data;              
 				}
@@ -264,7 +264,7 @@ var SimplesEvents = {
 
 Simples.extend({
 	bind : function( type, callback ){
-		if( typeof type === "string" && ( isFunction( callback ) || callback === false ) ){
+		if( typeof type === "string" && ( toString.call( callback ) === FunctionClass || callback === false ) ){
 			// Loop over elements 
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment
