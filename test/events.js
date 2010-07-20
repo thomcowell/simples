@@ -267,9 +267,9 @@ test("trigger() bubbling", 14, function() {
 	equals( ap, 1, "ap bubble" );
 });
 
-test("trigger(type, [data], [fn])", 8, function() {
+test("trigger(type, [data], [fn])", 9, function() {
 
-	var handler = function(event, a, b, c) {
+	var handler = function(event) {
 		equals( event.type, "click", "check passed data" );
 		same( event.data, [ 1, "2", "abc"], "check passed data" );
 		return "test";
@@ -307,7 +307,7 @@ test("trigger(type, [data], [fn])", 8, function() {
 	ok( pass, "Trigger on a table with a colon in the even type, see #3533" );
 
 	var form = Simples("<form/>").attr('action','');
-	Simples('body').append( form );
+	Simples('body').html( "bottom", form[0] );
 
 	// Make sure it can be prevented locally
 	form.bind("submit", function(){
@@ -333,12 +333,12 @@ test("trigger(type, [data], [fn])", 8, function() {
 	form.remove();
 });
 
-test("trigger(eventObject, [data], [fn])", 14, function() {
+test("trigger(eventObject, [data], [fn])", 18, function() {
 	
 	var $parent = Simples('<div>').attr('id', 'par').hide(),
 		$child = Simples('<p>').attr('id','child').html('foo');
-		Simples('body').append( $parent );
-		$parent.append( $child );
+		Simples('body').html( "bottom", $parent[0] );
+		$parent.html( "bottom", $child[0] );
 	
 	var event = SimplesEvent("noNew");	
 	ok( event != window, "Instantiate Simples.Event without the 'new' keyword" );
@@ -363,20 +363,16 @@ test("trigger(eventObject, [data], [fn])", 14, function() {
 		equals( e.type, 'foo', 'Verify event type when passed passing an event object' );
 		equals( e.target.id, 'child', 'Verify event.target when passed passing an event object' );
 		equals( e.currentTarget.id, 'par', 'Verify event.target when passed passing an event object' );
-		equals( e.secret, 'boo!', 'Verify event object\'s custom attribute when passed passing an event object' );
 	});
 	
 	$child.trigger("foo");
 	
 	$parent.unbind();
 
-	function error(){
+	$parent.bind('foo', function(){
 		ok( false, "This assertion shouldn't be reached");
-	}
+	});
 	
-	$parent.bind('foo', error );
-	
-	var event;
 	$child.bind('foo',function( e ){
 		equals( arguments.length, 1, "Check arguments length");
 		same( e.data, [1,2,3], "Check event.data");
@@ -387,7 +383,6 @@ test("trigger(eventObject, [data], [fn])", 14, function() {
 		
 		// Skips both errors
 		e.stopImmediatePropagation();
-		event = e;
 		return "result";
 	});
 	

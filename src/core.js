@@ -61,7 +61,7 @@ function Simples( selector, context ) {
 		merge.call( this, result.elems );
 	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
-		merge.call( this, slice.call(selector, 0) );
+		merge.call( this, slice.call( selector, 0 ) );
     } else if( objClass === ArrayClass ){
 
 		for(var d=0,e=selector.length;d<e;d++){
@@ -76,19 +76,6 @@ function Simples( selector, context ) {
     return this;
 }
 
-function isArray( obj ){ 
-	if( !obj ){ return false; }
-	return ( toString.call( obj ) === ArrayClass );
-}
-
-function isObject( obj ){
-	if( !obj ){ return false; }
-	return ( toString.call( obj ) === ObjectClass );
-}
-
-function isFunction( obj ) {
-	return ( toString.call( obj ) === FunctionClass );
-}
 function isEmptyObject( obj ) {
 	for ( var name in obj ) { return false; }
 	return true;
@@ -103,19 +90,20 @@ function isEmptyObject( obj ) {
  **/
 function merge( first /* obj1, obj2..... */) { 
 	// if only 1 argument is passed in assume Simples is the target
-    var target = ( arguments.length === 1 && !( this === window || this === document ) ) ? this : isObject( first ) ? first : {};
+    var target = ( arguments.length === 1 && !( this === window || this === document ) ) ? this : toString.call( first ) === ObjectClass ? first : {};
 	// set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1 : 0;
 	// Loop over arguments
     for (var l=arguments.length; i<l; i++) {
 		// if object apply directly to target with same keys
-		if( isObject( arguments[i] ) ){
+		isWhat = toString.call( arguments[i] );
+		if( isWhat === ObjectClass ){
 			for (var key in arguments[i]) {
                 if ( hasOwn.call( arguments[i], key ) ) {
                     target[key] = arguments[i][key];
                 }
             }
-		} else if( isArray( arguments[i] ) ){
+		} else if( isWhat === ArrayClass ){
          	// if array apply directly to target with numerical keys
 			if ( !hasOwn.call( target, 'length' ) ){ target.length = 0; }
 			for( var a=0,b=arguments[i].length;a<b;a++){
@@ -162,7 +150,7 @@ function extend(subClass, superClass, addMethods) {
 	}
 
 	// Detect whether addMethods is an object to extend onto subClass
-	if( isObject( addMethods ) ){
+	if( toString.call( addMethods ) === ObjectClass ){
 		for (var key in addMethods) {
 	        if ( hasOwn.call( addMethods, key ) ) {
 	            subClass.prototype[key] = addMethods[key];
@@ -175,9 +163,6 @@ function extend(subClass, superClass, addMethods) {
 merge.call( Simples, {
 	extend : extend,
 	merge : merge,
-	isArray : isArray,
-	isObject : isObject,
-	isFunction: isFunction,
 	// Has the ready events already been bound?      	
 	isReady : false,       
 	// Handle when the DOM is ready
@@ -360,5 +345,10 @@ Simples.prototype = {
 		}
 
 		return this;
-	}
+	}, 
+	// For internal use only.
+	// Behaves like an Array's method, not like a Simples method.
+	push: push,
+	sort: [].sort,
+	splice: [].splice
 };      

@@ -1,9 +1,11 @@
 module("Core");
 
+function isClass( obj, ClassName ){
+	return toString.call( obj ) === ClassName;
+}
+
+// sense check to ensure no browser incorrectly returns bad values
 test("Class String representations", 8, function(){
-	function isClass( obj, ClassName ){
-		return toString.call( obj ) === ClassName;
-	}
 	ok( isClass({0:'red',1:'green'}, ObjectClass ), "Should be "+ObjectClass );
 	ok( isClass([1,2], ArrayClass ), "Should be "+ArrayClass );
 	ok( isClass("ham", StringClass ), "Should be "+StringClass );
@@ -15,38 +17,38 @@ test("Class String representations", 8, function(){
 	var isNLorHC = toString.call( document.getElementsByClassName('row') );
 	ok( isNLorHC === NodeListClass || isNLorHC === HTMLCollectionClass, "Should be "+NodeListClass+' or '+HTMLCollectionClass );
 });
-
+// sense check to ensure no browser incorrectly returns bad values
 test("isArray", 8, function() {
-	strictEqual( Simples.isArray(), false, 'empty arguments should return false' );
-	strictEqual( Simples.isArray({simples:true}), false, 'passing in an object should return false' );
-	strictEqual( Simples.isArray( null ), false, 'passing in null should return false' );
-	strictEqual( Simples.isArray( 1 ), false, 'passing in a number should return false' );
-	strictEqual( Simples.isArray( 'string' ), false, 'passing in a string should return false' );
-	strictEqual( Simples.isArray( true ), false, 'passing in a booelan should return false' );
-	strictEqual( Simples.isArray( function(){} ), false, 'passing in a function should return false' );
-	ok( Simples.isArray(['simples']), 'passing in an array should return true' );
+	ok( !isClass( undefined, ArrayClass ), "Should not be "+ArrayClass );
+	ok( !isClass({simples:true}, ArrayClass), 'passing in an object should return false' );
+	ok( !isClass( null, ArrayClass ), 'passing in null should return false' );
+	ok( !isClass( 1, ArrayClass ), 'passing in a number should return false' );
+	ok( !isClass( 'string', ArrayClass ), 'passing in a string should return false' );
+	ok( !isClass( true, ArrayClass ), 'passing in a booelan should return false' );
+	ok( !isClass( function(){}, ArrayClass ), 'passing in a function should return false' );
+	ok( isClass( ['simples'], ArrayClass ), 'passing in an array should return true' );
 }); 
-
+// sense check to ensure no browser incorrectly returns bad values
 test("isObject", 8, function() {
-	strictEqual( Simples.isObject(), false, 'empty arguments should return false' );
-	strictEqual( Simples.isObject(['simples']), false, 'passing in an array should return false' );
-	strictEqual( Simples.isObject( null ), false, 'passing in null should return false' );
-	strictEqual( Simples.isObject( 1 ), false, 'passing in a number should return false' );
-	strictEqual( Simples.isObject( 'string' ), false, 'passing in a string should return false' );
-	strictEqual( Simples.isObject( true ), false, 'passing in a booelan should return false' );
-	strictEqual( Simples.isObject( function(){} ), false, 'passing in a function should return false' );
-	ok( Simples.isObject({simples:true}), 'passing in an object should return true' );
+	ok( !isClass( undefined, ObjectClass ), 'empty arguments should return false' );
+	ok( !isClass(['simples'], ObjectClass), 'passing in an array should return false' );
+	ok( !isClass( null, ObjectClass ), 'passing in null should return false' );
+	ok( !isClass( 1, ObjectClass ), 'passing in a number should return false' );
+	ok( !isClass( 'string', ObjectClass ), 'passing in a string should return false' );
+	ok( !isClass( true, ObjectClass ), 'passing in a booelan should return false' );
+	ok( !isClass( function(){}, ObjectClass ), 'passing in a function should return false' );
+	ok( isClass({simples:true}, ObjectClass), 'passing in an object should return true' );
 });
-
+// sense check to ensure no browser incorrectly returns bad values
 test("isFunction", 8, function() {
-	strictEqual( Simples.isFunction(), false, 'empty arguments should return false' );
-	strictEqual( Simples.isFunction(['simples']), false, 'passing in an array should return false' );
-	strictEqual( Simples.isFunction( null ), false, 'passing in null should return false' );
-	strictEqual( Simples.isFunction( 1 ), false, 'passing in a number should return false' );
-	strictEqual( Simples.isFunction( 'string' ), false, 'passing in a string should return false' );
-	strictEqual( Simples.isFunction( true ), false, 'passing in a booelan should return false' );
-	strictEqual( Simples.isFunction({simples:true}), false, 'passing in an object should return true' );
-	ok( Simples.isFunction( function(){} ), 'passing in a function should return false' );
+	ok( !isClass( undefined, FunctionClass ), 'empty arguments should return false' );
+	ok( !isClass(['simples'], FunctionClass), 'passing in an array should return false' );
+	ok( !isClass( null, FunctionClass ), 'passing in null should return false' );
+	ok( !isClass( 1, FunctionClass ), 'passing in a number should return false' );
+	ok( !isClass( 'string', FunctionClass ), 'passing in a string should return false' );
+	ok( !isClass( true, FunctionClass ), 'passing in a booelan should return false' );
+	ok( !isClass({simples:true}, FunctionClass), 'passing in an object should return true' );
+	ok( isClass( function(){}, FunctionClass ), 'passing in a function should return false' );
 });
 
 test("noop is a empty function", 1, function() {
@@ -56,8 +58,8 @@ test("noop is a empty function", 1, function() {
 test("setContext", 4, function() {                                                                           
 	var object = {hammer:true};
 	var context = Simples.setContext( object, function(){ return this; });   
-	strictEqual( typeof context, 'function', 'should be an object');
-	strictEqual( toString.call( context() ), '[object Object]', 'should be an object');
+	same( typeof context, 'function', 'should be an object');
+	same( toString.call( context() ), '[object Object]', 'should be an object');
 	same( context(), object, 'should return object' );
 	ok( context().hammer, 'should return object' );
 });
