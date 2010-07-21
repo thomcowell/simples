@@ -8,7 +8,7 @@ function returnTrue() {
 
 function SimplesEvent( event ){
 	// Allow instantiation without the 'new' keyword
-	if ( !(this instanceof SimplesEvent) ) {
+	if ( !this.isDefaultPrevented ) {
 		return new SimplesEvent( event );
 	}
 

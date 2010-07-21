@@ -292,7 +292,7 @@ test("trigger(type, [data], [fn])", 9, function() {
 
 	var pass = true;
 	try { 
-		Simples('#form input').eq(0).hide().trigger('focus');
+		Simples('#form input').slice(0).hide().trigger('focus');
 	} catch(e) { 
 		pass = false;
 	}
@@ -300,7 +300,7 @@ test("trigger(type, [data], [fn])", 9, function() {
 	
 	pass = true;
 	try {
-		Simples('table').eq(0).bind('test:test', function(){}).trigger('test:test');
+		Simples('table').slice(0).bind('test:test', function(){}).trigger('test:test');
 	} catch (e) {
 		pass = false;
 	}
@@ -330,7 +330,7 @@ test("trigger(type, [data], [fn])", 9, function() {
 
 	Simples(document).unbind("submit");
 
-	form.remove();
+	form.html("remove");
 });
 
 test("trigger(eventObject, [data], [fn])", 18, function() {
@@ -396,14 +396,12 @@ test("trigger(eventObject, [data], [fn])", 18, function() {
 	$child.trigger('foo');
 	
 	$child.unbind();
-	$parent.unbind().remove();
+	$parent.unbind().html('remove');
 });
 
-test("Simples.Event.currentTarget", function(){
-	expect(2);
+test("Simples.Event.currentTarget", 2, function(){
 	
-	var counter = 0,
-		$elem = Simples('<button>a</button>').bind("click", function(e){
+	var counter = 0, $elem = Simples('<button>a</button>').bind("click", function(e){
 		equals( e.currentTarget, this, "Check currentTarget on "+(counter++?"native":"fake") +" event" );
 	});
 	

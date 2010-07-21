@@ -157,42 +157,82 @@ test("attr('tabindex', value)", function() {
 	equals(element.attr('tabindex'), -1, 'set negative tabindex');
 });
 
-test("html",function(){
-	ok( false, "tests not written" );
-});
+test("html('inner')",function(){
 
-test("clone",function(){
-	ok( false, "tests not written" );
-});
-
-test("wrap",function(){
-	ok( false, "tests not written" );
-});
-
-test("unwrap",function(){
-	ok( false, "tests not written" );
-});
-
-test("empty", 3, function(){
+	var div = Simples('<div/>');	
+	function testInner( location, html, endHTML ){ 
+		location = location || html;
+		div[0].innerHTML = "";
+		if( html ){	
+			div.html( location, html );
+		} else {
+			div.html( location );
+		}
+		equal( div[0].innerHTML, endHTML, "location:"+location +" and html:"+html );
+	}
 	
-	equals( Simples("#ap").empty().html().length, 0, "Check text is removed" );
-	equals( Simples("#ap").length, 4, "Check elements are not removed" );
+	testInner( "<p>No Location</p>", undefined, "<p>No Location</p>");
+	testInner( "inner", "<p>Location is 'inner'</p>", "<p>Location is 'inner'</p>");
+
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";
+		
+	testInner( p, undefined, "<p>DOM Element</p>");
+	testInner( "inner", p, "<p>DOM Element</p>");
+	
+	testInner( "inner", Simples('#test-area'), "<div id='test-area'></div>" );
+	testInner( Simples('#test-area'), undefined, "<div id='test-area'></div>" );	
+	
+});
+
+test("html('outer')",function(){
+	ok( false, "tests not written" );
+});
+
+test("html('top')",function(){
+	ok( false, "tests not written" );
+});
+             
+test("html('bottom')",function(){
+	ok( false, "tests not written" );
+});
+
+test("html('remove')",function(){
+	ok( false, "tests not written" );
+});
+   
+test("html('before')",function(){
+	ok( false, "tests not written" );
+});
+
+test("html('after')",function(){
+	ok( false, "tests not written" );
+});
+
+test("html('empty')", 3, function(){
+	
+	equals( Simples("#ap").html("empty").html().length, 0, "Check text is removed" );
+	equals( Simples("#ap").length, 1, "Check elements are not removed" );
 
 	// using contents will get comments regular, text, and comment nodes
 	var j = Simples("#nonnodes").traverse('childNodes');
-	j.empty();
+	j.html("empty");
 	equals( j.html(), "", "Check node,textnode,comment empty works" );	
 });
 
-test("remove",function(){
+test("html('wrap')",function(){
 	ok( false, "tests not written" );
-});  
+});             
+
+test("html('unwrap')",function(){
+	ok( false, "tests not written" );
+});
 
 test("fetch",function(){
 	ok( false, "tests not written" );
 });
 
-test("eq",function(){
+test("slice",function(){
 	ok( false, "tests not written" );
 });
 // prepend append => 'string' and nodes check order                                	

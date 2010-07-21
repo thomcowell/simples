@@ -1,6 +1,8 @@
 var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	LAST_SPACE_OPTIONAL = /\s?$/,
 	FIRST_SPACE = /^\s+/,
+	LOCATION_INSIDE = /top|bottom|inner/,
+	LOCATION_SINGLE = /remove|empty|unwrap/,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
 	FIRST_LAST_SPACES = /^\s?|\s?$/g;
@@ -57,109 +59,68 @@ function wrap(xhtml, tag) {
     return element;
 }
 
-function clean( el ){
-	cleanData( el ); 
-	Simples( el ).empty();
-}
-
 Simples.extend({
 	html : function( location, html ){
 		if (arguments.length === 0) {
-           return this[0].innerHTML;
-       }
+			return this[0] ? this[0].innerHTML : "";
+		}
 
-       if ( arguments.length === 1 && arguments[0] !== 'remove') {
-           html = location;
-           location = 'inner';
-       }
-
-       return this.each(function() {
-           var el = this, parent =this.parentNode, list, len, i = 0;
-           if (location == "inner") {  
-               if (typeof html === "string") {
-                   el.innerHTML = html;
-                   list = el.getElementsByTagName('SCRIPT');
-                   len = list.length;
-                   for (; i < len; i++) {
-                       eval(list[i].text);
-                   }
-               } else {
-                   el.innerHTML = '';
-                   el.appendChild( html && html.each ? slice.call( html, 0 ) : html);
-               }
-           } else if (location == "outer") {
-               parent.replaceChild( wrapHelper(html, el), el);
-           } else if (location == "top") {
-               el.insertBefore( wrapHelper(html, el), el.firstChild);
-           } else if (location == "bottom") {
-               el.insertBefore( wrapHelper(html, el), null);
-           } else if (location == "remove") {
-               parent.removeChild(el);
-           } else if (location == "before") {
-               parent.insertBefore( wrapHelper(html, parent), el);
-           } else if (location == "after") {
-               parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
-		   }
-        });
-		return this;
-	},
-	wrap : function( selector ) {		
-		var tag, domElem;
-		if( typeof selector === 'string' ){            
-			
-			tag = TAG.exec( selector || '<div/>' );
-			domElem = document.createElement( ( tag !== null && tag.length === 2 ) ? tag[1] : null );
-		} else if( selector instanceof Simples ){
-		   	domElem = selector[0];
-		} else if( selector && selector.nodeType === 1 ){
-			domElem = selector;
+		if ( arguments.length === 1 && !LOCATION_SINGLE.test( arguments[0] ) ) {
+		    html = location;
+		    location = 'inner';
 		}
 		
-		if( !domElem ){ return this; }
+		location = location || "", results = [];
 		
-		this.each(function(){
-			if( this.parentNode && this.nodeType && this.nodeType !== 9 ){
-				var elem = Simples( domElem ).clone()[0];
-				this.parentNode.insertBefore( elem, this );
-				elem.appendChild( this );
-			}
-		});
-		
-		return this;
-    },
-	unwrap : function(){
-		if( !this.length ){ return this; }
-		results = [];
-		this.each(function(){
-			var parent = this.parentNode;
-			if( parent ){
-				var children = slice.call( this.childNodes, 0);
-				for(var i=0,l=children.length;i<l;i++){
-
-					parent.insertBefore( children[i], this );
+		this.each(function(index) {
+			var el = this, parent = el.parentNode;
+			if( el.nodeType === 3 || el.nodeType === 8 ){ return; }
+		    if (location == "inner") {
+			  	var list, len, i = 0;     
+				cleanData( this, false ); 
+		        if (typeof html === "string") {
+		            el.innerHTML = html;
+		            list = el.getElementsByTagName('SCRIPT');
+		            len = list.length;
+		            for (; i < len; i++) {
+		                eval(list[i].text);
+		            }
+		        } else {
+		            el.innerHTML = '';
+		            el.appendChild( html && html.each ? slice.call( html, 0 ) : html);
+		        }
+			} else if (location == "outer" && parent ) {
+				cleanData( this );
+		        parent.replaceChild( wrapHelper(html, el), el);
+		    } else if (location == "top") {
+		        el.insertBefore( wrapHelper(html, el), el.firstChild);
+		    } else if (location == "bottom") {
+		        el.insertBefore( wrapHelper(html, el), null);
+		    } else if (location == "remove" && parent) { 
+				cleanData( this );
+		        parent.removeChild(el);
+		    } else if (location == "before" && parent) {
+		        parent.insertBefore( wrapHelper(html, parent), el);
+		    } else if (location == "after" && parent) {
+		        parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
+			} else if( location == "empty" ) {
+				cleanData( this, false ); 
+				while ( el.firstChild ) {
+					el.removeChild( el.firstChild );
 				}
-				Simples(this).remove();
-				results.concat( children );
+			} else if (location == "wrap" && parent) {  
+				var elem = wrapHelper(html, parent); 
+				parent.insertBefore( elem, el );
+				elem.appendChild( el );
+			} else if(location == "unwrap" && parent){
+				results.concat( slice.call( el.childNodes, 0 ) );
+				parent.insertBefore( el.childNodes, el );
+				cleanData( el );
+				parent.removeChild( el );
 			}
-		});
-		return Simples( results );
-	},
-	empty : function(){            
-		this.each(function(){
-			cleanData( this, false );
-			// Remove any remaining nodes
-			while ( this.firstChild ) {
-				this.removeChild( this.firstChild );
-			}
-		});
-	},
-	remove : function(){
-		this.each(function(){
-			if ( this.parentNode ) { 
-				cleanData( this );				
-				this.parentNode.removeChild( this );
-			}
-		});
+	    }); 
+		
+		return results.length ? Simples( results ) : this;
 	},
 	// attributes	
 	hasClass : function( className ){
@@ -254,7 +215,8 @@ Simples.extend({
 		}); 
 		return Simples( results );
 	},
-	eq : function( i ){
-		return Simples( slice.apply( this, i < 0 ? [ i ] : [+i, i+1]  ) );
+	slice : function( i, len ){
+		len = ( 0 < len ) ? len : 1 ;
+		return Simples( slice.apply( this, i < 0 ? [ i ] : [+i, i+len]  ) );
 	}
 });
