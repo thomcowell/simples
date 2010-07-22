@@ -27,7 +27,7 @@ function Simples( selector, context ) {
 	if ( !(this instanceof Simples) ){	// or this.each !== Simples.prototype.each
 		return new Simples( selector, context );  		
 	} else if( selector instanceof Simples ){
-		merge.call( this, slice.call( selector, 0 ) );
+		this.push.apply( this, slice.call( selector, 0 ) );
 		return this;
 	}
 	  	
@@ -58,16 +58,15 @@ function Simples( selector, context ) {
 		this.context = result.context;
 		this.selector = result.selector;
 
-		merge.call( this, result.elems );
+		this.push.apply( this, result.elems );
 	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
-		merge.call( this, slice.call( selector, 0 ) );
+		this.push.apply( this, slice.call( selector, 0 ) );
     } else if( objClass === ArrayClass ){
 
 		for(var d=0,e=selector.length;d<e;d++){
 			if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
-				this[ this.length ] = selector[d];
-				this.length++;
+				this.push.call( this, selector[d] );
 			}
 		}
 		
@@ -105,11 +104,7 @@ function merge( first /* obj1, obj2..... */) {
             }
 		} else if( isWhat === ArrayClass ){
          	// if array apply directly to target with numerical keys
-			if ( !hasOwn.call( target, 'length' ) ){ target.length = 0; }
-			for( var a=0,b=arguments[i].length;a<b;a++){
-				target[ target.length ] = arguments[i][a]; 
-				target.length++;
-			}
+			push.apply( target, arguments[i] );
 		}                                            
     }
 
@@ -120,7 +115,7 @@ function merge( first /* obj1, obj2..... */) {
 merge.call( Simples, {
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		if( !( this === window || this === document ) && toString.call( addMethods ) === ObjectClass ){
+		if( this.prototype && toString.call( addMethods ) === ObjectClass ){
 			for (var key in addMethods) {
 		        if ( hasOwn.call( addMethods, key ) ) {
 		            this.prototype[key] = addMethods[key];
@@ -271,7 +266,7 @@ Simples.prototype = {
 		                                                     
 		if( this.length === 1){
 
-			callback.call( this[0] );
+			callback.call( this[0], 1, 1 );
 		} else if( this.length > 1 ) {
 			
 			for(var i=0,l=this.length;i<l;i++){
@@ -283,16 +278,16 @@ Simples.prototype = {
 	},
 	filter : function( testFn ){
 		
-		var newSimples = new Simples();
-		newSimples.context = this.context;
+		var result = new Simples();
+		result.context = this.context;
 		
 		this.each(function(i,l){
 			if( testFn.call( this, i, l ) === true ){
-				newSimples.push( this );
+				result.push( this );
 			}
-		});           
+		});
 		
-		return newSimples;
+		return result;
 	},
 	ready: function( fn ) {
 		// Attach the listeners

@@ -145,7 +145,7 @@ Animation.prototype = {
 function CompositeAnimation( animations ){
 	
 	if( toString.call(animations) === ArrayClass ){
-		merge.call( this, animations );
+		push.apply( this, animations );
 	}
 	
 	return this;
