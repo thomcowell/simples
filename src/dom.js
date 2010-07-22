@@ -22,7 +22,7 @@ function wrapHelper(html, el) {
 // If the html starts with a Tag, it will wrap the context in that tag.
 function wrap(xhtml, tag) {
 
-    var attributes = {}, element, i = 0, attr, node, attrList, result;
+    var attributes = {}, element, x, i = 0, attr, node, attrList, result;
 
     if ( VALID_ELEMENTS.test(xhtml) ) {
         result = VALID_ELEMENTS.exec(xhtml);
@@ -44,8 +44,10 @@ function wrap(xhtml, tag) {
     }
 
     element = document.createElement(tag);
-    
-	Simples( element ).attr( attributes );
+
+    for( x in attributes ){
+		attrs( element, x, attributes[x] );
+	}
 
     element.innerHTML = xhtml;
     return element;
@@ -103,15 +105,29 @@ Simples.extend({
 			return this[0] ? this[0].innerHTML : "";
 		}
 
-		if ( arguments.length === 1 && !LOCATION_SINGLE.test( arguments[0] ) ) {
-		    html = location;
-		    location = 'inner';
+		if ( arguments.length === 1 ){	
+			if( location === "outer" && this[0] ){
+				html = this[0].outerHTML;
+
+				if ( !html ) {
+					var div = this[0].ownerDocument.createElement("div");
+					div.appendChild( this[0].cloneNode(true) );
+					html = div.innerHTML;
+				}
+				
+				return html;
+			} else if( !LOCATION_SINGLE.test( arguments[0] ) ) {
+			    html = location;
+			    location = 'inner';
+			} 
 		}
 		
-		location = location || "", results = [];
+		location = location || "";
+		var results = new Simples();
 		
-		this.each(function(index) {
-			var el = this, parent = el.parentNode;
+		this.each(function(index) {   
+
+			var el = this, parent = el.parentNode, elem;
 			if( el.nodeType === 3 || el.nodeType === 8 ){ return; }
 		    if (location == "inner") {
 			  	var list, len, i = 0;     
@@ -128,37 +144,39 @@ Simples.extend({
 		            el.appendChild( html && html.each ? slice.call( html, 0 ) : html);
 		        }
 			} else if (location == "outer" && parent ) {
-				cleanData( this );
-		        parent.replaceChild( wrapHelper(html, el), el);
+				cleanData( el );     
+				elem = wrapHelper(html, el);
+				results.push( elem );
+		        parent.replaceChild( elem, el);
 		    } else if (location == "top") {
 		        el.insertBefore( wrapHelper(html, el), el.firstChild);
 		    } else if (location == "bottom") {
 		        el.insertBefore( wrapHelper(html, el), null);
 		    } else if (location == "remove" && parent) { 
-				cleanData( this );
+				cleanData( el );
 		        parent.removeChild(el);
 		    } else if (location == "before" && parent) {
 		        parent.insertBefore( wrapHelper(html, parent), el);
 		    } else if (location == "after" && parent) {
 		        parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
 			} else if( location == "empty" ) {
-				cleanData( this, false ); 
+				cleanData( el, false ); 
 				while ( el.firstChild ) {
 					el.removeChild( el.firstChild );
 				}
 			} else if (location == "wrap" && parent) {  
-				var elem = wrapHelper(html, parent); 
+				elem = wrapHelper( html, parent ); 
 				parent.insertBefore( elem, el );
 				elem.appendChild( el );
-			} else if(location == "unwrap" && parent){
-				results.concat( slice.call( el.childNodes, 0 ) );
+			} else if( location == "unwrap" && parent ){
 				parent.insertBefore( el.childNodes, el );
+				results.push.apply( results, slice.call( el.childNodes, 0 ) );
 				cleanData( el );
 				parent.removeChild( el );
 			}
-	    }); 
-		
-		return results.length ? Simples( results ) : this;
+	    });
+		       
+		return results.length ? results : this;
 	},
 	// attributes	
 	hasClass : function( className ){

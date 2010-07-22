@@ -157,7 +157,7 @@ test("attr('tabindex', value)", function() {
 	equals(element.attr('tabindex'), -1, 'set negative tabindex');
 });
 
-test("html('inner')",function(){
+test("html('inner')", 6, function(){
 
 	var div = Simples('<div/>');	
 	function testInner( location, html, endHTML ){ 
@@ -185,8 +185,25 @@ test("html('inner')",function(){
 	
 });
 
-test("html('outer')",function(){
-	ok( false, "tests not written" );
+test("html('outer')", 4, function(){
+	var div = Simples('<div/>'), parent;
+	equal( div.html("outer"), "<div></div>", "Should return the outer html" );
+	
+	function testOuter( html, endHTML ){
+		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
+		div = Simples('#war-hammer');
+		div.html("outer", html )
+		equal( parent.html(), endHTML, "should have "+ endHTML );
+	}
+
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";
+		
+	testOuter( "<span>Super Duper</span>", "<span>Super Duper</span>" );
+	
+	testOuter( p, "<p>DOM Element</p>" ); 
+	
+	testOuter( Simples('<div/>'), "<div></div>" );
 });
 
 test("html('top')",function(){
