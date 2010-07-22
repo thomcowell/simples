@@ -357,8 +357,9 @@ test('Simples.each',function(){
 	});
 });
 
-test('Simples.filter', 6, function(){
-	var s_obj = Simples('div'), counter=0, length = s_obj.length;
+test('Simples.filter', 14, function(){
+	var s_obj = Simples('div'), counter=0, length = s_obj.length, set = Simples('.row');
+
 	var results = s_obj.filter(function(i,l){ 
 		if( i !== counter ){
 			ok( false, "i doesn't equal counter ");
@@ -370,8 +371,11 @@ test('Simples.filter', 6, function(){
 		return this.className === "row";
 	});
 
-	ok( results instanceof Simples, "should return an instance of Simples");
-	notDeepEqual( results, s_obj, "should return an instance of Simples");	
+	ok( results instanceof Simples, "should return an instance of Simples"); 
+	equal( results.length, set.length, "should return the same length" ); 
+	for(var i=0,l=set.length;i<l;i++){
+		same( results[i], set[i], "should return an instance of Simples");	
+	}
 	same( results.selector, '', "node list of .row -- should have empty selector");	              
 	same( results.context, document, "node list of .row -- should have empty context");
 	equal( results.length, 8, "should return an instance of Simples");
