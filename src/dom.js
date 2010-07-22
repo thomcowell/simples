@@ -54,6 +54,49 @@ function wrap(xhtml, tag) {
 function hasClass( elem, className ){
 	return (" " + elem.className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1;
 } 
+
+function attrs( elem, name, value ){
+	if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
+		return undefined;
+	}
+	
+	if( value === undefined ){
+		if ( elem.nodeName.toUpperCase() === "FORM" && elem.getAttributeNode(name) ) {
+			// browsers index elements by id/name on forms, give priority to attributes.				
+			return elem.getAttributeNode( name ).nodeValue;
+		} else if ( name === "style" && !Simples.support.style ){
+			// get style correctly
+			return elem.style.cssText;				
+		} else if( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ){
+			// These attributes don't require special treatment
+			return elem[ name ];
+		} else {
+			// it must be this
+			return elem.getAttribute( name );
+		}
+		return null;  
+	} else if( value === null ){   	
+		if ( elem.nodeType === 1 ) {
+			elem.removeAttribute( name );
+		}
+	} else { 
+		if ( typeof value == ( 'function' || 'object' ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
+			return undefined;
+		}
+
+		if( name === "style" && !Simples.support.style ){
+			// get style correctly
+			elem.style.cssText = "" + value;
+		} else if ( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ) { 
+			// These attributes don't require special treatment 
+			elem[ name ] = ""+value;
+		} else { 
+			// it must be this
+			elem.setAttribute(name, ""+value);
+		}
+	}	
+}
+
 Simples.extend({
 	html : function( location, html ){
 		if (arguments.length === 0) {
@@ -147,52 +190,17 @@ Simples.extend({
 		var nameClass = toString.call( name );
 			
 		if( nameClass === ObjectClass ){
-			for( var key in name ){
-				this.attr( key, name[key] );
+			for( var key in name ){   
+				this.each(function(){
+					attrs( this, key, name[key] );
+				});
 			}
 		} else if( nameClass === StringClass ){
 			if( value === undefined ){                
-
-				var elem = this[0];
-				if( !elem ){ return null; }     
-
-				if ( elem.nodeName.toUpperCase() === "FORM" && elem.getAttributeNode(name) ) {
-					// browsers index elements by id/name on forms, give priority to attributes.				
-					return elem.getAttributeNode( name ).nodeValue;
-				} else if ( name === "style" && !Simples.support.style ){
-					// get style correctly
-					return elem.style.cssText;				
-				} else if( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ){
-					// These attributes don't require special treatment
-					return elem[ name ];
-				} else {
-					// it must be this
-					return elem.getAttribute( name );
-				}
-				return null;
-			} else if( value === null){
-				this.each(function(){
-					if ( this.nodeType === 1 ) {
-						this.removeAttribute( name );
-					}				
-				});
+               	return attrs( this[0], name, value );
 			} else { 
-				if( typeof value == ( 'function' || 'object' ) ){ return this; }
-				this.each(function(){                                  
-					if ( this.nodeType === 3 || this.nodeType === 8 || ( name === "type" && IMMUTABLE_ATTR.test( this.nodeName ) ) ) {
-						return undefined;
-					}
-
-					if( name === "style" && !Simples.support.style ){
-						// get style correctly
-						elem.style.cssText = "" + value;
-					} else if ( this.nodeType === 1 && !SPECIAL_URL.test( name ) && name in this ) { 
-						// These attributes don't require special treatment 
-						this[ name ] = ""+value;
-					} else { 
-						// it must be this
-						this.setAttribute(name, ""+value);
-					}
+				this.each(function(){
+					attrs( this, name, value );
 				});			
 			}
 		}
