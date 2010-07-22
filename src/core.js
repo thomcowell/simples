@@ -15,6 +15,7 @@ var toString = Object.prototype.toString,
 	BooleanClass = "[object Boolean]",
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]",
+	FIRST_LAST_SPACES = /^\s*|\s*$/g,
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -204,19 +205,10 @@ merge.call( Simples, {
 			return func.apply( context, arguments );
 		};
 	},
-	// Use native String.trim function wherever possible
-	trim: trim ?
-	function( text ) {
-		return text == null ?
-			"" :
-			trim.call( text );
-	} :
-
-	// Otherwise use our own trimming functionality
-	function( text ) {
-		return text == null ?
-			"" :
-			text.toString().replace( trimLeft, "" ).replace( trimRight, "" );
+	// Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	trim : function( text ) {
+		text = text == null ? "" : text;
+		return trim ? trim.call( text ) : text.toString().replace( FIRST_LAST_SPACES, "" );
 	},
 	noop : function(){}
 });

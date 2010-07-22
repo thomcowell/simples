@@ -1,11 +1,11 @@
 var STRIP_TAB_NEW_LINE = /\n|\t/g,
-	LAST_SPACE_OPTIONAL = /\s?$/,
-	FIRST_SPACE = /^\s+/,
 	LOCATION_INSIDE = /top|bottom|inner/,
 	LOCATION_SINGLE = /remove|empty|unwrap/,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
-	FIRST_LAST_SPACES = /^\s?|\s?$/g;
+	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
+	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i,
+	QUOTE_MATCHER = /(["']?)/g;
 
 // Borrowed from XUI project
 // private method for finding a dom element
@@ -14,7 +14,7 @@ function getTag(el) {
 }
 
 function wrapHelper(html, el) {
-  return (typeof html == "string") ? wrap(html, getTag(el)) : html && html.each ? slice.call( html, 0 ) : html;
+  return (typeof html == "string") ? wrap( html, getTag(el) ) : html;
 }
 
 // private method
@@ -22,29 +22,21 @@ function wrapHelper(html, el) {
 // If the html starts with a Tag, it will wrap the context in that tag.
 function wrap(xhtml, tag) {
 
-    var attributes = {},
-        re = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i,
-        element,
-        x,
-        a,
-        i = 0,
-        attr,
-        node,
-        attrList;
+    var attributes = {}, element, i = 0, attr, node, attrList, result;
 
-    if (re.test(xhtml)) {
-        result = re.exec(xhtml);
-        tag = result[1];
+    if ( VALID_ELEMENTS.test(xhtml) ) {
+        result = VALID_ELEMENTS.exec(xhtml);
+		tag = result[1];
 
         // if the node has any attributes, convert to object
         if (result[2] !== "") {
-            attrList = result[2].split(/([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i);
+            attrList = result[2].split( SPLIT_ATTRIBUTE );
 
             for (; i < attrList.length; i++) {
-                attr = attrList[i].replace(/^\s*|\s*$/g, "");
+                attr = Simples.trim( attrList[i] );
                 if (attr !== "" && attr !== " ") {
                     node = attr.split('=');
-                    attributes[node[0]] = node[1].replace(/(["']?)/g, '');
+                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, '');
                 }
             }
         }
@@ -59,6 +51,9 @@ function wrap(xhtml, tag) {
     return element;
 }
 
+function hasClass( elem, className ){
+	return (" " + elem.className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1;
+} 
 Simples.extend({
 	html : function( location, html ){
 		if (arguments.length === 0) {
@@ -126,25 +121,25 @@ Simples.extend({
 	hasClass : function( className ){
 		className = " " + className + " ";
 		for ( var i = 0, l = this.length; i < l; i++ ) {
-			if ( (" " + this[i].className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1 ) {
+			if ( hasClass( this[i], className ) ) {
 				return true;
 			}
 		}
 		return false;
 	},     
-	addClass : function( className ){
+	addClass : function( className ){ 
+		className = " " + className + " ";
 		this.each(function(){
-			if( !Simples(this).hasClass( className ) ){
-				classname = ( this.className.replace( STRIP_TAB_NEW_LINE, " ").replace( LAST_SPACE_OPTIONAL, '') + ' '+className );
-				this.className = classname.replace( FIRST_SPACE,'');
+			if( !hasClass( this, className ) ){
+				this.className = Simples.trim( Simples.trim( this.className.replace( STRIP_TAB_NEW_LINE, " ") ) + className );
 			} 
 		});
 		return this;
 	},
-	removeClass : function( className ){
+	removeClass : function( className ){  
+		className = ' '+className+' ';
 		this.each(function(){
-			className = (' ' + this.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( ' '+className+' ', ' ' );
-			this.className = className.replace( FIRST_LAST_SPACES, '' );
+			this.className = Simples.trim( (' ' + this.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( className, ' ' ) );
 		});
 		return this;		
 	},
