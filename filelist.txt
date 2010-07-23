@@ -1,1 +1,1 @@
-intro,core,support,data,ajax,selector,dom,css,events,position,animation,outro
+header,core,support,data,ajax,selector,dom,css,events,position,animation,footer
