@@ -57,7 +57,10 @@ test("serialise - when passing in 1 argument as an array",5,function(){
 	equal( serialise([{name:"ham",value:false}]), "ham=false", "boolean false value should be represented" );
 	equal( serialise([1,true,false,"there",function(){ return 'red'; }]), "", "an array not of objects value should be represented" );
 });
-
+      
+test("network stuff",function(){
+	ok( false, "test not written");
+})
 // test("Simples.ajax", 3, function(){
 // 	Simples.ajax({
 // 		url: url("data/name.html"),

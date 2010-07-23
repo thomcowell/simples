@@ -59,36 +59,49 @@ var AnimationController = {
 		}
 	}
 };
-
-function Animation( elem, opts ){
-	
-	if( !( elem && elem.nodeType === 1 && opts ) ){
-		throw new Error('Not all options have been provided!');
+ 
+/**
+ * elem {Element}
+ * setStyle {Object} 
+ * opts {Object}  
+ * opts.callback {Function}
+ * opts.reverse {Boolean}
+ * opts.manualStart {Boolean}
+ * opts.duration {Object}
+ */
+function Animation( elem, setStyle, opts ){
+	// sanity check arguments
+	if( !( elem && elem.nodeType === 1 && setStyle ) ){  
+		return null;
+	} 
+	// check instance invoked
+	if( !( this instanceof Animation ) ){
+		return new Animation( elem, setStyle, opts );
 	}
 	
+	opts = opts || {}; 
 	this[0] = elem; 
 	this.length = 1;
 	this._id = ++GUID;
 	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop;
-	this._reverse = ( opts.reverse === true ) ? this.reverse : Simples.noop;
+	this._reverse = opts.reverse === true;
 	this._autoStart = opts.manualStart !== true;
+	this._frames = [];
 
 	var frames = Math.round( ( opts.duration || 600 ) * ( FRAME_RATE / 1000 ) ), _start = {}, _delta = {}, _end = {};
 	
 	// check for supported css animated features and prep for animation
-	for( var key in opts.setStyle ){
+	for( var key in setStyle ){
 		
-		var opacity = ( key === 'opacity' && opts.setStyle[ key ] >= 0 && opts.setStyle[ key ] <= 1 );
+		var opacity = ( key === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 		if( opacity || TEST_TYPE.test( key ) ){
-			_start[ key ] = ( this.css( key ) + '' || '0').replace('px','') * 1;
-            _end[ key ] = (opts.setStyle[ key ] + '' || '0').replace('px','') * 1;
-			_delta[ key ] = _end[ key ] - _start[ key ];
+			_start[ key ] = ( currentCSS( this[0], key ) + '' || '0').replace('px','') * 1;
+			_delta[ key ] = ( setStyle[ key ] + '' || '0').replace('px','') * 1 - _start[ key ];
 		}                                        
 	}
 	
 	var _tween = opts.tween && TWEENS.propertyIsEnumerable( opts.tween ) ? TWEENS[ opts.tween ] : TWEENS.easing;
-	this._frames = [ _start ];
 	
 	for(var i=0;i<=frames;i++){
 		
@@ -100,13 +113,10 @@ function Animation( elem, opts ){
 		this._frames.push( css );
 	}
 	
-	this._frames.push( _end );
-	
 	return this._autoStart ? this.start() : this;
 }
 
-Animation.prototype = {  
-	css : Simples.prototype.css,
+Animation.prototype = {
 	start : function( frame ){
 		this._frame = ( typeof frame !== 'number' ) ? 0 : ( 0 < frame ? frame : this._frames.length + frame );
 		AnimationController.start( this );
@@ -116,9 +126,9 @@ Animation.prototype = {
 	stop : function(){
 		
 		AnimationController.stop( this );
-		this._callback.call( this );
-		this._reverse.call( this );
-		return this; 
+		this._callback.call( this[0], this );
+		
+		return this._reverse ? this.reverse() : this; 
 	},                          
 	reverse : function( start ){
 		this._frames.reverse();
@@ -127,16 +137,28 @@ Animation.prototype = {
 		return this;
 	},
 	reset : function(){
-		this.css( this._frames[0] );
+		var frame = this._frames[0];
+		var callStop = this._frame !== 0;
+		this._frame = 0;
 		
-		return this;
+		for( var name in frame ){
+			setStyle( this[0], name, frame[ name ] );
+		}
+		
+		return callStop ? this.stop() : this;
 	},
-	step : function(){                                                                               
-		
-		this.css( this.frames[ this._frame ] );
-		this._frame++;   
-		
-		if ( this._frame >= this._frames.length ) { this.stop(); }
+	step : function(){  
+
+		this._frame++;
+
+		var frame = this._frames[ this._frame ] || this._frames[ this._frames.length - 1 ];
+		for( var name in frame ){
+			setStyle( this[0], name, frame[ name ] );
+		}
+		             
+		if ( this._frame >= this._frames.length ) { 
+			return this.stop(); 
+		}
 		    
 		return this;
 	}
@@ -181,11 +203,14 @@ Simples.merge(Simples, {
 });
 
 Simples.extend({
-    animate: function( opts ){
+    animate: function( css, opts ){
 		var animations = [];
 		if( opts ){		
 			this.each(function(){
-				animations.push( new Animation( this, opts ) );
+				var anim = Animation( this, css, opts );
+				if( anim ){
+					animations.push( anim );
+				}
 			});
 		}
 		return animations.length > 1 ? new CompositeAnimation( animations ) : animations[0];
