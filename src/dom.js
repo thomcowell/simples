@@ -213,12 +213,12 @@ Simples.extend({
 	attr : function(name, value){
 		var nameClass = toString.call( name );
 			
-		if( nameClass === ObjectClass ){
-			for( var key in name ){   
-				this.each(function(){
+		if( nameClass === ObjectClass ){   
+			this.each(function(){   
+				for( var key in name ){
 					attrs( this, key, name[key] );
-				});
-			}
+				}
+			});
 		} else if( nameClass === StringClass ){
 			if( value === undefined ){                
                	return attrs( this[0], name, value );
