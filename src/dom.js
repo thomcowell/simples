@@ -1,23 +1,28 @@
 var STRIP_TAB_NEW_LINE = /\n|\t/g,
-	LOCATION_INSIDE = /top|bottom|inner/,
-	LOCATION_SINGLE = /^remove$|^empty$|^unwrap$/,
+	OTHER_SINGLE_ARGUMENTS = /^remove$|^empty$|^unwrap$/,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
 	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
 	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i,
 	QUOTE_MATCHER = /(["']?)/g;
 
-// Borrowed from XUI project
-function wrapHelper(html, el) {
-  return (typeof html == "string") ? wrap( html, (el.firstChild === null) ? {'UL':'LI','DL':'DT','TR':'TD'}[el.tagName] || el.tagName : el.firstChild.tagName ) : html;
-}
-
-// private method
-// Wraps the HTML in a TAG, Tag is optional
-// If the html starts with a Tag, it will wrap the context in that tag.
-function wrap(xhtml, tag) {
-
-    var attributes = {}, element, x, i = 0, attr, node, attrList, result;
+// private method - Borrowed from XUI project
+// Wraps the HTML in a TAG, Tag is optional. If the html starts with a Tag, it will wrap the context in that tag.
+function wrapHelper(xhtml, el) {
+	// insert into document fragment to ensure insert occurs without messing up order
+ 	if( toString.call( xhtml ) !== StringClass ){
+		if( xhtml && xhtml.length !== undefined ){
+			var docFrag = document.createDocumentFragment();
+			xhtml = slice.call( xhtml, 0 );
+			for(var p=0,r=xhtml.length;p<r;p++){
+				docFrag.appendChild( xhtml[p] );
+			}
+			xhtml = docFrag;
+		}
+		
+		return xhtml;
+	}
+    var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
 
     if ( VALID_ELEMENTS.test(xhtml) ) {
         result = VALID_ELEMENTS.exec(xhtml);
@@ -27,7 +32,7 @@ function wrap(xhtml, tag) {
         if (result[2] !== "") {
             attrList = result[2].split( SPLIT_ATTRIBUTE );
 
-            for (; i < attrList.length; i++) {
+            for (var l=attrList.length; i < l; i++) {
                 attr = Simples.trim( attrList[i] );
                 if (attr !== "" && attr !== " ") {
                     node = attr.split('=');
@@ -36,7 +41,9 @@ function wrap(xhtml, tag) {
             }
         }
         xhtml = result[3];
-    }
+    } else {
+		tag = (el.firstChild === null) ? {'UL':'LI','DL':'DT','TR':'TD'}[el.tagName] || el.tagName : el.firstChild.tagName;
+	}
 
     element = document.createElement(tag);
 
@@ -48,7 +55,8 @@ function wrap(xhtml, tag) {
     return element;
 }
 
-function hasClass( elem, className ){
+// private method - className must be provided as " "+className+" "
+function hasClass( elem, className ){                 
 	return (" " + elem.className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1;
 } 
 
@@ -98,9 +106,7 @@ Simples.extend({
 	html : function( location, html ){
 		if (arguments.length === 0) {
 			return this[0] ? this[0].innerHTML : "";
-		}
-
-		if ( arguments.length === 1 ){	
+		} else if ( arguments.length === 1 ){	
 			if( location === "outer" && this[0] ){
 				html = this[0].outerHTML;
 
@@ -111,21 +117,10 @@ Simples.extend({
 				}
 				
 				return html;
-			} else if( !LOCATION_SINGLE.test( arguments[0] ) ) {
+			} else if( !OTHER_SINGLE_ARGUMENTS.test( arguments[0] ) ) {
 			    html = location;
 			    location = 'inner';
 			} 
-		} 
-		
-		// insert into document fragment to ensure insert occurs without messing up order
-		if( html instanceof Simples ){   
-			
-			var docFrag = document.createDocumentFragment();
-			html = slice.call( html, 0 );
-			for(var i=0,l=html.length;i<l;i++){
-				docFrag.appendChild( html[i] );
-			}
-			html = docFrag;
 		}
 		
 		location = location || "";
@@ -147,19 +142,19 @@ Simples.extend({
 		            }
 		        } else {
 		            el.innerHTML = '';
-		            el.appendChild( html );
+		            el.appendChild( wrapHelper( html, el ) );
 		        }
-			} else if (location == "outer" && parent ) {
-				cleanData( el );     
+			} else if (location == "outer" && parent ) {     
 				elem = wrapHelper(html, el);
-				results.push( elem );
+				cleanData( el );
 		        parent.replaceChild( elem, el);
 		    } else if (location == "top") {
 		        el.insertBefore( wrapHelper(html, el), el.firstChild);
 		    } else if (location == "bottom") {
 		        el.insertBefore( wrapHelper(html, el), null);
 		    } else if (location == "remove" && parent) { 
-				cleanData( el );
+				elem = parent;
+				cleanData( el );     
 		        parent.removeChild(el);
 		    } else if (location == "before" && parent) {
 		        parent.insertBefore( wrapHelper(html, parent), el);
@@ -171,14 +166,19 @@ Simples.extend({
 					el.removeChild( el.firstChild );
 				}
 			} else if (location == "wrap" && parent) {  
-				elem = wrapHelper( html, parent ); 
-				parent.insertBefore( elem, el );
-				elem.appendChild( el );
+				var elems = wrapHelper( html, parent );           
+				var wrap = ( elems.nodeType === 11 ? elems.firstChild : elems );
+				parent.insertBefore( elems, el );
+				wrap.appendChild( el );
 			} else if( location == "unwrap" && parent ){
-				parent.insertBefore( el.childNodes, el );
-				results.push.apply( results, slice.call( el.childNodes, 0 ) );
+				var docFrag = wrapHelper( el.childNodes, el );
 				cleanData( el );
+				elem = docFrag.childNodes;
+				parent.insertBefore( docFrag, el );
 				parent.removeChild( el );
+			}
+			if( elem ){
+				results.push.apply( results, slice.call( elem, 0 ) );
 			}
 	    });
 		       
@@ -232,15 +232,15 @@ Simples.extend({
 	},
 	/* TODO: Rename me as I don't indicate functionality */
 	traverse : function( name ){
-		var isWhat = toString.call( name ), results = [];
+		var isWhat = toString.call( name ), results = new Simples();
 		this.each(function(){
-			var elem = ( isWhat === StringClass ) ? this[ name ] : ( isWhat === FunctionClass ) ? name.call( this )  : null;
+			var elem = ( isWhat === StringClass ) ? this[ name ] : ( isWhat === FunctionClass ) ? name.call( this, this ) : null;
 			if( elem ){
-				elem = elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ];
-				results = results.concat( elem );
+				results.push.apply( results, elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ] );
 			}
-		}); 
-		return Simples( results );
+		});
+		
+		return results;
 	},
 	slice : function( i, len ){
 		len = ( 0 < len ) ? len : 1 ;

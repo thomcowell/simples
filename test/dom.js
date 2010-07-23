@@ -261,11 +261,11 @@ test("html('remove')",function(){
 });
    
 test("html('before')", 3, function(){
-	var div, parent, content = '<p id="war-hammer">This should not be here</p>';
+	var div, parent, content = '<p id="war-hammer">This should be here</p>';
 	
 	function testBefore( html, endHTML ){
 		endHTML = endHTML || html;
-		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
+		parent = Simples('#test-area').html( content );
 		div = Simples('#war-hammer');
 		div.html("before", html )
 		equal( parent.html(), endHTML + content, "should insert before "+ endHTML );
@@ -282,11 +282,11 @@ test("html('before')", 3, function(){
 });
 
 test("html('after')", 3, function(){
-	var div, parent, content = '<p id="war-hammer">This should not be here</p>';
+	var div, parent, content = '<p id="war-hammer">This should be here</p>';
 	
 	function testAfter( html, endHTML ){     
 		endHTML = endHTML || html;
-		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
+		parent = Simples('#test-area').html( content );
 		div = Simples('#war-hammer');
 		div.html("after", html )
 		equal( parent.html(), content + endHTML, "should insert after "+ endHTML );
@@ -315,19 +315,83 @@ test("html('empty')", 4, function(){
 	equals( j.html(), "", "Check node,textnode,comment empty works" );	
 });
 
-test("html('wrap')",function(){
-	ok( false, "tests not written" );
+test("html('wrap')", 3, function(){
+	var div, parent = Simples('#test-area'), content = '<p id="war-hammer">This should be here</p>';
+	
+	function testWrap( html, endHTML ){     
+		endHTML = endHTML || html;  
+		var wrapper = endHTML.split('</');
+		parent.html( content );
+		div = Simples('#war-hammer');
+		div.html("wrap", html )
+		equal( parent.html(), wrapper.shift()+content+'</'+wrapper.join('</'), "should wrap after "+ endHTML );
+	}
+
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";
+		
+	testWrap( "<span>Super Duper</span>" );
+	
+	testWrap( p, "<p>DOM Element</p>" ); 
+	
+	testWrap( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
 });             
 
-test("html('unwrap')",function(){
-	ok( false, "tests not written" );
+test("html('unwrap')", 2, function(){
+	var content = '<div id="war-hammer"></div>', contents = '<span>1</span><span>2</span><span>3</span><span>4</span>';
+	
+	var parent = Simples('#test-area').html( content );
+	var div = Simples('#war-hammer').html( contents );
+	equal( parent.html(), content.replace('></', '>'+contents+'</'), "ensure test is correctly set up" );
+	div.html( "unwrap" )
+	equal( parent.html(), contents, "should remove div Element, but not children" );
+
 });
 
-test("fetch",function(){
-	ok( false, "tests not written" );
+test("traverse",function(){
+	var div = Simples('#row-wrapper'); 
+	
+	function testTraverse( traverse, results, message ){
+		for(var i=0,l=results.length;i<l;i++){
+			equal( traverse[i], results[i], message );
+		}
+	}
+	
+	testTraverse( div.traverse('childNodes'), Simples( div[0].childNodes ), "fetch childNodes" );
+	testTraverse( div.traverse('parentNode'), Simples( div[0].parentNode ), "fetch parentNode" );
+	testTraverse( div.traverse(function(){
+		var parent = this.parentNode;
+		while( parent ){
+			if( parent.nodeName.toLowerCase() === "body" ){
+				break;
+			}
+			parent = parent.parentNode;
+		}
+		return parent
+	}), Simples( document.body ), "fetch body" );
 });
 
-test("slice",function(){
-	ok( false, "tests not written" );
+test("slice", 10, function(){             
+	var contents = '<span id="one"></span><span id="two"></span><span id="three"></span><span id="four"></span>', div = Simples('<div/>');
+	
+	function testSlice( start, end ){
+		count = end || 1;                                       
+		var nodes = div.html( contents )[0].childNodes;
+		var test = Simples( nodes );
+		var result = test.slice( start, end );           
+		if( start < 0 ){
+			count = Math.abs( start ); 
+			start = nodes.length + start;
+		}
+		equal( result.length, count, "should have the same length" ); 
+		for( var i=0;i<count;i++){
+			same( result[i], nodes[ start+ i ], "should have the same elements");
+		}
+	}
+	
+	testSlice( 0 );
+	testSlice( 1, 2 );
+	testSlice( -1 );
+	testSlice( -2 );
 });
 // prepend append => 'string' and nodes check order                                	
