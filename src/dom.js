@@ -1,6 +1,6 @@
 var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	LOCATION_INSIDE = /top|bottom|inner/,
-	LOCATION_SINGLE = /remove|empty|unwrap/,
+	LOCATION_SINGLE = /^remove$|^empty$|^unwrap$/,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
 	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
@@ -8,13 +8,8 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	QUOTE_MATCHER = /(["']?)/g;
 
 // Borrowed from XUI project
-// private method for finding a dom element
-function getTag(el) {
-    return (el.firstChild === null) ? {'UL':'LI','DL':'DT','TR':'TD'}[el.tagName] || el.tagName : el.firstChild.tagName;
-}
-
 function wrapHelper(html, el) {
-  return (typeof html == "string") ? wrap( html, getTag(el) ) : html;
+  return (typeof html == "string") ? wrap( html, (el.firstChild === null) ? {'UL':'LI','DL':'DT','TR':'TD'}[el.tagName] || el.tagName : el.firstChild.tagName ) : html;
 }
 
 // private method
@@ -120,6 +115,17 @@ Simples.extend({
 			    html = location;
 			    location = 'inner';
 			} 
+		} 
+		
+		// insert into document fragment to ensure insert occurs without messing up order
+		if( html instanceof Simples ){   
+			
+			var docFrag = document.createDocumentFragment();
+			html = slice.call( html, 0 );
+			for(var i=0,l=html.length;i<l;i++){
+				docFrag.appendChild( html[i] );
+			}
+			html = docFrag;
 		}
 		
 		location = location || "";
@@ -141,7 +147,7 @@ Simples.extend({
 		            }
 		        } else {
 		            el.innerHTML = '';
-		            el.appendChild( html && html.each ? slice.call( html, 0 ) : html);
+		            el.appendChild( html );
 		        }
 			} else if (location == "outer" && parent ) {
 				cleanData( el );     

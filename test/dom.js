@@ -160,7 +160,7 @@ test("attr('tabindex', value)", function() {
 test("html('inner')", 6, function(){
 
 	var div = Simples('<div/>');	
-	function testInner( location, html, endHTML ){ 
+	function testInner( location, html, endHTML ){
 		location = location || html;
 		div[0].innerHTML = "";
 		if( html ){	
@@ -179,17 +179,22 @@ test("html('inner')", 6, function(){
 		
 	testInner( p, undefined, "<p>DOM Element</p>");
 	testInner( "inner", p, "<p>DOM Element</p>");
+
+	var innerHTML = '<p class="test-war-hammer">This should be here</p><span class="test-war-hammer">Super Duper 1</span><span class="test-war-hammer">Super Duper 2</span>'
+	Simples('#test-area').html( innerHTML );
+	testInner( "inner", Simples('.test-war-hammer'), innerHTML );
 	
-	testInner( "inner", Simples('#test-area'), "<div id='test-area'></div>" );
-	testInner( Simples('#test-area'), undefined, "<div id='test-area'></div>" );	
+	Simples('#test-area').html( innerHTML );
+	testInner( Simples('.test-war-hammer'), undefined, innerHTML );	
 	
 });
 
 test("html('outer')", 4, function(){
 	var div = Simples('<div/>'), parent;
-	equal( div.html("outer"), "<div></div>", "Should return the outer html" );
+	equal( div.html("outer"), "<div></div>", "Should return the html for the selected element" );
 	
-	function testOuter( html, endHTML ){
+	function testOuter( html, endHTML ){     
+		endHTML = endHTML || html;
 		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
 		div = Simples('#war-hammer');
 		div.html("outer", html )
@@ -199,36 +204,109 @@ test("html('outer')", 4, function(){
 	var p = document.createElement('p');
 	p.innerText = "DOM Element";
 		
-	testOuter( "<span>Super Duper</span>", "<span>Super Duper</span>" );
+	testOuter( "<span>Super Duper</span>" );
 	
 	testOuter( p, "<p>DOM Element</p>" ); 
 	
-	testOuter( Simples('<div/>'), "<div></div>" );
+	testOuter( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
 });
 
-test("html('top')",function(){
-	ok( false, "tests not written" );
+test("html('top')", 3, function(){  
+	var contents = '<span>1</span><span>2</span><span>3</span><span>4</span>', div = Simples('<div/>');
+	
+	function testTop( html, endHTML ){
+		endHTML = endHTML || html;
+		div[0].innerHTML = contents;
+		div.html( 'top', html );
+		equal( div[0].innerHTML, endHTML+contents, "should insert at the top "+endHTML );
+	}
+
+	testTop( "<p>I am Top</p>" );
+	
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";	
+	testTop( p, "<p>DOM Element</p>" );
+	
+	testTop( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
 });
              
-test("html('bottom')",function(){
-	ok( false, "tests not written" );
+test("html('bottom')", 3, function(){
+	var contents = '<span>1</span><span>2</span><span>3</span><span>4</span>', div = Simples('<div/>');
+	
+	function testTop( html, endHTML ){    
+		endHTML = endHTML || html;
+		div[0].innerHTML = contents;
+		div.html( 'bottom', html );
+		equal( div[0].innerHTML, contents+endHTML, "should insert at the bottom "+endHTML );
+	}
+
+	testTop( "<p>I am Bottom</p>" );
+	
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";	
+	testTop( p, "<p>DOM Element</p>" );
+	
+	testTop( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
 });
 
 test("html('remove')",function(){
-	ok( false, "tests not written" );
+	var contents = '<span>1</span><span>2</span><span>3</span><span>4</span>', parent = Simples('#test-area');
+	
+	parent[0].innerHTML = contents;
+	equal( parent.html(), contents, "ensure setup correct");
+	div = Simples('span', parent );
+	div.html( 'remove' );
+	equal( parent[0].innerHTML, "", "should remove all children of parent" );
+
 });
    
-test("html('before')",function(){
-	ok( false, "tests not written" );
-});
-
-test("html('after')",function(){
-	ok( false, "tests not written" );
-});
-
-test("html('empty')", 3, function(){
+test("html('before')", 3, function(){
+	var div, parent, content = '<p id="war-hammer">This should not be here</p>';
 	
-	equals( Simples("#ap").html("empty").html().length, 0, "Check text is removed" );
+	function testBefore( html, endHTML ){
+		endHTML = endHTML || html;
+		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
+		div = Simples('#war-hammer');
+		div.html("before", html )
+		equal( parent.html(), endHTML + content, "should insert before "+ endHTML );
+	}
+
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";
+		
+	testBefore( "<span>Super Duper</span>" );
+	
+	testBefore( p, "<p>DOM Element</p>" ); 
+	
+	testBefore( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
+});
+
+test("html('after')", 3, function(){
+	var div, parent, content = '<p id="war-hammer">This should not be here</p>';
+	
+	function testAfter( html, endHTML ){     
+		endHTML = endHTML || html;
+		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
+		div = Simples('#war-hammer');
+		div.html("after", html )
+		equal( parent.html(), content + endHTML, "should insert after "+ endHTML );
+	}
+
+	var p = document.createElement('p');
+	p.innerText = "DOM Element";
+		
+	testAfter( "<span>Super Duper</span>" );
+	
+	testAfter( p, "<p>DOM Element</p>" ); 
+	
+	testAfter( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
+});
+
+test("html('empty')", 4, function(){
+	
+	ok( Simples("#ap").html().length > 0, "ensure test is valid" );
+	Simples("#ap").html("empty")
+	equals( Simples("#ap").html().length, 0, "Check text is removed" );
 	equals( Simples("#ap").length, 1, "Check elements are not removed" );
 
 	// using contents will get comments regular, text, and comment nodes
