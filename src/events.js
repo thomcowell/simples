@@ -90,7 +90,7 @@ var SimplesEvents = {
 			var data = readData( elem, 'events' ) || {};
 			
 			if( !callback.guid ){
-				callback.guid = ++this.guid;
+				callback.guid = this.guid++;
 				callback.handled = this.handler( callback );
 			}
 			
