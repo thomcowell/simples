@@ -1,17 +1,17 @@
-var start = [], stop = [];
+var t_start_anim = [], t_stop_anim = [];
 module("Animation",{
 	setup : function(){
 		window.__AnimationController__ = window.AnimationController; 
-		start = []; stop = [];
+		t_start_anim = []; t_stop_anim = [];
 		window.AnimationController.start = function(){
-			start.push( arguments[0] );
+			t_start_anim.push( arguments[0] );
 		};
 		window.AnimationController.stop = function(){
-			stop.push( arguments[0] );
+			t_stop_anim.push( arguments[0] );
 		};
 	},
 	teardown : function(){    
-		start = []; stop = [];
+		t_start_anim = []; t_stop_anim = [];
 		Simples('#test-area').css('opacity', 1 );
 		window.AnimationController = window.__AnimationController__;
 	}
@@ -50,10 +50,10 @@ test("Animation.start()", 2, function() {
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
  
    	// set correct context
-	anim._frame = undefined; start = [];
+	anim._frame = undefined; t_start_anim = [];
 	anim.start();
 	equal( anim._frame, 0, "should set the frame to 0");
-	same( anim, start[0], "should call AnimationController.start");
+	same( anim, t_start_anim[0], "should call AnimationController.start");
 });
 	
 test("Animation.stop()", 8, function() {
@@ -70,10 +70,10 @@ test("Animation.stop()", 8, function() {
 	}
    	// set correct context
 	anim._frame = 12;
-	stop = [];
+	t_stop_anim = [];
 	anim.stop();
 	equal( anim._frame, 12, "should set the frame to 0");
-	same( anim, stop[0], "should call AnimationController.start");
+	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
 	anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {reverse:true} );
 	anim.reverse = function(){
@@ -81,11 +81,11 @@ test("Animation.stop()", 8, function() {
 	}
    	// set correct context
 	anim._frame = 4;
-	stop = [];
+	t_stop_anim = [];
 	anim.stop();	
 	
 	equal( anim._frame, 4, "should set the frame to 0");
-	same( anim, stop[0], "should call AnimationController.start");
+	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
 });
 
@@ -95,20 +95,21 @@ test("Animation.reverse()", 7, function() {
 			   		
 	same( anim._frames, frames, "check validity of setup" );
 	anim._autoStart = true;
-	start = [];
+	t_start_anim = [];
 	anim.reverse();
 	same( anim._frames, frames.reverse(), "frames are reversed" );
-	same( start[0], anim, "should automatically call start" );
+	same( t_start_anim[0], anim, "should automatically call start" );
 	
 	anim._autoStart = false;
-	start = [];
+	t_start_anim = [];
 	anim.reverse();
 	same( anim._frames, frames.reverse(), "frames are reversed" );
-	same( start[0], undefined, "should automatically call start" );
+	same( t_start_anim[0], undefined, "should automatically call start" );
 	
+	t_start_anim = [];
 	anim.reverse( true );
 	same( anim._frames, frames.reverse(), "frames are reversed" );
-	same( start[0], anim, "should automatically call start" );
+	same( t_start_anim[0], anim, "should automatically call start" );
 });
 
 test("Animation.step()", 7, function() { 
@@ -144,7 +145,7 @@ test("Animation.reset()", 4, function() {
 	
 	anim.reset();
 	
-	equal( stop[0], anim, "should call stop, as not on first frame");
+	equal( t_stop_anim[0], anim, "should call stop, as not on first frame");
 	equal( anim._frame, 0, "set back to first frame");
 	equal( Math.floor( anim._frames[0].opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
 });
