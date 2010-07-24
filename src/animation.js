@@ -1,7 +1,10 @@
-var FRAME_RATE = 24,
-	GUID = 1e6,
-	TEST_TYPE = /padding|margin|height|width|top|left|right|bottom/,
-	TWEENS = {
+var AnimationController = {
+	animations : {},
+	frameRate : 24,
+	length : 0,
+	guid : 1e6,
+	allowTypes : /padding|margin|height|width|top|left|right|bottom/,
+	tweens : {
 		easing : function( frame, frameCount, start, delta) {
 			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
 		},
@@ -11,15 +14,10 @@ var FRAME_RATE = 24,
 		quadratic : function( frame, frameCount, start, delta ){
 			return start + (((Math.cos((frame/frameCount)*Math.PI) )/2) * delta );
 		}
-	};   
-
-var AnimationController = {
-	animations : {},
-	length : 0,
+	},  
 	timerID : null,
-	cycle : false,    
-	last : 0,
-	interval : Math.round( 1000/ FRAME_RATE ),
+	cycle : false,
+	interval : Math.round( 1000/ this.frameRate ),
 	start : function( animation ){
 		if( !hasOwn.call( this.animations, animation._id ) ){
 			this.length++;
@@ -27,7 +25,7 @@ var AnimationController = {
 		}
 		
 		if( !this.timerID ){
-			this.interval = Math.round( 1000/ FRAME_RATE );
+			this.interval = Math.round( 1000/ this.frameRate );
 			this.timerID = window.setInterval( AnimationController.step, this.interval );
 			this.step();
 		}
@@ -82,26 +80,25 @@ function Animation( elem, setStyle, opts ){
 	opts = opts || {}; 
 	this[0] = elem; 
 	this.length = 1;
-	this._id = ++GUID;
+	this._id = AnimationController.guid++;
 	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop;
 	this._reverse = opts.reverse === true;
 	this._autoStart = opts.manualStart !== true;
 	this._frames = [];
 
-	var frames = Math.round( ( opts.duration || 600 ) * ( FRAME_RATE / 1000 ) ), _start = {}, _delta = {}, _end = {};
+	var frames = Math.round( ( opts.duration || 600 ) * ( AnimationController.frameRate / 1000 ) ), _start = {}, _delta = {},
+		_tween = AnimationController.tweens[ opts.tween ] || AnimationController.tweens.easing;
 	
 	// check for supported css animated features and prep for animation
 	for( var key in setStyle ){
 		
 		var opacity = ( key === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
-		if( opacity || TEST_TYPE.test( key ) ){
-			_start[ key ] = ( currentCSS( this[0], key ) + '' || '0').replace('px','') * 1;
+		if( opacity || AnimationController.allowTypes.test( key ) ){
+			_start[ key ] = ( currentCSS( elem, key ) + '' || '0').replace('px','') * 1;
 			_delta[ key ] = ( setStyle[ key ] + '' || '0').replace('px','') * 1 - _start[ key ];
 		}                                        
 	}
-	
-	var _tween = opts.tween && TWEENS.propertyIsEnumerable( opts.tween ) ? TWEENS[ opts.tween ] : TWEENS.easing;
 	
 	for(var i=0;i<=frames;i++){
 		
@@ -187,15 +184,13 @@ for( var key in Animation.prototype ){
 Simples.merge(Simples, {
     animationDefaults: function( opts ){
 	  	opts = opts || {};
-		
-		if( !AnimationController.timerID ){
-			FRAME_RATE = opts.frameRate || FRAME_RATE;
-		}
+	
+		AnimationController.frameRate = opts.frameRate || AnimationController.frameRate;
 		
 		if( opts.tweens ){
 			for( var key in opts.tweens ){
-				if( !hasOwn.call( TWEENS, key ) ){
-					TWEENS[ key ] = opts.tweens[ key ];
+				if( !hasOwn.call( AnimationController.tweens, key ) ){
+					AnimationController.tweens[ key ] = opts.tweens[ key ];
 				}
 			}
 		}

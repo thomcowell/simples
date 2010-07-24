@@ -3,14 +3,12 @@ module("Animation",{
 	setup : function(){
 		window.__AnimationController__ = window.AnimationController; 
 		start = []; stop = [];
-		window.AnimationController = {
-			start : function(){
-				start.push( arguments[0] );
-			},
-			stop : function(){
-				stop.push( arguments[0] );
-			}
-		}
+		window.AnimationController.start = function(){
+			start.push( arguments[0] );
+		};
+		window.AnimationController.stop = function(){
+			stop.push( arguments[0] );
+		};
 	},
 	teardown : function(){    
 		start = []; stop = [];
@@ -32,7 +30,7 @@ test("Animation contructor checks defaults", 8, function() {
 	same( anim._frames.slice( 0 )[0], {opacity:1}, "should have the start state as first frame" );
 	same( anim._frames.slice( -1 )[0], {opacity:0}, "should have the start state as first frame" );
 	anim_id = anim._id;
-	ok( anim._id > 1000000, "should have an id" );
+	ok( anim._id >= 1e6, "should have an id" );
 });
 
 test("Animation contructor checks opts", 7, function() {                                                 
@@ -152,6 +150,19 @@ test("Animation.reset()", 4, function() {
 });
 
 module("AnimationController");
-test("AnimationController.start()", 1, function() {    
-	ok( true, "super");
+test("AnimationController singleton", 6, function(){
+   	function testObject( Obj, name, type ){
+	 	equal( typeof Obj[ name ], type, "should have "+name+" of type "+type );
+	}
+	
+	testObject( AnimationController, 'animations', 'object' );
+	testObject( AnimationController, 'length', 'number' );
+	testObject( AnimationController, 'cycle', 'boolean' );		
+	testObject( AnimationController, 'start', 'function' );
+	testObject( AnimationController, 'step', 'function' );
+	testObject( AnimationController, 'stop', 'function' );
+});
+
+test("Nothing",function(){
+	
 });
