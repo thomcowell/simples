@@ -72,7 +72,7 @@ testoffset("absolute"/* in iframe */, 4, function($, iframe) {
 		equals( Simples( that.id, doc ).position().left, that.left, "Simples('" + that.id + "').offset().left" );
 	})(tests[i]);
 	
-	forceScroll.remove();
+	forceScroll.html("remove");
 });
 
 testoffset("absolute", 82, function( Simples ) {

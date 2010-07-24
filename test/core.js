@@ -133,111 +133,18 @@ test('extend works as expected with 1 arguments', 10, function(){
 		same( window[ f ], undefined, "Should not have the same functions window."+f+" => undefined");
 	}
 
-	extend.call( window, funcs );
+	Simples.extend.call( window, funcs );
     // now test that the window doesn't have the properties in funcs	
 	for( var e in funcs ){
 		same( window[ e ], undefined, "Should not have the same functions window."+e+" => undefined");
 	}
 	
-	extend.call( Class, funcs );
+	Simples.extend.call( Class, funcs );
 	
 	for( var key in Class.prototype ){
 		same( funcs[ key ], Class.prototype[key], "Should have the same functions Class.prototype."+key+" => "+funcs[ key ]);
 	}
 
-});
-   
-test('extend works as expected with 2 arguments', 4, function(){
-	function Class(){ this.start = false; return this; }
-	
-	var length = 0;
-	for(var func in Class.prototype ){
-		length++;
-	}
-	
-	same( length, 0, "Should have an empty prototype chain");
-	
-	var funcs = { 
-		start : function(){ this.start = new Date(); },
-		stop : function(){ this.start = false; },
-		reset : function(){ this.reset = new Date(); }
-	};
-
-	extend( Class, funcs);
-
-	for( var key in Class.prototype ){
-		same( funcs[ key ], Class.prototype[key], "Should have the same functions Class.prototype."+key+" => "+funcs[ key ]);
-	}
-}); 
-
-test('extend works as expected with 3 arguments', 7, function(){
-	function SubClass(){ return this; }
-	function Class(){ this.start = false; return this; }
-	
-	var length = 0;
-	for(var func in Class.prototype ){ length++; }
-	for(var sfunc in SubClass.prototype ){ length++; }
-	same( length, 0, "Should have an empty prototype chain");
-	
-	var funcs = { 
-		start : function(){ this.start = new Date(); },
-		stop : function(){ this.start = false; },
-		reset : function(){ this.reset = new Date(); }
-	};
-
-	Class.prototype = funcs;
-	
-	var extra = { 
-		reset: function(){
-			this.start = null;
-		},
-		more : function(){
-			return 'I want more!!!';
-		}
-	};
-
-	extend( SubClass, Class, extra );
-	var result = merge( {}, funcs, extra );
-
-	same( funcs, Class.prototype, "Should have the same functions Class.prototype.");
-	same( SubClass.prototype.superclass, Class.prototype, "SubClass should have Class as the superClass" );
-
-	for(var key in result ){
-		if( key !== 'constructor' ){
-			same( result[ key ], SubClass.prototype[ key ], "should have the same functions -> "+ key );
-		}
-	}
-});
-
-test('extend works as expected with 3 arguments and null addMethods', 6, function(){
-
-	function SubClass(){ return this; }
-	function Class(){ this.start = false; return this; }
-	
-	var length = 0;
-	for(var func in Class.prototype ){ length++; }
-	for(var sfunc in SubClass.prototype ){ length++; }
-	
-	same( length, 0, "Should have an empty prototype chain");
-	
-	var funcs = { 
-		start : function(){ this.start = new Date(); },
-		stop : function(){ this.start = false; },
-		reset : function(){ this.reset = new Date(); }
-	};
-
-	Class.prototype = funcs;
-
-	extend( SubClass, Class, null );
-
-	same( funcs, Class.prototype, "Should have the same functions Class.prototype.");
-	same( SubClass.prototype.superclass, Class.prototype, "SubClass should have Class as the superClass" );
-
-	for(var key in funcs ){
-		if( key !== 'constructor' ){
-			same( funcs[ key ], SubClass.prototype[ key ], "should have the same functions -> "+ key );
-		}
-	}
 });
 
 module("Core: instantiating an instance of Simples where select isn't called", { 

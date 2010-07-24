@@ -15,6 +15,7 @@ var toString = Object.prototype.toString,
 	BooleanClass = "[object Boolean]",
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]",
+	FIRST_LAST_SPACES = /^\s*|\s*$/g,
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -110,53 +111,19 @@ function merge( first /* obj1, obj2..... */) {
 
     return target;
 }
-      
-/**
-* @name extend
-* @namespace
-* @description used to extend functions onto an Class: 1 argument onto this, 2 arguments onto Class & 3 arguments subClass, superClass and methods to add to build a heirarchy
-* @param {Constructor} subClass the base class to add the superClass and addMethods to
-* @param {Constructor} superClass the Class to extend onto subClass
-* @param {Object} addMethods methods to add to the extended subClass object
-**/
-function extend(subClass, superClass, addMethods) { 
-    // if subClass & superClass are not specified extend onto Simples the object provided
-	if( arguments.length === 1 && !( this === window || this === document ) ){
-		// Shortcut to extend Simples without adding subClasses
-		addMethods = arguments[0];
-		subClass = this;  
-	// if SuperClass is not specified extend onto subClass the object provided
-	} else if( arguments.length === 2 ){
-		addMethods = arguments[1];      
-	// if no addMethods are specified no superClass structure is created, to ensure superClass structure pass in an empty object
-	} else if( arguments.length === 3 ) {
-		// Standard extend behaviour expected
-		var F = function() {};
-
-	    F.prototype = superClass.prototype;
-	    subClass.prototype = new F();
-	    subClass.prototype.constructor = subClass;
-
-	    subClass.prototype.superclass = superClass.prototype;
-
-	    if (superClass.prototype.constructor == Object.prototype.constructor) {
-	        superClass.prototype.constructor = superClass;
-	    }
-	}
-
-	// Detect whether addMethods is an object to extend onto subClass
-	if( toString.call( addMethods ) === ObjectClass ){
-		for (var key in addMethods) {
-	        if ( hasOwn.call( addMethods, key ) ) {
-	            subClass.prototype[key] = addMethods[key];
-	        }
-	    }
-	}
-}
 
 // call with Simples to make sure context is correct
 merge.call( Simples, {
-	extend : extend,
+	extend : function( addMethods ){
+		// Detect whether addMethods is an object to extend onto subClass
+		if( this.prototype && toString.call( addMethods ) === ObjectClass ){
+			for (var key in addMethods) {
+		        if ( hasOwn.call( addMethods, key ) ) {
+		            this.prototype[key] = addMethods[key];
+		        }
+		    }
+		}		
+	},
 	merge : merge,
 	// Has the ready events already been bound?      	
 	isReady : false,       
@@ -185,8 +152,8 @@ merge.call( Simples, {
 			}
 
 			// Trigger any bound ready events
-			if ( Simples.prototype.triggerHandler ) {
-				Simples( document ).triggerHandler( "ready" );
+			if ( Simples.prototype.trigger ) {
+				Simples( document.body ).trigger( "ready" );
 			}
 		}
 	},
@@ -238,19 +205,10 @@ merge.call( Simples, {
 			return func.apply( context, arguments );
 		};
 	},
-	// Use native String.trim function wherever possible
-	trim: trim ?
-	function( text ) {
-		return text == null ?
-			"" :
-			trim.call( text );
-	} :
-
-	// Otherwise use our own trimming functionality
-	function( text ) {
-		return text == null ?
-			"" :
-			text.toString().replace( trimLeft, "" ).replace( trimRight, "" );
+	// Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	trim : function( text ) {
+		text = text == null ? "" : text;
+		return trim ? trim.call( text ) : text.toString().replace( FIRST_LAST_SPACES, "" );
 	},
 	noop : function(){}
 });
@@ -283,7 +241,7 @@ function doScrollCheck() {
 		// http://javascript.nwbox.com/IEContentLoaded/
 		document.documentElement.doScroll("left");
 	} catch(e) {
-		setTimeout( doScrollCheck, 1 );
+		window.setTimeout( doScrollCheck, 1 );
 		return;
 	}
 
@@ -330,7 +288,7 @@ Simples.prototype = {
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			fn.call( document, Simples );
+			fn.call( document, SimplesEvent( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
