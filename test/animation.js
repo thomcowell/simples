@@ -150,6 +150,38 @@ test("Animation.reset()", 4, function() {
 	equal( Math.floor( anim._frames[0].opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
 });
 
+var prefix_ = 't_comp_';
+
+module("CompositeAnimation",{
+	setup : function(){
+		for( var name in Animation ){
+			window[ prefix_ + name ] = [];
+		}
+	},
+	teardown : function(){
+		for( var name in Animation ){
+			window[ prefix_ + name ] = null;
+		}
+	}
+});
+function createAnim( id ){
+	var anim = {};
+	for( var name in Animation ){
+		anim[ name ] = function(){
+			window[ prefix_ + name ].push( id || 0 );
+		}
+	}
+	return anim;	
+}
+
+test("",function(){
+	var anims = [];
+	for(var i=0;i<6;i++){
+		anims.push( anim_)
+	}
+	var ca = new CompositeAnimation( [ anim_, anim_, anim_, anim_ ] );
+})
+
 module("AnimationController");
 test("AnimationController singleton", 6, function(){
    	function testObject( Obj, name, type ){
