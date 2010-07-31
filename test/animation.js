@@ -1,4 +1,4 @@
-var t_start_anim = [], t_stop_anim = [];
+var t_start_anim = [], t_stop_anim = [], anim_id;
 module("Animation",{
 	setup : function(){
 		window.__AnimationController__ = window.AnimationController; 
@@ -16,7 +16,7 @@ module("Animation",{
 		window.AnimationController = window.__AnimationController__;
 	}
 });
-var anim_id;
+
 test("Animation contructor checks defaults", 8, function() {                                                 
 	
 	equal( Animation( Simples('#test-area')[0] ), null, "should not return a animation object" );
@@ -67,7 +67,7 @@ test("Animation.stop()", 8, function() {
 	
     anim.reverse = function(){
 		ok( false, 'should not call reverse' );
-	}
+	};
    	// set correct context
 	anim._frame = 12;
 	t_stop_anim = [];
@@ -78,7 +78,7 @@ test("Animation.stop()", 8, function() {
 	anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {reverse:true} );
 	anim.reverse = function(){
 		ok( true, 'should call reverse' );
-	}
+	};
    	// set correct context
 	anim._frame = 4;
 	t_stop_anim = [];
@@ -117,7 +117,7 @@ test("Animation.step()", 7, function() {
 	anim._frame = 3;
 	anim.stop = function(){
 		ok( false, "should not call stop");
-	}
+	};
 	function testStep( frameNumber ){
 		anim.step();    
 		equal( anim._frame, frameNumber, "should increment the frame by one");
@@ -127,10 +127,10 @@ test("Animation.step()", 7, function() {
 	
 	testStep( 4 );
 	testStep( 5 );       
-	anim._frame = anim._frames.length - 1
+	anim._frame = anim._frames.length - 1;
 	anim.stop = function(){
 		ok( true, "should call stop");
-	}
+	};
 	testStep( anim._frames.length );
 	
 });
@@ -152,50 +152,133 @@ test("Animation.reset()", 4, function() {
 
 var prefix_ = 't_comp_';
 
-module("CompositeAnimation",{
-	setup : function(){
-		for( var name in Animation ){
-			window[ prefix_ + name ] = [];
-		}
-	},
-	teardown : function(){
-		for( var name in Animation ){
-			window[ prefix_ + name ] = null;
-		}
-	}
-});
-function createAnim( id ){
-	var anim = {};
-	for( var name in Animation ){
-		anim[ name ] = function(){
-			window[ prefix_ + name ].push( id || 0 );
-		}
-	}
-	return anim;	
+function testObject( Obj, name, type ){
+ 	equal( typeof Obj[ name ], type, "should have "+name+" of type "+type );
 }
 
-test("",function(){
+function createCA( count ){
+	count = count > 0 ? count : 6;
 	var anims = [];
-	for(var i=0;i<6;i++){
-		anims.push( anim_)
+	for(var i=0;i<count;i++){
+		anims.push( createAnim( i ) );
 	}
-	var ca = new CompositeAnimation( [ anim_, anim_, anim_, anim_ ] );
-})
+	return new CompositeAnimation( anims );	
+}
 
-module("AnimationController");
-test("AnimationController singleton", 6, function(){
-   	function testObject( Obj, name, type ){
-	 	equal( typeof Obj[ name ], type, "should have "+name+" of type "+type );
+function createAnim( id ){
+	var anim = { test_id: id };
+	for( var name in Animation.prototype ){ (function( n, a ){
+		a[n] = function(){
+			window._test[ prefix_ + n ].push( a );
+		};
+	})( name, anim ); }
+	return anim;	
+} 
+
+module("CompositeAnimation", {
+	setup : function(){     
+		window._test = {};
+		for( var name in Animation.prototype ){
+			window._test[ prefix_ + name ] = [];
+		} 
+	},
+	teardown : function(){
+		for( var name in Animation.prototype ){
+			window._test[ prefix_ + name ] = null;
+		}
+		delete window._test;
 	}
+}); 
+
+test("properly setup", 7, function(){
+   	var ca = createCA( 2 );
+	
+	for( var name in Animation.prototype ){
+		testObject( ca, name, 'function' );
+	}
+	testObject( ca, '0', 'object');
+	testObject( ca, '1', 'object');
+});
+
+test("without passing array of animations", 6, function(){
+   	var ca = new CompositeAnimation();
+	
+	for( var name in Animation.prototype ){
+		testObject( ca, name, 'function' );
+	}
+	testObject( ca, '0', 'undefined');
+});                                      
+
+test("with passing Animation", 7, function(){
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
+   	var ca = new CompositeAnimation( anim );
+	
+	for( var name in Animation.prototype ){
+		testObject( ca, name, 'function' );
+	}
+	testObject( ca, '0', 'object');
+	equal( ca[0]._id, anim._id, "should be the animation" );
+});
+
+test("functions", 15,function(){
+   	var ca = createCA( 2 );
+
+	for( var name in Animation.prototype ){
+		ca[ name ]();
+		equal( window._test[ prefix_ + name ].length, 2, name+" should have 2 animation calls" );
+		for(var i=0;i<2;i++){
+			equal( window._test[ prefix_ + name ][ i ].test_id, i, name+" should have same id" );
+		}  
+	}
+});
+
+module("AnimationController", {
+	setup:function(){     
+		AnimationController.frameRate = 24;
+		AnimationController.cycle = false;
+	},
+	teardown:function(){
+		window.clearInterval( AnimationController.timerID );
+		AnimationController.timerID = null;
+		AnimationController.animations = {};
+		AnimationController.length = 0;
+	}
+});
+test("test singleton", 9, function(){
 	
 	testObject( AnimationController, 'animations', 'object' );
+	testObject( AnimationController, 'frameRate', 'number' );
 	testObject( AnimationController, 'length', 'number' );
+	testObject( AnimationController, 'interval', 'number' );
+	testObject( AnimationController, 'tweens', 'object' );
 	testObject( AnimationController, 'cycle', 'boolean' );		
 	testObject( AnimationController, 'start', 'function' );
 	testObject( AnimationController, 'step', 'function' );
 	testObject( AnimationController, 'stop', 'function' );
 });
 
-test("Nothing",function(){
+test("start()", function(){
+	//setup 
+	AnimationController._step = AnimationController.step;
+	AnimationController.step = function(){
+		ok( false, "Should not have called step" );
+	}      
 	
+	AnimationController.frameRate = 1;
+	AnimationController.start();
+	
+	ok( !AnimationController.interval, "should have a frameRate of undefined" );
+	equal( AnimationController.timerID, undefined, "should have a frameRate of undefined" );
+    
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0 }, { manualStart:true } );
+	AnimationController.step = function(){
+		ok( true, "Should have called step" );
+	}
+	AnimationController.start( anim );
+	equal( AnimationController.length, 1, "should have one animation" );
+	ok( AnimationController.timerID > 5, "should have one animation" );
+	equal( AnimationController.interval, 1000, "should have one animation" );  
+
+	// cleanup	
+	AnimationController.step = AnimationController._step;
 });

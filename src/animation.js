@@ -18,16 +18,19 @@ var AnimationController = {
 	timerID : null,
 	cycle : false,
 	interval : Math.round( 1000/ this.frameRate ),
-	start : function( animation ){
-		if( !hasOwn.call( this.animations, animation._id ) ){
-			this.length++;
-			this.animations[ animation._id ] = animation;
-		}
+	start : function( animation ){                            
+
+		if( animation && animation instanceof Animation ){ 
+			if( !hasOwn.call( this.animations, animation._id ) ){
+				this.length++;
+				this.animations[ animation._id ] = animation;
+			}
 		
-		if( !this.timerID ){
-			this.interval = Math.round( 1000/ this.frameRate );
-			this.timerID = window.setInterval( AnimationController.step, this.interval );
-			this.step();
+			if( !this.timerID ){
+				this.interval = Math.round( 1000/ this.frameRate );
+				this.timerID = window.setInterval( AnimationController.step, this.interval );
+				this.step();
+			}
 		}
 	},
 	step : function(){          
@@ -162,7 +165,9 @@ Animation.prototype = {
 }; 
 
 function CompositeAnimation( animations ){
-	
+	if( animations instanceof Animation ){
+		animations = [ animations ];
+	}
 	if( toString.call(animations) === ArrayClass ){
 		push.apply( this, animations );
 	}
@@ -171,14 +176,16 @@ function CompositeAnimation( animations ){
 }
 
 for( var key in Animation.prototype ){
-	CompositeAnimation.prototype[ key ] = function(){
-		for(var i=0,l=this.length;i<l;i++){
-			if( this[ i ][ key ] ){
-				this[ i ][ key ].apply( this[ i ], arguments );
+	CompositeAnimation.prototype[ key ] = (function( name ){ 
+		return function(){
+			for(var i=0,l=this.length;i<l;i++){
+				if( this[ i ][ name ] ){
+					this[ i ][ name ].apply( this[ i ], arguments );
+				}
 			}
-		}
-		return this;
-	};
+			return this;
+		};
+	})( key );
 }
 
 Simples.merge(Simples, {
