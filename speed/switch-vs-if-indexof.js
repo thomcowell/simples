@@ -1,4 +1,4 @@
-(function($){   
+(function( Simples ){   
 	
 	// Test to determine whether the toString call is faster than the typeof and checks
 	// Browser 	| typeof:toString per 50000 calls average ms
