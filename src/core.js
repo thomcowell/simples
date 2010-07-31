@@ -88,7 +88,7 @@ function isEmptyObject( obj ) {
  * @param {Object} obj native javascript object to be merged  
  * @param {Object|Array} obj native javascript object or array to be merged onto first  	
  **/
-function merge( first /* obj1, obj2..... */) { 
+Simples.merge = function( first /* obj1, obj2..... */) { 
 	// if only 1 argument is passed in assume Simples is the target
     var target = ( arguments.length === 1 && !( this === window || this === document ) ) ? this : toString.call( first ) === ObjectClass ? first : {};
 	// set i to value based on whether there are more than 1 arguments
@@ -113,7 +113,7 @@ function merge( first /* obj1, obj2..... */) {
 }
 
 // call with Simples to make sure context is correct
-merge.call( Simples, {
+Simples.merge({
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
 		if( this.prototype && toString.call( addMethods ) === ObjectClass ){
@@ -124,7 +124,6 @@ merge.call( Simples, {
 		    }
 		}		
 	},
-	merge : merge,
 	// Has the ready events already been bound?      	
 	isReady : false,       
 	// Handle when the DOM is ready

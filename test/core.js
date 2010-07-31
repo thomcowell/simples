@@ -66,7 +66,7 @@ test("setContext", 4, function() {
 
 test('merge works as expected with 1 argument', 8, function(){
 	var array = ['red','blue','green'];
-	var result = merge( array );
+	var result = Simples.merge.call( {}, array );
 	same( result.length, array.length, "Should have the same length as the array");
 	
 	for(var i=0,l=3;i<l;i++){
@@ -74,7 +74,7 @@ test('merge works as expected with 1 argument', 8, function(){
 	}
 	
 	var insert = {bool:true,func:function(){},str:'string',num:1};
-	result = merge( insert );
+	result = Simples.merge.call( {}, insert );
 	for(var key in insert){
 		same( result[key], insert[key], "obj should have the same response as insert."+key+" => "+insert[ key ]);
 	}
@@ -82,7 +82,7 @@ test('merge works as expected with 1 argument', 8, function(){
 
 test('merge works as expected with 2 argument', 8, function(){
 	var array = ['red','blue','green'];
-	var result = merge( {}, array );
+	var result = Simples.merge( {}, array );
 	same( result.length, array.length, "Should have the same length as the array");
 	
 	for(var i=0,l=3;i<l;i++){
@@ -90,7 +90,7 @@ test('merge works as expected with 2 argument', 8, function(){
 	}
 	
 	var insert = {bool:true,func:function(){},str:'string',num:1};
-	result = merge({},insert);
+	result = Simples.merge({},insert);
 	for(var key in insert){
 		same( result[key], insert[key], "obj should have the same response as insert."+key+" => "+insert[ key ]);
 	}
@@ -100,7 +100,7 @@ test('merge works as expected with 3 argument', 8, function(){
 	var array = ['red','blue','green'],
 		insert = { bool:true, func:function(){}, str:'string', num:1 };
 		
-	var result = merge( {}, array, insert );
+	var result = Simples.merge( {}, array, insert );
 
 	same( result.length, array.length, "Should have the same length as the array");
 
