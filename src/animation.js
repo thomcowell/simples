@@ -16,14 +16,14 @@ var AnimationController = {
 		}
 	},  
 	timerID : null,
-	cycle : false,
 	interval : Math.round( 1000/ this.frameRate ),
 	start : function( animation ){                            
 
 		if( animation && animation instanceof Animation ){ 
 			if( !hasOwn.call( this.animations, animation._id ) ){
 				this.length++;
-				this.animations[ animation._id ] = animation;
+				this.animations[ animation._id ] = animation; 
+				animation._startTime = new Date().getTime() - ( typeof frame !== 'number' ) ? 0 : ( 0 < frame ? 0 : this._duration * ( frame / AnimationController.frameRate ) );
 			}
 		
 			if( !this.timerID ){
@@ -34,18 +34,11 @@ var AnimationController = {
 		}
 	},
 	step : function(){          
-		if( this.length ){     
-			if( this.cycle ){
-				for( var id in this.animations ){
-					this.animations[ id ]._frame++;
-				}
-			} else {
-				this.cycle = true;
-				for( di in this.animations ){
-					this.animations[ di ].step();
-				}
-				this.cycle = false;
-			}			
+		if( this.length ){ 
+			var now = new Date().getTime();    
+			for( var id in this.animations ){
+				this.animations[ id ].step( now );
+			}   	       
 		} else if( this.timerID ){
 			window.clearInterval( this.timerID );
 			this.timerID = null;
@@ -54,6 +47,7 @@ var AnimationController = {
 	stop : function( animation ){
 		if( animation ){
 			if( hasOwn.call( this.animations, animation._id ) ){
+				delete animation._startTime;
 				delete this.animations[ animation._id ];        
 				this.length--;
 			}
@@ -87,10 +81,10 @@ function Animation( elem, setStyle, opts ){
 	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop;
 	this._reverse = opts.reverse === true;
 	this._autoStart = opts.manualStart !== true;
-	this._frames = [];
-
-	var frames = Math.round( ( opts.duration || 600 ) * ( AnimationController.frameRate / 1000 ) ), _start = {}, _delta = {},
-		_tween = AnimationController.tweens[ opts.tween ] || AnimationController.tweens.easing;
+	this._duration = ( opts.duration || 600 );
+	this._tween = AnimationController.tweens[ opts.tween ] || AnimationController.tweens.easing;
+	this._start = {};
+	this._finish = {};	
 	
 	// check for supported css animated features and prep for animation
 	for( var key in setStyle ){
@@ -98,19 +92,9 @@ function Animation( elem, setStyle, opts ){
 		var opacity = ( key === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 		if( opacity || AnimationController.allowTypes.test( key ) ){
-			_start[ key ] = ( currentCSS( elem, key ) + '' || '0').replace('px','') * 1;
-			_delta[ key ] = ( setStyle[ key ] + '' || '0').replace('px','') * 1 - _start[ key ];
+			this._start[ key ] = ( currentCSS( elem, key ) + '' || '0').replace('px','') * 1;
+			this._finish[ key ] = ( setStyle[ key ] + '' || '0').replace('px','') * 1;
 		}                                        
-	}
-	
-	for(var i=0;i<=frames;i++){
-		
-		var css = {};
-		for( var name in _start ){
-			css[ name ] = _tween( i, frames, _start[ name ], _delta[ name ] );
-		}
-		
-		this._frames.push( css );
 	}
 	
 	return this._autoStart ? this.start() : this;
@@ -118,8 +102,7 @@ function Animation( elem, setStyle, opts ){
 
 Animation.prototype = {
 	start : function( frame ){
-		this._frame = ( typeof frame !== 'number' ) ? 0 : ( 0 < frame ? frame : this._frames.length + frame );
-		AnimationController.start( this );
+		AnimationController.start( this, frame );
 		
 		return this;
 	}, 
@@ -130,36 +113,41 @@ Animation.prototype = {
 		
 		return this._reverse ? this.reverse() : this; 
 	},                          
-	reverse : function( start ){
-		this._frames.reverse();
-		if( this._autoStart || start ){ this.start(); }
+	reverse : function( shouldStart ){
+		var start = this._start, finish = this._finish;
+
+		this._start = finish;
+		this._finish = start;
+
+		if( this._autoStart || shouldStart ){ this.start(); }
 		
 		return this;
 	},
 	reset : function(){
-		var frame = this._frames[0];
-		var callStop = this._frame !== 0;
-		this._frame = 0;
 		
-		for( var name in frame ){
-			setStyle( this[0], name, frame[ name ] );
+		if( this._startTime ){
+			this.stop();
 		}
-		
-		return callStop ? this.stop() : this;
+
+		for( var name in this._start ){
+			setStyle( this[0], name, this._start[ name ] );
+		}
+
+		return this;
 	},
-	step : function(){  
+	step : function( now ){
+		now = ( now || new Date().getTime() ) - this._startTime;
 
-		this._frame++;
+		if ( now > this._duration ) {
 
-		var frame = this._frames[ this._frame ] || this._frames[ this._frames.length - 1 ];
-		for( var name in frame ){
-			setStyle( this[0], name, frame[ name ] );
+			this.stop();
+		} else {
+
+			for( var name in this._start ){
+				setStyle( this[0], name, this._tween( now, this._duration, this._start[ name ], this._finish[ name ] - this._start[ name ] ) );
+			}
 		}
-		             
-		if ( this._frame >= this._frames.length ) { 
-			return this.stop(); 
-		}
-		    
+
 		return this;
 	}
 }; 

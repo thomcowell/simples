@@ -1,13 +1,21 @@
-var t_start_anim = [], t_stop_anim = [], anim_id;
+var t_start_anim = [], t_stop_anim = [], anim_id, test_now;
+
+function setUpStartTime( animation, frame, frameRate ){
+	animation._startTime = start = new Date().getTime() - ( animation._duration * frame / frameRate );
+	return animation;
+}
+
 module("Animation",{
 	setup : function(){
 		window.__AnimationController__ = window.AnimationController; 
 		t_start_anim = []; t_stop_anim = [];
-		window.AnimationController.start = function(){
-			t_start_anim.push( arguments[0] );
+		window.AnimationController.start = function( animation ){
+			test_now = new Date().getTime();
+			animation._startTime = test_now;
+			t_start_anim.push( animation );
 		};
-		window.AnimationController.stop = function(){
-			t_stop_anim.push( arguments[0] );
+		window.AnimationController.stop = function( animation ){
+			t_stop_anim.push( animation );
 		};
 	},
 	teardown : function(){    
@@ -23,12 +31,12 @@ test("Animation contructor checks defaults", 8, function() {
 	
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
 	
-	equal( anim._frames.length, Math.floor( 600 * 24/1000 ) + 1, "should have x frames" );
+	equal( anim._duration, 600, "should have x frames" );
 	ok( !anim._reverse, "should set to reverse to false" );
 	ok( anim._autoStart, "should autoStart animation" );
 	equal( typeof anim._callback, "function", "should always set a callback function" );
-	same( anim._frames.slice( 0 )[0], {opacity:1}, "should have the start state as first frame" );
-	same( anim._frames.slice( -1 )[0], {opacity:0}, "should have the start state as first frame" );
+	same( anim._start, {opacity:1}, "should have the start state as first frame" );
+	same( anim._finish, {opacity:0}, "should have the start state as first frame" );
 	anim_id = anim._id;
 	ok( anim._id >= 1e6, "should have an id" );
 });
@@ -37,12 +45,12 @@ test("Animation contructor checks opts", 7, function() {
 
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {reverse:true, manualStart:true, duration:1000});
 	
-	equal( anim._frames.length, Math.floor( 1000 * 24/1000 ) + 1, "should have x frames" );
+	equal( anim._duration, 1000, "should have x frames" );
 	ok( anim._reverse, "should set to reverse to false" );
 	ok( !anim._autoStart, "should autoStart animation" );
 	equal( typeof anim._callback, "function", "should always set a callback function" );
-	same( anim._frames.slice( 0 )[0], {opacity:1}, "should have the start state as first frame" );
-	same( anim._frames.slice( -1 )[0], {opacity:0}, "should have the start state as first frame" );
+	same( anim._start, {opacity:1}, "should have the start state as first frame" );
+	same( anim._finish, {opacity:0}, "should have the start state as first frame" );
 	ok( anim._id === anim_id + 1, "should have an id" );
 });
 
@@ -50,14 +58,14 @@ test("Animation.start()", 2, function() {
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
  
    	// set correct context
-	anim._frame = undefined; t_start_anim = [];
+	anim._startTime = undefined; t_start_anim = [];
 	anim.start();
-	equal( anim._frame, 0, "should set the frame to 0");
+	equal( anim._startTime, test_now, "should set the frame to 0");
 	same( anim, t_start_anim[0], "should call AnimationController.start");
 });
 	
 test("Animation.stop()", 8, function() {
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {
+	var start, anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {
 		callback:function( animation ){
 			ok( true, "should call callback");
 			same( this, anim[0], "this should be the element" );
@@ -69,85 +77,87 @@ test("Animation.stop()", 8, function() {
 		ok( false, 'should not call reverse' );
 	};
    	// set correct context
-	anim._frame = 12;
+	anim = setUpStartTime( anim, 12, 24 );
+	start = anim._startTime;
 	t_stop_anim = [];
 	anim.stop();
-	equal( anim._frame, 12, "should set the frame to 0");
+	equal( anim._startTime, start, "should set the frame to 0");
 	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
-	anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {reverse:true} );
+	anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { reverse:true } );
 	anim.reverse = function(){
 		ok( true, 'should call reverse' );
 	};
    	// set correct context
-	anim._frame = 4;
+	anim = setUpStartTime( anim, 4, 24 );
+	start = anim._startTime;
 	t_stop_anim = [];
 	anim.stop();	
 	
-	equal( anim._frame, 4, "should set the frame to 0");
+	equal( anim._startTime, start, "should set the frame to 0");
 	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
 });
 
-test("Animation.reverse()", 7, function() { 
+test("Animation.reverse()", 6, function() { 
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} ),
-		frames = anim._frames;
-			   		
-	same( anim._frames, frames, "check validity of setup" );
+		states = [ anim._start, anim._finish ];
+
 	anim._autoStart = true;
 	t_start_anim = [];
 	anim.reverse();
-	same( anim._frames, frames.reverse(), "frames are reversed" );
+	same( [ anim._finish, anim._start ], states, "frames are reversed" );
 	same( t_start_anim[0], anim, "should automatically call start" );
 	
 	anim._autoStart = false;
 	t_start_anim = [];
 	anim.reverse();
-	same( anim._frames, frames.reverse(), "frames are reversed" );
+	same( [ anim._start, anim._finish ], states, "frames are reversed" );
 	same( t_start_anim[0], undefined, "should automatically call start" );
 	
 	t_start_anim = [];
 	anim.reverse( true );
-	same( anim._frames, frames.reverse(), "frames are reversed" );
+	same( [ anim._finish, anim._start ], states, "frames are reversed" );
 	same( t_start_anim[0], anim, "should automatically call start" );
-});
+});   
 
-test("Animation.step()", 7, function() { 
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} ), factor = 1000;
-	anim._frame = 3;
+function testStep( anim, frameNumber, frameMax, factor ){
+	var stop = false, now = new Date().getTime(), frameTime = now + ( ( frameNumber / frameMax ) * anim._duration );
 	anim.stop = function(){
-		ok( false, "should not call stop");
+		ok( stop, "should "+(stop ? "": "not ")+"call stop");
 	};
-	function testStep( frameNumber ){
-		anim.step();    
-		equal( anim._frame, frameNumber, "should increment the frame by one");
-		var frame = anim._frames[ frameNumber ] || anim._frames[ anim._frames.length -1 ];
-		equal( Math.floor( frame.opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
+
+	if( frameNumber > frameMax ){
+		stop = true;
 	}
 	
-	testStep( 4 );
-	testStep( 5 );       
-	anim._frame = anim._frames.length - 1;
-	anim.stop = function(){
-		ok( true, "should call stop");
-	};
-	testStep( anim._frames.length );
-	
+	anim._startTime = now;
+	anim.step( frameTime );    
+    
+	if( !stop ){
+		var opacity = AnimationController.tweens.easing( ( frameNumber / frameMax ) * anim._duration, anim._duration, anim._start.opacity, anim._finish.opacity - anim._start.opacity );
+		equal( Math.floor( opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );			
+	}
+}
+
+test("Animation.step()", 26, function() { 
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { manualStart:true, duration:1000 } ), max = 24;
+	for(var i=0;i<=max+1;i++){
+		testStep( anim, i, max, 1000 );
+	}      
 });
 
-test("Animation.reset()", 4, function() {    
+test("Animation.reset()", 3, function() {    
 	
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} ), factor = 1000;
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { manualStart:true, duration:1000 } ), factor = 1000;
 	
-	anim._frame = 4;
-	anim.step();
-	equal( Math.floor( anim._frames[5].opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
-	
+	testStep( anim, 8, 24, factor );
+	 
+	anim.stop = Animation.prototype.stop;
 	anim.reset();
 	
 	equal( t_stop_anim[0], anim, "should call stop, as not on first frame");
-	equal( anim._frame, 0, "set back to first frame");
-	equal( Math.floor( anim._frames[0].opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
+	equal( anim._start.opacity, anim[0].style.opacity, "set back to first frame");
 });
 
 var prefix_ = 't_comp_';
