@@ -1,19 +1,37 @@
-var t_start_anim = [], t_stop_anim = [], anim_id;
+var t_start_anim = [], t_stop_anim = [], anim_id, test_now;
+
+function setUpStartTime( animation, frame, frameRate ){
+	animation._startTime = start = new Date().getTime() - ( animation._duration * frame / frameRate );
+	return animation;
+}
+
+function clone( obj ){
+	var nobj = {};
+	for( var name in obj ){
+		nobj[ name ] = obj[ name ];
+	}
+	return nobj;
+}
+
 module("Animation",{
 	setup : function(){
-		window.__AnimationController__ = window.AnimationController; 
+		window.__AnimationController__ = clone( window.AnimationController ); 
 		t_start_anim = []; t_stop_anim = [];
-		window.AnimationController.start = function(){
-			t_start_anim.push( arguments[0] );
+		
+		window.AnimationController.start = function( animation ){
+			test_now = new Date().getTime();
+			animation._startTime = test_now;
+			t_start_anim.push( animation );
 		};
-		window.AnimationController.stop = function(){
-			t_stop_anim.push( arguments[0] );
+		window.AnimationController.stop = function( animation ){
+			t_stop_anim.push( animation );
 		};
 	},
-	teardown : function(){    
+	teardown : function(){   
 		t_start_anim = []; t_stop_anim = [];
 		Simples('#test-area').css('opacity', 1 );
-		window.AnimationController = window.__AnimationController__;
+		window.AnimationController = clone( window.__AnimationController__ );
+		window.__AnimationController__ = null;
 	}
 });
 
@@ -23,41 +41,40 @@ test("Animation contructor checks defaults", 8, function() {
 	
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
 	
-	equal( anim._frames.length, Math.floor( 600 * 24/1000 ) + 1, "should have x frames" );
+	equal( anim._duration, 600, "should have x frames" );
 	ok( !anim._reverse, "should set to reverse to false" );
 	ok( anim._autoStart, "should autoStart animation" );
 	equal( typeof anim._callback, "function", "should always set a callback function" );
-	same( anim._frames.slice( 0 )[0], {opacity:1}, "should have the start state as first frame" );
-	same( anim._frames.slice( -1 )[0], {opacity:0}, "should have the start state as first frame" );
-	anim_id = anim._id;
-	ok( anim._id >= 1e6, "should have an id" );
+	same( anim._start, {opacity:1}, "should have the start state as first frame" );
+	same( anim._finish, {opacity:0}, "should have the start state as first frame" );
+	equal( anim._id, AnimationController.guid - 1, "should have an id" );
 });
 
 test("Animation contructor checks opts", 7, function() {                                                 
 
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {reverse:true, manualStart:true, duration:1000});
 	
-	equal( anim._frames.length, Math.floor( 1000 * 24/1000 ) + 1, "should have x frames" );
+	equal( anim._duration, 1000, "should have duration" );
 	ok( anim._reverse, "should set to reverse to false" );
 	ok( !anim._autoStart, "should autoStart animation" );
 	equal( typeof anim._callback, "function", "should always set a callback function" );
-	same( anim._frames.slice( 0 )[0], {opacity:1}, "should have the start state as first frame" );
-	same( anim._frames.slice( -1 )[0], {opacity:0}, "should have the start state as first frame" );
-	ok( anim._id === anim_id + 1, "should have an id" );
+	same( anim._start, {opacity:1}, "should have the start state as first frame" );
+	same( anim._finish, {opacity:0}, "should have the start state as first frame" );  
+	equal( anim._id, AnimationController.guid - 1, "should have an id" );
 });
 
 test("Animation.start()", 2, function() {
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
  
    	// set correct context
-	anim._frame = undefined; t_start_anim = [];
+	anim._startTime = undefined; t_start_anim = [];
 	anim.start();
-	equal( anim._frame, 0, "should set the frame to 0");
+	equal( anim._startTime, test_now, "should set the frame to 0");
 	same( anim, t_start_anim[0], "should call AnimationController.start");
 });
 	
 test("Animation.stop()", 8, function() {
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {
+	var start, anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {
 		callback:function( animation ){
 			ok( true, "should call callback");
 			same( this, anim[0], "this should be the element" );
@@ -69,85 +86,87 @@ test("Animation.stop()", 8, function() {
 		ok( false, 'should not call reverse' );
 	};
    	// set correct context
-	anim._frame = 12;
+	anim = setUpStartTime( anim, 12, 24 );
+	start = anim._startTime;
 	t_stop_anim = [];
 	anim.stop();
-	equal( anim._frame, 12, "should set the frame to 0");
+	equal( anim._startTime, start, "should set the frame to 0");
 	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
-	anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {reverse:true} );
+	anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { reverse:true } );
 	anim.reverse = function(){
 		ok( true, 'should call reverse' );
 	};
    	// set correct context
-	anim._frame = 4;
+	anim = setUpStartTime( anim, 4, 24 );
+	start = anim._startTime;
 	t_stop_anim = [];
 	anim.stop();	
 	
-	equal( anim._frame, 4, "should set the frame to 0");
+	equal( anim._startTime, start, "should set the frame to 0");
 	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
 });
 
-test("Animation.reverse()", 7, function() { 
+test("Animation.reverse()", 6, function() { 
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} ),
-		frames = anim._frames;
-			   		
-	same( anim._frames, frames, "check validity of setup" );
+		states = [ anim._start, anim._finish ];
+
 	anim._autoStart = true;
 	t_start_anim = [];
 	anim.reverse();
-	same( anim._frames, frames.reverse(), "frames are reversed" );
+	same( [ anim._finish, anim._start ], states, "frames are reversed" );
 	same( t_start_anim[0], anim, "should automatically call start" );
 	
 	anim._autoStart = false;
 	t_start_anim = [];
 	anim.reverse();
-	same( anim._frames, frames.reverse(), "frames are reversed" );
+	same( [ anim._start, anim._finish ], states, "frames are reversed" );
 	same( t_start_anim[0], undefined, "should automatically call start" );
 	
 	t_start_anim = [];
 	anim.reverse( true );
-	same( anim._frames, frames.reverse(), "frames are reversed" );
+	same( [ anim._finish, anim._start ], states, "frames are reversed" );
 	same( t_start_anim[0], anim, "should automatically call start" );
-});
+});   
 
-test("Animation.step()", 7, function() { 
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} ), factor = 1000;
-	anim._frame = 3;
+function testStep( anim, frameNumber, frameMax, factor ){
+	var stop = false, now = new Date().getTime(), frameTime = now + ( ( frameNumber / frameMax ) * anim._duration );
 	anim.stop = function(){
-		ok( false, "should not call stop");
+		ok( stop, "should "+(stop ? "": "not ")+"call stop");
 	};
-	function testStep( frameNumber ){
-		anim.step();    
-		equal( anim._frame, frameNumber, "should increment the frame by one");
-		var frame = anim._frames[ frameNumber ] || anim._frames[ anim._frames.length -1 ];
-		equal( Math.floor( frame.opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
+
+	if( frameNumber > frameMax ){
+		stop = true;
 	}
 	
-	testStep( 4 );
-	testStep( 5 );       
-	anim._frame = anim._frames.length - 1;
-	anim.stop = function(){
-		ok( true, "should call stop");
-	};
-	testStep( anim._frames.length );
-	
+	anim._startTime = now;
+	anim.step( frameTime );    
+    
+	if( !stop ){
+		var opacity = AnimationController.tweens.easing( ( frameNumber / frameMax ) * anim._duration, anim._duration, anim._start.opacity, anim._finish.opacity - anim._start.opacity );
+		equal( Math.floor( opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );			
+	}
+}
+
+test("Animation.step()", 26, function() { 
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { manualStart:true, duration:1000 } ), max = 24;
+	for(var i=0;i<=max+1;i++){
+		testStep( anim, i, max, 1000 );
+	}      
 });
 
-test("Animation.reset()", 4, function() {    
+test("Animation.reset()", 3, function() {    
 	
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} ), factor = 1000;
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { manualStart:true, duration:1000 } ), factor = 1000;
 	
-	anim._frame = 4;
-	anim.step();
-	equal( Math.floor( anim._frames[5].opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
-	
+	testStep( anim, 8, 24, factor );
+	 
+	anim.stop = Animation.prototype.stop;
 	anim.reset();
 	
 	equal( t_stop_anim[0], anim, "should call stop, as not on first frame");
-	equal( anim._frame, 0, "set back to first frame");
-	equal( Math.floor( anim._frames[0].opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );
+	equal( anim._start.opacity, anim[0].style.opacity, "set back to first frame");
 });
 
 var prefix_ = 't_comp_';
@@ -166,7 +185,7 @@ function createCA( count ){
 }
 
 function createAnim( id ){
-	var anim = { test_id: id };
+	var anim = { _id: id };
 	for( var name in Animation.prototype ){ (function( n, a ){
 		a[n] = function(){
 			window._test[ prefix_ + n ].push( a );
@@ -227,7 +246,7 @@ test("functions", 15,function(){
 		ca[ name ]();
 		equal( window._test[ prefix_ + name ].length, 2, name+" should have 2 animation calls" );
 		for(var i=0;i<2;i++){
-			equal( window._test[ prefix_ + name ][ i ].test_id, i, name+" should have same id" );
+			equal( window._test[ prefix_ + name ][ i ]._id, i, name+" should have same id" );
 		}  
 	}
 });
@@ -235,50 +254,119 @@ test("functions", 15,function(){
 module("AnimationController", {
 	setup:function(){     
 		AnimationController.frameRate = 24;
-		AnimationController.cycle = false;
+		AnimationController.interval = Math.round( 1000 / 24 );
+		
+		for( var name in Animation.prototype ){
+			Animation.prototype[ '_' + name ] = Animation.prototype[ name ];
+			Animation.prototype[ name ] = function(){
+				ok( true, name + " called" );
+			};
+		}
 	},
-	teardown:function(){
+	teardown:function(){                                                    
+		for( var name in Animation.prototype ){
+			Animation.prototype[ name ] = Animation.prototype[ '_' + name ];
+			delete Animation.prototype[ '_' + name ];
+		}
+		
 		window.clearInterval( AnimationController.timerID );
 		AnimationController.timerID = null;
 		AnimationController.animations = {};
 		AnimationController.length = 0;
 	}
 });
-test("test singleton", 9, function(){
+test("test singleton", 8, function(){
 	
 	testObject( AnimationController, 'animations', 'object' );
 	testObject( AnimationController, 'frameRate', 'number' );
 	testObject( AnimationController, 'length', 'number' );
 	testObject( AnimationController, 'interval', 'number' );
-	testObject( AnimationController, 'tweens', 'object' );
-	testObject( AnimationController, 'cycle', 'boolean' );		
+	testObject( AnimationController, 'tweens', 'object' );		
 	testObject( AnimationController, 'start', 'function' );
 	testObject( AnimationController, 'step', 'function' );
 	testObject( AnimationController, 'stop', 'function' );
 });
 
-test("start()", function(){
-	//setup 
+test("start() basics", 9, function(){
+	//setup
 	AnimationController._step = AnimationController.step;
+	// test setup
 	AnimationController.step = function(){
 		ok( false, "Should not have called step" );
-	}      
-	
+	};
+
 	AnimationController.frameRate = 1;
 	AnimationController.start();
-	
-	ok( !AnimationController.interval, "should have a frameRate of undefined" );
+
+	equal( AnimationController.interval, Math.round( 1000 / 24 ), "should have a default interval" );
 	equal( AnimationController.timerID, undefined, "should have a frameRate of undefined" );
-    
-	var anim = Animation( Simples('#test-area')[0], {'opacity': 0 }, { manualStart:true } );
+
+	var anim = Animation( Simples('#test-area')[0], {'opacity': 0 }, { manualStart:true } ),
+		id = AnimationController.timerID;
+		
 	AnimationController.step = function(){
 		ok( true, "Should have called step" );
-	}
+	};
+	
 	AnimationController.start( anim );
+	
 	equal( AnimationController.length, 1, "should have one animation" );
-	ok( AnimationController.timerID > 5, "should have one animation" );
-	equal( AnimationController.interval, 1000, "should have one animation" );  
+	ok( AnimationController.timerID > id, "should start the timer" );
+	equal( AnimationController.interval, 1000, "should have set the interval correctly" );  
+    
+	AnimationController.frameRate = 12;
+	id = AnimationController.timerID;
+	AnimationController.start( anim );
+
+	equal( AnimationController.length, 1, "should have one animation" );
+	equal( AnimationController.timerID, id, "should have one timer" );
+	equal( AnimationController.interval, 1000, "should have one animation" );	
 
 	// cleanup	
 	AnimationController.step = AnimationController._step;
+});
+
+test("step() thorough", 12, function(){
+	window.__clearInterval__ = window.clearInterval;
+	window.clearInterval = function(){
+		ok( true, "should call clearInterval" );
+	}
+	
+	AnimationController.timerID = 34324;
+ 	AnimationController.step();
+
+	equal( AnimationController.timerID, undefined, "when timerID but no animations should stop timer");
+   
+	window.clearInterval = window.__clearInterval__; 
+	
+	for( var id=0;id<10;id++){
+		AnimationController.animations[ id ] = createAnim( id );
+		AnimationController.length = id+1;
+		AnimationController.animations[ id ].step = (function(id){
+			return function( now ){ 
+				var current = new Date().getTime();
+				ok( current+10 > now && current - 10 < now, "should call and pass now "+id );
+			};
+		})( id );
+	}
+	
+	AnimationController.step()
+});
+
+test("stop() thorough", 30, function(){
+
+	for( var id=0;id<10;id++){
+		AnimationController.animations[ id ] = createAnim( id );
+		AnimationController.length = id+1;
+		AnimationController.animations[ id ]._startTime = new Date().getTime();
+	}
+	var length = 10;
+	for( var i=0;i<10;i++){
+		var animation = AnimationController.animations[ i ];
+		AnimationController.stop( animation );
+		equal( animation._startTime, undefined, "should not have a startTime" );
+		equal( AnimationController.animations[ i ], undefined, "should not have a record of the animation - "+animation._id );
+		equal( AnimationController.length, --length, "should decrement length" );
+	}
+	
 });
