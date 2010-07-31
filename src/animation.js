@@ -16,7 +16,7 @@ var AnimationController = {
 		}
 	},  
 	timerID : null,
-	interval : Math.round( 1000/ this.frameRate ),
+	interval : Math.round( 1000 / this.frameRate ),
 	start : function( animation ){                            
 
 		if( animation && animation instanceof Animation ){ 
@@ -25,7 +25,7 @@ var AnimationController = {
 				this.animations[ animation._id ] = animation; 
 				animation._startTime = new Date().getTime() - ( typeof frame !== 'number' ) ? 0 : ( 0 < frame ? 0 : this._duration * ( frame / AnimationController.frameRate ) );
 			}
-		
+ 			
 			if( !this.timerID ){
 				this.interval = Math.round( 1000/ this.frameRate );
 				this.timerID = window.setInterval( AnimationController.step, this.interval );
@@ -45,12 +45,10 @@ var AnimationController = {
 		}
 	},
 	stop : function( animation ){
-		if( animation ){
-			if( hasOwn.call( this.animations, animation._id ) ){
-				delete animation._startTime;
-				delete this.animations[ animation._id ];        
-				this.length--;
-			}
+		if( animation && hasOwn.call( this.animations, animation._id ) ){
+			delete animation._startTime;
+			delete this.animations[ animation._id ];        
+			this.length--;
 		}
 	}
 };
