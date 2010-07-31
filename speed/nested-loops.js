@@ -1,4 +1,4 @@
-(function($){   
+(function( Simples ){   
 	
 	// Test to determine whether the toString call is faster than the typeof and checks
 	// Browser 	| typeof:toString per 50000 calls average ms
@@ -11,7 +11,7 @@
 		for( var name in css ){
 			elements.each(function(){
 				setStyle( this, name, css[name] );
-			})
+			});
 		}
 	}
 	
@@ -23,7 +23,7 @@
 		});		
 	}
 	
-	perfTester.write( 'Testing of looping position - '+count+' times' );
+	perfTester.write( 'Testing of looping css - '+count+' times' );
 	test( forThenFunction, count, 'forThenFunction' );
 	test( functionThenFor, count, 'functionThenFor' );
 	test( functionThenFor, count, 'functionThenFor' );	
