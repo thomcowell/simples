@@ -17,13 +17,13 @@ var AnimationController = {
 	},  
 	timerID : null,
 	interval : Math.round( 1000 / this.frameRate ),
-	start : function( animation ){                            
+	start : function( animation, frame ){                            
 
 		if( animation && animation instanceof Animation ){ 
 			if( !hasOwn.call( this.animations, animation._id ) ){
 				this.length++;
 				this.animations[ animation._id ] = animation; 
-				animation._startTime = new Date().getTime() - ( typeof frame !== 'number' ) ? 0 : ( 0 < frame ? 0 : this._duration * ( frame / AnimationController.frameRate ) );
+				animation._startTime = new Date().getTime() - ( typeof frame !== 'number' ||  0 < frame ) ? 0 : frame / this._duration / 1000 * AnimationController.frameRate;
 			}
  			
 			if( !this.timerID ){
@@ -135,16 +135,15 @@ Animation.prototype = {
 	},
 	step : function( now ){
 		now = ( now || new Date().getTime() ) - this._startTime;
-
+		
+		for( var name in this._start ){
+			setStyle( this[0], name, this._tween( now > this._duration ? this._duration : now, this._duration, this._start[ name ], this._finish[ name ] - this._start[ name ] ) );
+		}
+		
 		if ( now > this._duration ) {
 
 			this.stop();
-		} else {
-
-			for( var name in this._start ){
-				setStyle( this[0], name, this._tween( now, this._duration, this._start[ name ], this._finish[ name ] - this._start[ name ] ) );
-			}
-		}
+		} 
 
 		return this;
 	}
@@ -194,7 +193,8 @@ Simples.extend({
     animate: function( css, opts ){
 		var animations = [];
 		if( opts ){		
-			this.each(function(){
+			this.each(function(){  
+				// debugger;
 				var anim = Animation( this, css, opts );
 				if( anim ){
 					animations.push( anim );

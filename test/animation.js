@@ -18,9 +18,10 @@ module("Animation",{
 		window.__AnimationController__ = clone( window.AnimationController ); 
 		t_start_anim = []; t_stop_anim = [];
 		
-		window.AnimationController.start = function( animation ){
+		window.AnimationController.start = function( animation, frame ){
 			test_now = new Date().getTime();
 			animation._startTime = test_now;
+			animation._calledFrame = frame;
 			t_start_anim.push( animation );
 		};
 		window.AnimationController.stop = function( animation ){
@@ -63,14 +64,20 @@ test("Animation contructor checks opts", 7, function() {
 	equal( anim._id, AnimationController.guid - 1, "should have an id" );
 });
 
-test("Animation.start()", 2, function() {
+test("Animation.start()", 5, function() {
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0} );
  
    	// set correct context
 	anim._startTime = undefined; t_start_anim = [];
 	anim.start();
-	equal( anim._startTime, test_now, "should set the frame to 0");
+	equal( anim._startTime, test_now, "should set the startTime");
 	same( anim, t_start_anim[0], "should call AnimationController.start");
+	
+	anim._startTime = undefined; t_start_anim = [];
+	anim.start( 6 );
+	equal( anim._startTime, Math.round( test_now - ( anim._duration/1000 * 6 / AnimationController.frameRate)) , "should set the startTime minus current Frame");
+	equal( anim._calledFrame, 6, "should call AnimationController.start with frame");
+	same( anim, t_start_anim[0], "should call AnimationController.start with animation");
 });
 	
 test("Animation.stop()", 8, function() {
@@ -143,17 +150,15 @@ function testStep( anim, frameNumber, frameMax, factor ){
 	anim._startTime = now;
 	anim.step( frameTime );    
     
-	if( !stop ){
-		var opacity = AnimationController.tweens.easing( ( frameNumber / frameMax ) * anim._duration, anim._duration, anim._start.opacity, anim._finish.opacity - anim._start.opacity );
-		equal( Math.floor( opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity" );			
-	}
+	var opacity = AnimationController.tweens.easing( Math.min( frameNumber / frameMax, 1 ) * anim._duration, anim._duration, anim._start.opacity, anim._finish.opacity - anim._start.opacity );
+	equal( Math.floor( opacity * factor ) / factor, Math.floor( anim[0].style.opacity * factor ) / factor, "should set to frame opacity - "+frameNumber+" of "+frameMax );			
 }
 
-test("Animation.step()", 26, function() { 
+test("Animation.step()", 27, function() { 
 	var anim = Animation( Simples('#test-area')[0], {'opacity': 0}, { manualStart:true, duration:1000 } ), max = 24;
 	for(var i=0;i<=max+1;i++){
 		testStep( anim, i, max, 1000 );
-	}      
+	}
 });
 
 test("Animation.reset()", 3, function() {    
@@ -287,7 +292,7 @@ test("test singleton", 8, function(){
 	testObject( AnimationController, 'stop', 'function' );
 });
 
-test("start() basics", 9, function(){
+test("start() basics", 10, function(){
 	//setup
 	AnimationController._step = AnimationController.step;
 	// test setup
@@ -307,12 +312,13 @@ test("start() basics", 9, function(){
 	AnimationController.step = function(){
 		ok( true, "Should have called step" );
 	};
-	
+
 	AnimationController.start( anim );
-	
+
 	equal( AnimationController.length, 1, "should have one animation" );
 	ok( AnimationController.timerID > id, "should start the timer" );
-	equal( AnimationController.interval, 1000, "should have set the interval correctly" );  
+	equal( AnimationController.interval, 1000, "should have set the interval correctly" );
+	ok( anim._startTime >= new Date().getTime() + 100, "should have correctly set the start time" );  
     
 	AnimationController.frameRate = 12;
 	id = AnimationController.timerID;
@@ -371,124 +377,32 @@ test("stop() thorough", 30, function(){
 	
 }); 
 
-// module("effects");
-// 
-// test("show()", function() {
-// 	expect(23);
-// 	var pass = true, div = jQuery("#main div");
-// 	div.show().each(function(){
-// 		if ( this.style.display == "none" ) pass = false;
-// 	});
-// 	ok( pass, "Show" );
-// 
-// 	var speeds = {
-// 	  "null speed": null,
-// 	  "undefined speed": undefined,
-// 	  "empty string speed": "",
-// 	  "false speed": false
-// 	};
-// 
-// 	jQuery.each(speeds, function(name, speed) {
-//     pass = true;
-//   	div.hide().show(speed).each(function() {
-//   		if ( this.style.display == "none" ) pass = false;
-//   	});
-//   	ok( pass, "Show with " + name);
-//   });
-// 
-// 
-// 	jQuery.each(speeds, function(name, speed) {
-//     pass = true;
-//   	div.hide().show(speed, function() {
-// 			pass = false;
-// 		});
-// 		ok( pass, "Show with " + name + " does not call animate callback" );
-// 	});
-// 
-// 	jQuery("#main").append('<div id="show-tests"><div><p><a href="#"></a></p><code></code><pre></pre><span></span></div><table><thead><tr><th></th></tr></thead><tbody><tr><td></td></tr></tbody></table><ul><li></li></ul></div>');
-// 
-// 	var old = jQuery("#show-tests table").show().css("display") !== "table";
-// 
-// 	var test = {
-// 		"div"      : "block",
-// 		"p"        : "block",
-// 		"a"        : "inline",
-// 		"code"     : "inline",
-// 		"pre"      : "block",
-// 		"span"     : "inline",
-// 		"table"    : old ? "block" : "table",
-// 		"thead"    : old ? "block" : "table-header-group",
-// 		"tbody"    : old ? "block" : "table-row-group",
-// 		"tr"       : old ? "block" : "table-row",
-// 		"th"       : old ? "block" : "table-cell",
-// 		"td"       : old ? "block" : "table-cell",
-// 		"ul"       : "block",
-// 		"li"       : old ? "block" : "list-item"
-// 	};
-// 
-// 	jQuery.each(test, function(selector, expected) {
-// 		var elem = jQuery(selector, "#show-tests").show();
-// 		equals( elem.css("display"), expected, "Show using correct display type for " + selector );
-// 	});
-// });
-// 
-// test("show(Number) - other displays", function() {
-// 	expect(15);
-// 	reset();
-// 	stop();
-// 
-// 	jQuery("#main").append('<div id="show-tests"><div><p><a href="#"></a></p><code></code><pre></pre><span></span></div><table><thead><tr><th></th></tr></thead><tbody><tr><td></td></tr></tbody></table><ul><li></li></ul></div>');
-// 
-// 	var old = jQuery("#show-tests table").show().css("display") !== "table",
-// 		num = 0;
-// 
-// 	var test = {
-// 		"div"      : "block",
-// 		"p"        : "block",
-// 		"a"        : "inline",
-// 		"code"     : "inline",
-// 		"pre"      : "block",
-// 		"span"     : "inline",
-// 		"table"    : old ? "block" : "table",
-// 		"thead"    : old ? "block" : "table-header-group",
-// 		"tbody"    : old ? "block" : "table-row-group",
-// 		"tr"       : old ? "block" : "table-row",
-// 		"th"       : old ? "block" : "table-cell",
-// 		"td"       : old ? "block" : "table-cell",
-// 		"ul"       : "block",
-// 		"li"       : old ? "block" : "list-item"
-// 	};
-// 
-// 	jQuery.each(test, function(selector, expected) {
-// 		var elem = jQuery(selector, "#show-tests").show(1, function() {
-// 			equals( elem.css("display"), expected, "Show using correct display type for " + selector );
-// 			if ( ++num === 15 ) {
-// 				start();
-// 			}
-// 		});
-// 	});
-// });
-// 
-// test("animate(Hash, Object, Function)", function() {
-// 	expect(1);
-// 	stop();
-// 	var hash = {opacity: 'show'};
-// 	var hashCopy = jQuery.extend({}, hash);
-// 	jQuery('#foo').animate(hash, 0, function() {
-// 		equals( hash.opacity, hashCopy.opacity, 'Check if animate changed the hash parameter' );
-// 		start();
-// 	});
-// });
-// 
-// test("animate negative height", function() {
-// 	expect(1);
-// 	stop();
-// 	jQuery("#foo").animate({ height: -100 }, 100, function() {
-// 		equals( this.offsetHeight, 0, "Verify height." );
-// 		start();
-// 	});
-// });
-// 
+module( "animate()" );
+test("animate(Hash, Object, Function)", 1, function() {
+	QUnit.stop();
+	var hash = {opacity: 'show'};
+	var hashCopy = clone( hash );
+	Simples('#foo').animate({opacity: 'show'}, {
+		callback: function( animate ) {
+			ok( !animate._start.opacity, 'Should not set opacity' );
+			QUnit.start();
+		},
+		duration:20
+	});
+}); 
+
+test("animate negative height", 1, function() {
+	
+    QUnit.stop();
+    Simples("#foo").animate({ height: -100 }, {
+        callback: function() {
+            equals( this.offsetHeight, 0, "Verify height.");
+            QUnit.start();
+        },
+		duration : 100
+    });	
+});
+   
 // /* // This test ends up being flaky depending upon the CPU load
 // test("animate option (queue === false)", function () {
 // 	expect(1);
@@ -496,7 +410,7 @@ test("stop() thorough", 30, function(){
 // 
 // 	var order = [];
 // 
-// 	var $foo = jQuery("#foo");
+// 	var $foo = Simples("#foo");
 // 	$foo.animate({width:'100px'}, 3000, function () {
 // 		// should finish after unqueued animation so second
 // 		order.push(2);
@@ -513,7 +427,7 @@ test("stop() thorough", 30, function(){
 // test("animate with no properties", function() {
 // 	expect(2);
 // 	
-// 	var divs = jQuery("div"), count = 0;
+// 	var divs = Simples("div"), count = 0;
 // 
 // 	divs.animate({}, function(){
 // 		count++;
@@ -523,7 +437,7 @@ test("stop() thorough", 30, function(){
 // 
 // 	stop();
 // 
-// 	var foo = jQuery("#foo");
+// 	var foo = Simples("#foo");
 // 
 // 	foo.animate({});
 // 	foo.animate({top: 10}, 100, function(){
@@ -537,9 +451,9 @@ test("stop() thorough", 30, function(){
 // 	
 // 	stop();
 // 	
-// 	var $elems = jQuery([{ a:0 },{ a:0 }]), counter = 0;
+// 	var $elems = Simples([{ a:0 },{ a:0 }]), counter = 0;
 // 	
-// 	equals( jQuery.timers.length, 0, "Make sure no animation was running from another test" );
+// 	equals( Simples.timers.length, 0, "Make sure no animation was running from another test" );
 // 		
 // 	$elems.eq(0).animate( {a:1}, 0, function(){
 // 		ok( true, "Animate a simple property." );
@@ -547,7 +461,7 @@ test("stop() thorough", 30, function(){
 // 	});
 // 	
 // 	// Failed until [6115]
-// 	equals( jQuery.timers.length, 0, "Make sure synchronic animations are not left on jQuery.timers" );
+// 	equals( Simples.timers.length, 0, "Make sure synchronic animations are not left on Simples.timers" );
 // 	
 // 	equals( counter, 1, "One synchronic animations" );
 // 	
@@ -569,7 +483,7 @@ test("stop() thorough", 30, function(){
 // 		start();
 // 	});
 // 	
-// 	var $elem = jQuery("<div />");
+// 	var $elem = Simples("<div />");
 // 	$elem.show(0, function(){ 
 // 		ok(true, "Show callback with no duration");
 // 	});
@@ -582,7 +496,7 @@ test("stop() thorough", 30, function(){
 // 	expect(1);
 // 	stop();
 // 
-// 	jQuery("#nothiddendiv")
+// 	Simples("#nothiddendiv")
 // 		.css("font-size", 10)
 // 		.animate({"font-size": 20}, 200, function(){
 // 			equals( this.style.fontSize, "20px", "The font-size property was animated." );
@@ -596,7 +510,7 @@ test("stop() thorough", 30, function(){
 // 
 // 	var obj = { test: 0 };
 // 
-// 	jQuery(obj).animate({test: 200}, 200, function(){
+// 	Simples(obj).animate({test: 200}, 200, function(){
 // 		equals( obj.test, 200, "The custom property should be modified." );
 // 		start();
 // 	});
@@ -606,7 +520,7 @@ test("stop() thorough", 30, function(){
 // 	expect(3);
 // 	stop();
 // 
-// 	var $foo = jQuery("#nothiddendiv");
+// 	var $foo = Simples("#nothiddendiv");
 // 	var w = 0;
 // 	$foo.hide().width(200).width();
 // 
@@ -629,7 +543,7 @@ test("stop() thorough", 30, function(){
 // 	expect(3);
 // 	stop();
 // 
-// 	var $foo = jQuery("#nothiddendivchild");
+// 	var $foo = Simples("#nothiddendivchild");
 // 	var w = 0;
 // 	$foo.hide().width(200).width();
 // 
@@ -655,7 +569,7 @@ test("stop() thorough", 30, function(){
 // 	expect(4);
 // 	stop();
 // 
-// 	var $foo = jQuery("#nothiddendiv");
+// 	var $foo = Simples("#nothiddendiv");
 // 	var w = 0;
 // 	$foo.hide().width(200).width();
 // 
@@ -682,7 +596,7 @@ test("stop() thorough", 30, function(){
 // 	expect(1);
 // 	stop();
 // 
-// 	var $foo = jQuery("#nothiddendivchild");
+// 	var $foo = Simples("#nothiddendivchild");
 // 	var w = 0;
 // 	$foo.hide().width(200).width();
 // 
@@ -710,7 +624,7 @@ test("stop() thorough", 30, function(){
 // 
 // test("toggle()", function() {
 // 	expect(6);
-// 	var x = jQuery("#nothiddendiv");
+// 	var x = Simples("#nothiddendiv");
 // 	ok( x.is(":visible"), "is visible" );
 // 	x.toggle();
 // 	ok( x.is(":hidden"), "is hidden" );
@@ -725,11 +639,11 @@ test("stop() thorough", 30, function(){
 // 	ok( x.is(":visible"), "is visible again" );
 // });
 // 
-// jQuery.checkOverflowDisplay = function(){
-// 	var o = jQuery.css( this, "overflow" );
+// Simples.checkOverflowDisplay = function(){
+// 	var o = Simples.css( this, "overflow" );
 // 
 // 	equals(o, "visible", "Overflow should be visible: " + o);
-// 	equals(jQuery.css( this, "display" ), "inline", "Display shouldn't be tampered with.");
+// 	equals(Simples.css( this, "display" ), "inline", "Display shouldn't be tampered with.");
 // 
 // 	start();
 // }
@@ -737,87 +651,87 @@ test("stop() thorough", 30, function(){
 // test("JS Overflow and Display", function() {
 // 	expect(2);
 // 	stop();
-// 	jQuery.makeTest( "JS Overflow and Display" )
+// 	Simples.makeTest( "JS Overflow and Display" )
 // 		.addClass("widewidth")
 // 		.css({ overflow: "visible", display: "inline" })
 // 		.addClass("widewidth")
 // 		.text("Some sample text.")
 // 		.before("text before")
 // 		.after("text after")
-// 		.animate({ opacity: 0.5 }, "slow", jQuery.checkOverflowDisplay);
+// 		.animate({ opacity: 0.5 }, "slow", Simples.checkOverflowDisplay);
 // });
 // 		
 // test("CSS Overflow and Display", function() {
 // 	expect(2);
 // 	stop();
-// 	jQuery.makeTest( "CSS Overflow and Display" )
+// 	Simples.makeTest( "CSS Overflow and Display" )
 // 		.addClass("overflow inline")
 // 		.addClass("widewidth")
 // 		.text("Some sample text.")
 // 		.before("text before")
 // 		.after("text after")
-// 		.animate({ opacity: 0.5 }, "slow", jQuery.checkOverflowDisplay);
+// 		.animate({ opacity: 0.5 }, "slow", Simples.checkOverflowDisplay);
 // });
 // 
-// jQuery.each( {
+// Simples.each( {
 // 	"CSS Auto": function(elem,prop){
-// 		jQuery(elem).addClass("auto" + prop)
+// 		Simples(elem).addClass("auto" + prop)
 // 			.text("This is a long string of text.");
 // 		return "";
 // 	},
 // 	"JS Auto": function(elem,prop){
-// 		jQuery(elem).css(prop,"auto")
+// 		Simples(elem).css(prop,"auto")
 // 			.text("This is a long string of text.");
 // 		return "";
 // 	},
 // 	"CSS 100": function(elem,prop){
-// 		jQuery(elem).addClass("large" + prop);
+// 		Simples(elem).addClass("large" + prop);
 // 		return "";
 // 	},
 // 	"JS 100": function(elem,prop){
-// 		jQuery(elem).css(prop,prop == "opacity" ? 1 : "100px");
+// 		Simples(elem).css(prop,prop == "opacity" ? 1 : "100px");
 // 		return prop == "opacity" ? 1 : 100;
 // 	},
 // 	"CSS 50": function(elem,prop){
-// 		jQuery(elem).addClass("med" + prop);
+// 		Simples(elem).addClass("med" + prop);
 // 		return "";
 // 	},
 // 	"JS 50": function(elem,prop){
-// 		jQuery(elem).css(prop,prop == "opacity" ? 0.50 : "50px");
+// 		Simples(elem).css(prop,prop == "opacity" ? 0.50 : "50px");
 // 		return prop == "opacity" ? 0.5 : 50;
 // 	},
 // 	"CSS 0": function(elem,prop){
-// 		jQuery(elem).addClass("no" + prop);
+// 		Simples(elem).addClass("no" + prop);
 // 		return "";
 // 	},
 // 	"JS 0": function(elem,prop){
-// 		jQuery(elem).css(prop,prop == "opacity" ? 0 : "0px");
+// 		Simples(elem).css(prop,prop == "opacity" ? 0 : "0px");
 // 		return 0;
 // 	}
 // }, function(fn, f){
-// 	jQuery.each( {
+// 	Simples.each( {
 // 		"show": function(elem,prop){
-// 			jQuery(elem).hide().addClass("wide"+prop);
+// 			Simples(elem).hide().addClass("wide"+prop);
 // 			return "show";
 // 		},
 // 		"hide": function(elem,prop){
-// 			jQuery(elem).addClass("wide"+prop);
+// 			Simples(elem).addClass("wide"+prop);
 // 			return "hide";
 // 		},
 // 		"100": function(elem,prop){
-// 			jQuery(elem).addClass("wide"+prop);
+// 			Simples(elem).addClass("wide"+prop);
 // 			return prop == "opacity" ? 1 : 100;
 // 		},
 // 		"50": function(elem,prop){
 // 			return prop == "opacity" ? 0.50 : 50;
 // 		},
 // 		"0": function(elem,prop){
-// 			jQuery(elem).addClass("noback");
+// 			Simples(elem).addClass("noback");
 // 			return 0;
 // 		}
 // 	}, function(tn, t){
 // 		test(fn + " to " + tn, function() {
-// 			var elem = jQuery.makeTest( fn + " to " + tn );
+// 			var elem = Simples.makeTest( fn + " to " + tn );
 // 	
 // 			var t_w = t( elem, "width" );
 // 			var f_w = f( elem, "width" );
@@ -853,7 +767,7 @@ test("stop() thorough", 30, function(){
 // 				if ( t_h == "hide"||t_h == "show" )
 // 					equals(this.style.height.indexOf(f_h), 0, "Height must be reset to " + f_h + ": " + this.style.height);
 // 					
-// 				var cur_o = jQuery.style(this, "opacity");
+// 				var cur_o = Simples.style(this, "opacity");
 // 				if ( cur_o !== "" ) cur_o = parseFloat( cur_o );
 // 	
 // 				if ( t_o == "hide"||t_o == "show" )
@@ -865,13 +779,13 @@ test("stop() thorough", 30, function(){
 // 				if ( t_o.constructor == Number ) {
 // 					equals(cur_o, t_o, "Final opacity should be " + t_o + ": " + cur_o);
 // 					
-// 					ok(jQuery.curCSS(this, "opacity") != "" || cur_o == t_o, "Opacity should be explicitly set to " + t_o + ", is instead: " + cur_o);
+// 					ok(Simples.curCSS(this, "opacity") != "" || cur_o == t_o, "Opacity should be explicitly set to " + t_o + ", is instead: " + cur_o);
 // 				}
 // 					
 // 				if ( t_w.constructor == Number ) {
 // 					equals(this.style.width, t_w + "px", "Final width should be " + t_w + ": " + this.style.width);
 // 					
-// 					var cur_w = jQuery.css(this,"width");
+// 					var cur_w = Simples.css(this,"width");
 // 
 // 					ok(this.style.width != "" || cur_w == t_w, "Width should be explicitly set to " + t_w + ", is instead: " + cur_w);
 // 				}
@@ -879,15 +793,15 @@ test("stop() thorough", 30, function(){
 // 				if ( t_h.constructor == Number ) {
 // 					equals(this.style.height, t_h + "px", "Final height should be " + t_h + ": " + this.style.height);
 // 					
-// 					var cur_h = jQuery.css(this,"height");
+// 					var cur_h = Simples.css(this,"height");
 // 
 // 					ok(this.style.height != "" || cur_h == t_h, "Height should be explicitly set to " + t_h + ", is instead: " + cur_w);
 // 				}
 // 				
 // 				if ( t_h == "show" ) {
-// 					var old_h = jQuery.curCSS(this, "height");
-// 					jQuery(elem).append("<br/>Some more text<br/>and some more...");
-// 					ok(old_h != jQuery.css(this, "height" ), "Make sure height is auto.");
+// 					var old_h = Simples.curCSS(this, "height");
+// 					Simples(elem).append("<br/>Some more text<br/>and some more...");
+// 					ok(old_h != Simples.css(this, "height" ), "Make sure height is auto.");
 // 				}
 // 	
 // 				start();
@@ -896,7 +810,7 @@ test("stop() thorough", 30, function(){
 // 	});
 // });
 // 
-// jQuery.fn.saveState = function(){
+// Simples.fn.saveState = function(){
 // 	var check = ['opacity','height','width','display','overflow'];	
 // 	expect(check.length);
 // 	
@@ -904,16 +818,16 @@ test("stop() thorough", 30, function(){
 // 	return this.each(function(){
 // 		var self = this;
 // 		self.save = {};
-// 		jQuery.each(check, function(i,c){
-// 			self.save[c] = jQuery.css(self,c);
+// 		Simples.each(check, function(i,c){
+// 			self.save[c] = Simples.css(self,c);
 // 		});
 // 	});
 // };
 // 
-// jQuery.checkState = function(){
+// Simples.checkState = function(){
 // 	var self = this;
-// 	jQuery.each(this.save, function(c,v){
-// 		var cur = jQuery.css(self,c);
+// 	Simples.each(this.save, function(c,v){
+// 		var cur = Simples.css(self,c);
 // 		equals( v, cur, "Make sure that " + c + " is reset (Old: " + v + " Cur: " + cur + ")");
 // 	});
 // 	start();
@@ -921,69 +835,69 @@ test("stop() thorough", 30, function(){
 // 
 // // Chaining Tests
 // test("Chain fadeOut fadeIn", function() {
-// 	jQuery('#fadein div').saveState().fadeOut('fast').fadeIn('fast',jQuery.checkState);
+// 	Simples('#fadein div').saveState().fadeOut('fast').fadeIn('fast',Simples.checkState);
 // });
 // test("Chain fadeIn fadeOut", function() {
-// 	jQuery('#fadeout div').saveState().fadeIn('fast').fadeOut('fast',jQuery.checkState);
+// 	Simples('#fadeout div').saveState().fadeIn('fast').fadeOut('fast',Simples.checkState);
 // });
 // 
 // test("Chain hide show", function() {
-// 	jQuery('#show div').saveState().hide('fast').show('fast',jQuery.checkState);
+// 	Simples('#show div').saveState().hide('fast').show('fast',Simples.checkState);
 // });
 // test("Chain show hide", function() {
-// 	jQuery('#hide div').saveState().show('fast').hide('fast',jQuery.checkState);
+// 	Simples('#hide div').saveState().show('fast').hide('fast',Simples.checkState);
 // });
 // 
 // test("Chain toggle in", function() {
-// 	jQuery('#togglein div').saveState().toggle('fast').toggle('fast',jQuery.checkState);
+// 	Simples('#togglein div').saveState().toggle('fast').toggle('fast',Simples.checkState);
 // });
 // test("Chain toggle out", function() {
-// 	jQuery('#toggleout div').saveState().toggle('fast').toggle('fast',jQuery.checkState);
+// 	Simples('#toggleout div').saveState().toggle('fast').toggle('fast',Simples.checkState);
 // });
 // 
 // test("Chain slideDown slideUp", function() {
-// 	jQuery('#slidedown div').saveState().slideDown('fast').slideUp('fast',jQuery.checkState);
+// 	Simples('#slidedown div').saveState().slideDown('fast').slideUp('fast',Simples.checkState);
 // });
 // test("Chain slideUp slideDown", function() {
-// 	jQuery('#slideup div').saveState().slideUp('fast').slideDown('fast',jQuery.checkState);
+// 	Simples('#slideup div').saveState().slideUp('fast').slideDown('fast',Simples.checkState);
 // });
 // 
 // test("Chain slideToggle in", function() {
-// 	jQuery('#slidetogglein div').saveState().slideToggle('fast').slideToggle('fast',jQuery.checkState);
+// 	Simples('#slidetogglein div').saveState().slideToggle('fast').slideToggle('fast',Simples.checkState);
 // });
 // test("Chain slideToggle out", function() {
-// 	jQuery('#slidetoggleout div').saveState().slideToggle('fast').slideToggle('fast',jQuery.checkState);
+// 	Simples('#slidetoggleout div').saveState().slideToggle('fast').slideToggle('fast',Simples.checkState);
 // });
 // 
-// jQuery.makeTest = function( text ){
-// 	var elem = jQuery("<div></div>")
-// 		.attr("id", "test" + jQuery.makeTest.id++)
+// Simples.makeTest = function( text ){
+// 	var elem = Simples("<div></div>")
+// 		.attr("id", "test" + Simples.makeTest.id++)
 // 		.addClass("box");
 // 
-// 	jQuery("<h4></h4>")
+// 	Simples("<h4></h4>")
 // 		.text( text )
 // 		.appendTo("#fx-tests")
 // 		.click(function(){
-// 			jQuery(this).next().toggle();
+// 			Simples(this).next().toggle();
 // 		})
 // 		.after( elem );
 // 
 // 	return elem;
 // }
 // 
-// jQuery.makeTest.id = 1;
+// Simples.makeTest.id = 1;
 // 
-// test("jQuery.show('fast') doesn't clear radio buttons (bug #1095)", function () {
+// test("Simples.show('fast') doesn't clear radio buttons (bug #1095)", function () {
 // 	expect(4);
 //   stop();
 // 
-// 	var $checkedtest = jQuery("#checkedtest");
-// 	// IE6 was clearing "checked" in jQuery(elem).show("fast");
+// 	var $checkedtest = Simples("#checkedtest");
+// 	// IE6 was clearing "checked" in Simples(elem).show("fast");
 // 	$checkedtest.hide().show("fast", function() {
-//   	ok( !! jQuery(":radio:first", $checkedtest).attr("checked"), "Check first radio still checked." );
-//   	ok( ! jQuery(":radio:last", $checkedtest).attr("checked"), "Check last radio still NOT checked." );
-//   	ok( !! jQuery(":checkbox:first", $checkedtest).attr("checked"), "Check first checkbox still checked." );
-//   	ok( ! jQuery(":checkbox:last", $checkedtest).attr("checked"), "Check last checkbox still NOT checked." );
+//   	ok( !! Simples(":radio:first", $checkedtest).attr("checked"), "Check first radio still checked." );
+//   	ok( ! Simples(":radio:last", $checkedtest).attr("checked"), "Check last radio still NOT checked." );
+//   	ok( !! Simples(":checkbox:first", $checkedtest).attr("checked"), "Check first checkbox still checked." );
+//   	ok( ! Simples(":checkbox:last", $checkedtest).attr("checked"), "Check last checkbox still NOT checked." );
 //   	start();
 // 	});
 // });
@@ -997,19 +911,19 @@ test("stop() thorough", 30, function(){
 // 	var _test2_called = false;
 // 	var _default_test_called = false;
 // 	
-// 	jQuery.easing['_test1'] = function() {
+// 	Simples.easing['_test1'] = function() {
 // 		_test1_called = true;
 // 	};
 // 	
-// 	jQuery.easing['_test2'] = function() {
+// 	Simples.easing['_test2'] = function() {
 // 		_test2_called = true;
 // 	};
 // 	
-// 	jQuery.easing['_default_test'] = function() {
+// 	Simples.easing['_default_test'] = function() {
 // 		_default_test_called = true;
 // 	};
 // 	
-// 	jQuery({a:0,b:0,c:0}).animate({
+// 	Simples({a:0,b:0,c:0}).animate({
 // 		a: [100, '_test1'],
 // 		b: [100, '_test2'],
 // 		c: 100
