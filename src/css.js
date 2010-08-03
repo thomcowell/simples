@@ -21,7 +21,7 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";    
 
 function currentCSS(elem, name, extra) {
-	
+	   
     var ret, style = elem.style, filter;
 
     // IE uses filters for opacity
@@ -91,6 +91,10 @@ function currentCSS(elem, name, extra) {
         }
     }
 
+	if( ( name === "width" || name === "height") && ret.indexOf('px') < 0 ){
+		return getWidthHeight( elem, name )
+	}
+
     return ret;
 }
 
@@ -142,7 +146,8 @@ function setStyle( elem, name, value ){
 }
 
 // Create innerHeight, innerWidth, outerHeight and outerWidth methods
-(function( Simples ){
+var getWidthHeight = (function( Simples ){
+	
 	function getWidthHeight( elem, name, extra ){
 		var val;
 		if ( elem.offsetWidth !== 0 ) {
@@ -247,6 +252,8 @@ function setStyle( elem, name, value ){
 	for(var i=0,l=_dimensions_.length;i<l;i++){
 	    setUpWidthAndHeight( _dimensions_[i] );
 	}
+	
+	return getWidthHeight;
 	
 })( Simples );  
 

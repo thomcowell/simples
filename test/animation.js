@@ -330,7 +330,7 @@ test("step() thorough", 12, function(){
 	window.__clearInterval__ = window.clearInterval;
 	window.clearInterval = function(){
 		ok( true, "should call clearInterval" );
-	}
+	};
 	
 	AnimationController.timerID = 34324;
  	AnimationController.step();
@@ -350,7 +350,7 @@ test("step() thorough", 12, function(){
 		})( id );
 	}
 	
-	AnimationController.step()
+	AnimationController.step();
 });
 
 test("stop() thorough", 30, function(){
