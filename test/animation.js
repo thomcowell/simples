@@ -317,8 +317,8 @@ test("start() basics", 10, function(){
 
 	equal( AnimationController.length, 1, "should have one animation" );
 	ok( AnimationController.timerID > id, "should start the timer" );
-	equal( AnimationController.interval, 1000, "should have set the interval correctly" );
-	ok( anim._startTime >= new Date().getTime() + 100, "should have correctly set the start time" );  
+	equal( AnimationController.interval, 1000, "should have set the interval correctly" );   
+	ok( anim._startTime > ( new Date().getTime() - 100 ), "should have correctly set the start time" );  
     
 	AnimationController.frameRate = 12;
 	id = AnimationController.timerID;
@@ -377,74 +377,73 @@ test("stop() thorough", 30, function(){
 	
 }); 
 
-module( "animate()" );
-test("animate(Hash, Object, Function)", 1, function() {
-	QUnit.stop();
-	var hash = {opacity: 'show'};
-	var hashCopy = clone( hash );
-	Simples('#foo').animate({opacity: 'show'}, {
+module( "Simples( element ).animate()", {
+   setup : function(){
+		AnimationController.frameRate = 24;
+		AnimationController.interval = Math.round( 1000 / 24 );
+		AnimationController.guid = 1e6;
+	},
+	teardown: function(){
+		window.clearInterval( AnimationController.timerID );
+		AnimationController.timerID = null;
+		AnimationController.animations = {};
+		AnimationController.length = 0;
+	}
+});
+
+test("with no properties", 2, function() {
+
+	var divs = Simples("div"), count = 0;
+
+	divs.animate({}, {callback: function(){
+		count++;
+	}});
+
+	equals( 0, count, "Make sure that callback is called for each element in the set." );
+
+	stop();
+
+	var foo = Simples("#foo");
+    debugger;
+	foo.animate({});
+	foo.animate({top: 10}, { duration : 100, callback:function(){
+		ok( true, "Animation was properly dequeued." );
+		start();
+	}});
+});
+
+test("animate(Hash, Object, Function)", 2, function() { 
+
+	stop();
+	var hash = {opacity: 'show'},
+		hashCopy = clone( hash ),
+		startOpacity = Simples('#foo').css('opacity');
+		
+	var anim = Simples('#foo').animate({opacity: 'show'}, {
 		callback: function( animate ) {
-			ok( !animate._start.opacity, 'Should not set opacity' );
-			QUnit.start();
+			ok( !animate._start.opacity, 'Should not set opacity' ); 
+			equal( Simples('#foo').css('opacity'), startOpacity, "shouldn't change the opacity");
+			start();
 		},
-		duration:20
-	});
+		duration:100,
+	}); 
+	
+	
 }); 
 
 test("animate negative height", 1, function() {
 	
-    QUnit.stop();
+    stop();
     Simples("#foo").animate({ height: -100 }, {
         callback: function() {
             equals( this.offsetHeight, 0, "Verify height.");
-            QUnit.start();
+            start();
         },
 		duration : 100
     });	
 });
    
-// /* // This test ends up being flaky depending upon the CPU load
-// test("animate option (queue === false)", function () {
-// 	expect(1);
-// 	stop();
-// 
-// 	var order = [];
-// 
-// 	var $foo = Simples("#foo");
-// 	$foo.animate({width:'100px'}, 3000, function () {
-// 		// should finish after unqueued animation so second
-// 		order.push(2);
-// 		same( order, [ 1, 2 ], "Animations finished in the correct order" );
-// 		start();
-// 	});
-// 	$foo.animate({fontSize:'2em'}, {queue:false, duration:10, complete:function () {
-// 		// short duration and out of queue so should finish first
-// 		order.push(1);
-// 	}});
-// });
-// */
-// 
-// test("animate with no properties", function() {
-// 	expect(2);
-// 	
-// 	var divs = Simples("div"), count = 0;
-// 
-// 	divs.animate({}, function(){
-// 		count++;
-// 	});
-// 
-// 	equals( divs.length, count, "Make sure that callback is called for each element in the set." );
-// 
-// 	stop();
-// 
-// 	var foo = Simples("#foo");
-// 
-// 	foo.animate({});
-// 	foo.animate({top: 10}, 100, function(){
-// 		ok( true, "Animation was properly dequeued." );
-// 		start();
-// 	});
-// });
+
 // 
 // test("animate duration 0", function() {
 // 	expect(11);

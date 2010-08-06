@@ -35,6 +35,7 @@ Simples.offset = {
 		body = container = innerDiv = checkDiv = table = td = null;
 		Simples.offset.initialize = Simples.noop;
 	},
+	
 	bodyOffset: function( body ) {
 		var top = body.offsetTop, left = body.offsetLeft;
 

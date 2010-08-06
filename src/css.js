@@ -20,6 +20,15 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	},	
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";    
 
+function currentStyle( elem, name, extra ){
+	
+	if( ( name === "width" || name === "height") && ret.indexOf('px') < 0 ){
+		return getWidthHeight( elem, name, extra );
+	}
+	
+	return currentCSS( elem, name, extra );	
+}
+
 function currentCSS(elem, name, extra) {
 	   
     var ret, style = elem.style, filter;
@@ -91,8 +100,8 @@ function currentCSS(elem, name, extra) {
         }
     }
 
-	if( ( name === "width" || name === "height") && ret.indexOf('px') < 0 ){
-		return getWidthHeight( elem, name )
+ 	else if( ( name === "top" || name === "left") && ret.indexOf('px') < 0 ){
+		return Simples( elem ).offset()[ name ];
 	}
 
     return ret;

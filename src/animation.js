@@ -23,7 +23,8 @@ var AnimationController = {
 			if( !hasOwn.call( this.animations, animation._id ) ){
 				this.length++;
 				this.animations[ animation._id ] = animation; 
-				animation._startTime = new Date().getTime() - ( typeof frame !== 'number' ||  0 < frame ) ? 0 : frame / this._duration / 1000 * AnimationController.frameRate;
+				frame = ( typeof frame !== 'number' ||  0 < frame ) ? 0 : frame / this._duration / 1000 * AnimationController.frameRate;
+				animation._startTime = new Date().getTime() - frame;
 			}
  			
 			if( !this.timerID ){
@@ -32,6 +33,13 @@ var AnimationController = {
 				this.step();
 			}
 		}
+	},
+	reset : function(){    
+		for( var id in this.animations ){
+			this.stop( this.animations[ id ] );
+		}
+		window.clearInterval( this.timerID );
+		this.timerID = null;
 	},
 	step : function(){          
 		if( this.length ){ 
@@ -63,8 +71,9 @@ var AnimationController = {
  * opts.duration {Object}
  */
 function Animation( elem, setStyle, opts ){
-	// sanity check arguments
-	if( !( elem && elem.nodeType === 1 && setStyle ) ){  
+	// sanity check arguments                           
+	var key;
+	if( !( elem && elem.nodeType === 1 && setStyle ) || Simples.isEmptyObject( setStyle ) ){  
 		return null;
 	} 
 	// check instance invoked
@@ -85,12 +94,12 @@ function Animation( elem, setStyle, opts ){
 	this._finish = {};	
 	
 	// check for supported css animated features and prep for animation
-	for( var key in setStyle ){
+	for( key in setStyle ){
 		
 		var opacity = ( key === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 		if( opacity || AnimationController.allowTypes.test( key ) ){
-			this._start[ key ] = ( currentCSS( elem, key ) + '' || '0').replace('px','') * 1;
+			this._start[ key ] = ( currentStyle( elem, key ) + '' || '0').replace('px','') * 1;
 			this._finish[ key ] = ( setStyle[ key ] + '' || '0').replace('px','') * 1;
 		}                                        
 	}
@@ -100,31 +109,30 @@ function Animation( elem, setStyle, opts ){
 
 Animation.prototype = {
 	start : function( frame ){
+
 		AnimationController.start( this, frame );
 		
 		return this;
 	}, 
-	stop : function(){
-		
-		AnimationController.stop( this );
+	stop : function( shouldReverse ){
+
 		this._callback.call( this[0], this );
+		AnimationController.stop( this );
 		
-		return this._reverse ? this.reverse() : this; 
+		return shouldReverse === false ? this : ( this._reverse || shouldReverse ) ? this.reverse() : this; 
 	},                          
 	reverse : function( shouldStart ){
 		var start = this._start, finish = this._finish;
 
 		this._start = finish;
 		this._finish = start;
-
-		if( this._autoStart || shouldStart ){ this.start(); }
 		
-		return this;
+		return shouldStart === false ? this : ( this._autoStart || shouldStart ) ? this.start() : this; 
 	},
 	reset : function(){
 		
 		if( this._startTime ){
-			this.stop();
+			this.stop( false );
 		}
 
 		for( var name in this._start ){
@@ -160,9 +168,8 @@ function CompositeAnimation( animations ){
 	return this;
 }
 
-for( var key in Animation.prototype ){
-	CompositeAnimation.prototype[ key ] = (function( name ){ 
-		return function(){
+for( var key in Animation.prototype ) (function( name ){ 
+		CompositeAnimation.prototype[ name ] = function(){
 			for(var i=0,l=this.length;i<l;i++){
 				if( this[ i ][ name ] ){
 					this[ i ][ name ].apply( this[ i ], arguments );
@@ -171,9 +178,8 @@ for( var key in Animation.prototype ){
 			return this;
 		};
 	})( key );
-}
 
-Simples.merge(Simples, {
+Simples.merge({
     animationDefaults: function( opts ){
 	  	opts = opts || {};
 	
@@ -186,15 +192,15 @@ Simples.merge(Simples, {
 				}
 			}
 		}
-	}
+	},
+	Animation : Animation
 });
 
 Simples.extend({
     animate: function( css, opts ){
 		var animations = [];
-		if( opts ){		
+		if( css ){		
 			this.each(function(){  
-				// debugger;
 				var anim = Animation( this, css, opts );
 				if( anim ){
 					animations.push( anim );

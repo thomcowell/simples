@@ -244,6 +244,6 @@ Simples.extend({
 	},
 	slice : function( i, len ){
 		len = ( 0 < len ) ? len : 1 ;
-		return Simples( slice.apply( this, i < 0 ? [ i ] : [+i, i+len]  ) );
+		return Simples( slice.apply( this, i < 0 ? [ i ] : [+i, i+len]  ), true );
 	}
 });
