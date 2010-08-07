@@ -13,7 +13,7 @@ test("test that values are assigned", 10, function() {
 });           
 
 test("test that broswer values are returned", 3, function() {
-	ok( !isEmptyObject( Simples.browser ), "should have a browser object" );
+	ok( !Simples.isEmptyObject( Simples.browser ), "should have a browser object" );
 	ok( parseFloat( Simples.browser.version ) > 0, "Is a number" );
 	var browsers = ["mozilla","webkit","msie","opera"];
 	for(var i=0,l=browsers.length;i<l;i++){

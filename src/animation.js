@@ -1,9 +1,10 @@
-var AnimationController = {
+var REGEX_PIXEL = /px\s?$/,
+	AnimationController = {
 	animations : {},
 	frameRate : 24,
 	length : 0,
 	guid : 1e6,
-	allowTypes : /padding|margin|height|width|top|left|right|bottom/,
+	allowTypes : /padding|margin|height|width|top|left|right|bottom|fontSize/,
 	tweens : {
 		easing : function( frame, frameCount, start, delta) {
 			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
@@ -22,15 +23,21 @@ var AnimationController = {
 		if( animation && animation instanceof Animation ){ 
 			if( !hasOwn.call( this.animations, animation._id ) ){
 				this.length++;
-				this.animations[ animation._id ] = animation; 
-				frame = ( typeof frame !== 'number' ||  0 < frame ) ? 0 : frame / this._duration / 1000 * AnimationController.frameRate;
-				animation._startTime = new Date().getTime() - frame;
-			}
- 			
+				this.animations[ animation._id ] = animation;
+				if( animation._duration === 0 ){
+					animation.stop(); 
+				} else{
+					frame = ( frame > 0 ) ? ( animation._duration / AnimationController.frameRate * frame ) : 0;
+					animation._startTime = new Date().getTime() - frame;
+				}
+			}    
+			
 			if( !this.timerID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				this.timerID = window.setInterval( AnimationController.step, this.interval );
-				this.step();
+				this.timerID = window.setInterval(function(){ AnimationController.step() }, this.interval ); 
+				if( frame > 0 ){
+					animation.step( new Date().getTime() );
+				}
 			}
 		}
 	},
@@ -41,7 +48,7 @@ var AnimationController = {
 		window.clearInterval( this.timerID );
 		this.timerID = null;
 	},
-	step : function(){          
+	step : function(){    
 		if( this.length ){ 
 			var now = new Date().getTime();    
 			for( var id in this.animations ){
@@ -72,8 +79,7 @@ var AnimationController = {
  */
 function Animation( elem, setStyle, opts ){
 	// sanity check arguments                           
-	var key;
-	if( !( elem && elem.nodeType === 1 && setStyle ) || Simples.isEmptyObject( setStyle ) ){  
+	if( !( elem && elem.nodeType === 1 && setStyle && !Simples.isEmptyObject( setStyle ) ) ){  
 		return null;
 	} 
 	// check instance invoked
@@ -88,19 +94,19 @@ function Animation( elem, setStyle, opts ){
 	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop;
 	this._reverse = opts.reverse === true;
 	this._autoStart = opts.manualStart !== true;
-	this._duration = ( opts.duration || 600 );
+	this._duration = ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600;
 	this._tween = AnimationController.tweens[ opts.tween ] || AnimationController.tweens.easing;
 	this._start = {};
 	this._finish = {};	
 	
 	// check for supported css animated features and prep for animation
-	for( key in setStyle ){
-		
-		var opacity = ( key === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
+	for( var key in setStyle ){
+	   	var cKey = key.replace( RDASH_ALPHA, fcamelCase );
+		var opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
-		if( opacity || AnimationController.allowTypes.test( key ) ){
-			this._start[ key ] = ( currentStyle( elem, key ) + '' || '0').replace('px','') * 1;
-			this._finish[ key ] = ( setStyle[ key ] + '' || '0').replace('px','') * 1;
+		if( opacity || AnimationController.allowTypes.test( cKey ) ){
+			this._start[ cKey ] = ( Simples.style( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
+			this._finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
 		}                                        
 	}
 	
@@ -114,10 +120,10 @@ Animation.prototype = {
 		
 		return this;
 	}, 
-	stop : function( shouldReverse ){
-
+	stop : function( shouldReverse ){     
+		
+		AnimationController.stop( this ); 
 		this._callback.call( this[0], this );
-		AnimationController.stop( this );
 		
 		return shouldReverse === false ? this : ( this._reverse || shouldReverse ) ? this.reverse() : this; 
 	},                          
@@ -136,7 +142,7 @@ Animation.prototype = {
 		}
 
 		for( var name in this._start ){
-			setStyle( this[0], name, this._start[ name ] );
+			Simples.setStyle( this[0], name, this._start[ name ] );
 		}
 
 		return this;
@@ -145,7 +151,7 @@ Animation.prototype = {
 		now = ( now || new Date().getTime() ) - this._startTime;
 		
 		for( var name in this._start ){
-			setStyle( this[0], name, this._tween( now > this._duration ? this._duration : now, this._duration, this._start[ name ], this._finish[ name ] - this._start[ name ] ) );
+			Simples.setStyle( this[0], name, this._tween( now > this._duration ? this._duration : now, this._duration, this._start[ name ], this._finish[ name ] - this._start[ name ] ) );
 		}
 		
 		if ( now > this._duration ) {

@@ -10,7 +10,7 @@
 	function forThenFunction(){
 		for( var name in css ){
 			elements.each(function(){
-				setStyle( this, name, css[name] );
+				Simples.setStyle( this, name, css[name] );
 			});
 		}
 	}
@@ -18,7 +18,7 @@
 	function functionThenFor(){
 		elements.each(function(){
 			for( var name in css ){
-				setStyle( this, name, css[name] );
+				Simples.setStyle( this, name, css[name] );
 			}
 		});		
 	}
