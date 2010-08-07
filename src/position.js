@@ -3,7 +3,7 @@ var REGEX_HTML_BODY = /^body|html$/i;
 
 Simples.offset = {
 	init : function(){
-		var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( currentCSS(body, "marginTop", true) ) || 0,
+		var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
 			html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
 
 		Simples.merge( container.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" } );
@@ -35,21 +35,22 @@ Simples.offset = {
 		body = container = innerDiv = checkDiv = table = td = null;
 		Simples.offset.initialize = Simples.noop;
 	},
+	
 	bodyOffset: function( body ) {
 		var top = body.offsetTop, left = body.offsetLeft;
 
 		Simples.offset.init();
 
 		if ( Simples.offset.doesNotIncludeMarginInBodyOffset ) {
-			top  += parseFloat( currentCSS(body, "marginTop",  true) ) || 0;
-			left += parseFloat( currentCSS(body, "marginLeft", true) ) || 0;
+			top  += parseFloat( Simples.currentCSS(body, "marginTop",  true) ) || 0;
+			left += parseFloat( Simples.currentCSS(body, "marginLeft", true) ) || 0;
 		}
 
 		return { top: top, left: left };
 	},
 	
 	setOffset: function( elem, options, i ) {
-		var position = currentCSS( elem, "position" );
+		var position = Simples.currentCSS( elem, "position" );
 
 		// set position first, in-case top/left are set even on static elem
 		if ( position === "static" ) {
@@ -58,8 +59,8 @@ Simples.offset = {
 
 		var curElem    = Simples( elem ),
 			curOffset  = curElem.offset(),
-			curCSSTop  = currentCSS( elem, "top", true ),
-			curCSSLeft = currentCSS( elem, "left", true ),
+			curCSSTop  = Simples.currentCSS( elem, "top", true ),
+			curCSSLeft = Simples.currentCSS( elem, "left", true ),
 			calculatePosition = (position === "absolute" && (curCSSTop === 'auto' || curCSSLeft === 'auto' ) ),
 			props = {}, curPosition = {}, curTop, curLeft;
 
@@ -198,12 +199,12 @@ Simples.extend({
 		// Subtract element margins
 		// note: when an element has margin: auto the offsetLeft and marginLeft
 		// are the same in Safari causing offset.left to incorrectly be 0
-		offset.top  -= parseFloat( currentCSS(elem, "marginTop",  true) ) || 0;
-		offset.left -= parseFloat( currentCSS(elem, "marginLeft", true) ) || 0;
+		offset.top  -= parseFloat( Simples.currentCSS(elem, "marginTop",  true) ) || 0;
+		offset.left -= parseFloat( Simples.currentCSS(elem, "marginLeft", true) ) || 0;
 
 		// Add offsetParent borders
-		parentOffset.top  += parseFloat( currentCSS(offsetParent[0], "borderTopWidth",  true) ) || 0;
-		parentOffset.left += parseFloat( currentCSS(offsetParent[0], "borderLeftWidth", true) ) || 0;
+		parentOffset.top  += parseFloat( Simples.currentCSS(offsetParent[0], "borderTopWidth",  true) ) || 0;
+		parentOffset.left += parseFloat( Simples.currentCSS(offsetParent[0], "borderLeftWidth", true) ) || 0;
 
 		// Subtract the two offsets
 		return {
@@ -216,12 +217,11 @@ Simples.extend({
 		var newObj = Simples();
 		this.each(function() {
 			var offsetParent = this.offsetParent || document.body;
-			while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && currentCSS(offsetParent, "position") === "static") ) {
+			while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && Simples.currentCSS(offsetParent, "position") === "static") ) {
 				offsetParent = offsetParent.offsetParent;
 			}  
 			if( offsetParent !== null || offsetParent !== undefined ){
-				newObj[newObj.length] = offsetParent;
-				newObj.length++;
+				newObj.push( offsetParent );
 			}
 		});
 		return newObj;

@@ -158,7 +158,7 @@ test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", func
 	});
 
 	// IE6 was clearing "checked" in Simples.css(elem, "height");
-	currentCSS( checkedtest, "height");
+	Simples.currentCSS( checkedtest, "height");
 
 	ok( !! Simples(radio[0]).attr("checked"), "Check first radio still checked." );
 	ok( ! Simples(radio[radio.length - 1]).attr("checked"), "Check last radio still NOT checked." );

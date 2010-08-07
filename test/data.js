@@ -128,9 +128,6 @@ test("cleanData on element with data as requested", 1, function() {
 	equal( r_div[ accessID ], undefined, "a div should have data removed");
 });
 
-function spyFn(){
-	window.__spy__ = arguments;
-}
 module("Data: Simples instance", {
 	setup: function(){
 		window.old_addData = addData;

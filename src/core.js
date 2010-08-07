@@ -64,22 +64,19 @@ function Simples( selector, context ) {
 
 		this.push.apply( this, slice.call( selector, 0 ) );
     } else if( objClass === ArrayClass ){
-
-		for(var d=0,e=selector.length;d<e;d++){
-			if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
-				this.push.call( this, selector[d] );
+        if( context === true ){
+	         this.push.apply( this, selector );
+		} else {
+			for(var d=0,e=selector.length;d<e;d++){
+				if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
+					this.push.call( this, selector[d] );
+				}
 			}
 		}
-		
 	}
 	
     return this;
-}
-
-function isEmptyObject( obj ) {
-	for ( var name in obj ) { return false; }
-	return true;
-}       
+}      
 
 /**
  * @name merge
@@ -110,7 +107,7 @@ Simples.merge = function( first /* obj1, obj2..... */) {
     }
 
     return target;
-}
+};
 
 // call with Simples to make sure context is correct
 Simples.merge({
@@ -123,6 +120,10 @@ Simples.merge({
 		        }
 		    }
 		}		
+	},  
+	isEmptyObject : function( obj ) {
+		for ( var name in obj ) { return false; }
+		return true;
 	},
 	// Has the ready events already been bound?      	
 	isReady : false,       
@@ -274,7 +275,7 @@ Simples.prototype = {
 		
 		this.each(function(i,l){
 			if( testFn.call( this, i, l ) === true ){
-				result.push( this );
+				result.push.call( result, this );
 			}
 		});
 		
@@ -298,7 +299,7 @@ Simples.prototype = {
 		return this;
 	}, 
 	// For internal use only.
-	// Behaves like an Array's method, not like a Simples method.
+	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
 	push: push,
 	sort: [].sort,
 	splice: [].splice

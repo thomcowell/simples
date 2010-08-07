@@ -15,7 +15,7 @@
 		counter++;      
 		for( var i=0,l=elements.length;i<l;i++ ){
 			now = new Date().getTime();
-			setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
+			Simples.setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
 		}                      
 	}
     
@@ -27,7 +27,7 @@
 		counter++;                               
 		now = new Date().getTime(); 
 		for( var i=0,l=elements.length;i<l;i++ ){
-			setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
+			Simples.setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
 		}                      
 	}
     
@@ -39,7 +39,7 @@
 		counter++;                               
 		now = new Date().getTime(); 
 		for( var i=0,l=elements.length;i<l;i++ ){
-			setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
+			Simples.setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
 		}                      
 	}
     
@@ -51,7 +51,7 @@
 		counter++;      
 		for( var i=0,l=elements.length;i<l;i++ ){
 			now = new Date().getTime();
-			setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
+			Simples.setStyle( elements, 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
 		}                      
 	}
     
