@@ -10,30 +10,22 @@ var TAG = /\<(\w+)\s?\/?\>/,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g;
 	
-function SimplesSelector( selector, context ){
-
-	var results = {
-		context : context,
-		selector : selector,
-		elems : []
-	};
+function SimplesSelector( selector, context, results ){
+	results = results || [];
 
     if ( typeof( selector ) === 'string' ) {
 		// if it is a multi select split and short cut the process
-		if( COMMA_WITH_BOUNDARY.test( selector ) ){ 
+		if( COMMA_WITH_BOUNDARY.test( selector ) ){
+			results.selector = selector; 
+            results.context = ( context && context.nodeType === 9 ? context : document );
 
-			var get = selector.split( COMMA_WITH_BOUNDARY ), els = [];
+			var get = selector.split( COMMA_WITH_BOUNDARY );
 
 			for(var x=0,y=get.length;x<y;x++){
 				
-				els = els.concat( SimplesSelector( get[x], context ).elems );
+				results.push.apply( results, slice.call( SimplesSelector( get[x], context ), 0 ) );
 			}
-            // return interface
-			return {
-				context : ( context && context.nodeType === 9 ? context : document ),
-				selector : selector,
-				elems : els
-			};
+			return results;
 		}
 		// clean up selector           
         selector = selector.replace( TAG_STRIP, '');
@@ -43,17 +35,13 @@ function SimplesSelector( selector, context ){
 		// check selector if structured to create element
 		var tag = TAG.exec( selector );
 		if( tag !== null && tag.length > 1 ){
-			return {
-				context : document,
-				selector : tag[0],
-				elems : [ document.createElement( tag[1] ) ]
-			};
+			results.context = document;
+			results.selector = tag[0];
+			results.push( document.createElement( tag[1] ) );
 		} else { 
-			// reset the selector to one used
-			results.selector = selector;
 			// allow another document to be used for context where getting by id
 			results.context = context = ( selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0 ) ? ( context && context.nodeType === 9 ? context : document ) : ( context || document );
-
+            results.selector = selector;
 			var split = selector.split( SPACE_WITH_BOUNDARY );     
 
 			for(var i=0,l=split.length;i<l;i++){           
@@ -69,7 +57,7 @@ function SimplesSelector( selector, context ){
 					context = getElements( split[i], context );
 				}
 			}
-			results.elems = context;
+			results.push.apply( results, context );
 		}
     }
 	return results;

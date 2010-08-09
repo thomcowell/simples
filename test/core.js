@@ -243,11 +243,11 @@ test("Simples constructor when instantiated with Window", 5, function(){
 module("Core: instantiating an instance of Simples"); 
 
 test("Simples constructor when instantiated with a call through to selector", 4, function(){
-	var results = SimplesSelector('#row-wrapper');
+	var results = SimplesSelector('#row-wrapper', null, { push:[].push, selector : "#row-wrapper" });
 	var s_obj = Simples('#row-wrapper');
 	ok( s_obj instanceof Simples, "should return an instance of Simples" );  		
  
-	equal( s_obj[0], results.elems[0], "should return with an Element, when supplied" );  
+	equal( s_obj[0], results[0], "should return with an Element, when supplied" );  
 	equal( s_obj.context, results.context, "should set the context to the element" );
 	equal( s_obj.selector, results.selector, "should set the selector to an empty string because no string selector supplied" );	                             
 });

@@ -55,17 +55,18 @@ function Simples( selector, context ) {
 	  
 	var objClass = toString.call( selector );
 	if( objClass === StringClass ){
-		var result = SimplesSelector( selector, context );
-		this.context = result.context;
-		this.selector = result.selector;
+		this.context = context;
+		this.selector = selector;
+		
+		return SimplesSelector( selector, context, this );
 
-		this.push.apply( this, result.elems );
 	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
 		this.push.apply( this, slice.call( selector, 0 ) );
     } else if( objClass === ArrayClass ){
         if( context === true ){
-	         this.push.apply( this, selector );
+			// shortcut to use native push
+	        this.push.apply( this, selector );
 		} else {
 			for(var d=0,e=selector.length;d<e;d++){
 				if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
