@@ -143,7 +143,6 @@ function ajax(url, options) {
 	try {
 		xhr.send( (type !== "GET" && s.data) || null );
 	} catch( sendError ) {
-		debugger;
 		onreadystatechange();
 	}
     // non-async requests

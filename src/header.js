@@ -1,8 +1,7 @@
 /*!
  * Simples JavaScript Library v@VERSION
  * http://simples.eightsquarestudio.com/
- *
- * Copyright @CURRENT_YEAR, Thomas Cowell
+ * Copyright (c) 2009 - @CURRENT_YEAR, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
  * Date: 
