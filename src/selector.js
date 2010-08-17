@@ -8,12 +8,17 @@ var TAG = /\<(\w+)\s?\/?\>/,
 	// isSimple = /^.[^:#\[\.,]*$/,
 	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
-	COMMA_WITH_BOUNDARY = /\s?\,\s?/g;
+	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
+	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined";
 	
 function SimplesSelector( selector, context, results ){
 	results = results || [];
-
+     
     if ( typeof( selector ) === 'string' ) {
+		if( QUERY_SELECTOR ){
+			results.push.apply( results, slice.call( ( context || document ).querySelectorAll( selector ), 0 ) )
+			return results;
+		}
 		// if it is a multi select split and short cut the process
 		if( COMMA_WITH_BOUNDARY.test( selector ) ){
 			results.selector = selector; 
