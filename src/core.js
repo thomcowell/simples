@@ -94,7 +94,7 @@ Simples.merge = function( first /* obj1, obj2..... */) {
 	// Loop over arguments
     for (var l=arguments.length; i<l; i++) {
 		// if object apply directly to target with same keys
-		isWhat = toString.call( arguments[i] );
+		var isWhat = toString.call( arguments[i] );
 		if( isWhat === ObjectClass ){
 			for (var key in arguments[i]) {
                 if ( hasOwn.call( arguments[i], key ) ) {
@@ -281,6 +281,13 @@ Simples.prototype = {
 		});
 		
 		return result;
+	},
+	find: function( selector ){
+		var results = Simples();
+		this.each(function(){
+			results.push.apply( results, SimplesSelector( selector, this ) );
+		});
+		return results;
 	},
 	ready: function( fn ) {
 		// Attach the listeners

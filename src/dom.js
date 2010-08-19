@@ -184,6 +184,15 @@ Simples.extend({
 		       
 		return results.length ? results : this;
 	},
+	text : function( text ){
+		if( text ){
+			this.each(function(){
+				this.innerText = text;
+			});
+		} else {
+			return this[0] && this[0].innerText;
+		}
+	},
 	// attributes	
 	hasClass : function( className ){
 		className = " " + className + " ";
