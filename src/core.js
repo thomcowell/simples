@@ -128,13 +128,28 @@ Simples.merge({
 	},
 	// Has the ready events already been bound?      	
 	isReady : false,       
+	ready: function( fn ) {
+		// Attach the listeners
+		Simples.bindReady();
+		
+		// If the DOM is already ready
+		if ( Simples.isReady ) {
+			// Execute the function immediately
+			fn.call( document, SimplesEvent( 'ready' ) );
+
+		// Otherwise, remember the function for later
+		} else if ( readyList ) {
+			// Add the function to the wait list
+			readyList.push( fn );
+		}
+	},
 	// Handle when the DOM is ready
-	ready : function() {
+	readyHandler : function() {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
 			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 			if ( !document.body ) {
-				return setTimeout( Simples.ready, 13 );
+				return setTimeout( Simples.readyHandler, 13 );
 			}
 
 			// Remember that the DOM is ready
@@ -168,7 +183,7 @@ Simples.merge({
 		// Catch cases where $(document).ready() is called after the
 		// browser event has already occurred.
 		if ( document.readyState === "complete" ) {
-			return Simples.ready();
+			return Simples.readyHandler();
 		}
 
 		// Mozilla, Opera and webkit nightlies currently support this event
@@ -177,7 +192,7 @@ Simples.merge({
 			document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
 
 			// A fallback to window.onload, that will always work
-			window.addEventListener( "load", Simples.ready, false );
+			window.addEventListener( "load", Simples.readyHandler, false );
 
 		// If IE event model is used
 		} else if ( document.attachEvent ) {
@@ -186,7 +201,7 @@ Simples.merge({
 			document.attachEvent("onreadystatechange", DOMContentLoaded);
 
 			// A fallback to window.onload, that will always work
-			window.attachEvent( "onload", Simples.ready );
+			window.attachEvent( "onload", Simples.readyHandler );
 
 			// If IE and not a frame
 			// continually check to see if the document is ready
@@ -218,7 +233,7 @@ Simples.merge({
 if ( document.addEventListener ) {
 	DOMContentLoaded = function() {
 		document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
-		Simples.ready();
+		Simples.readyHandler();
 	};
 
 } else if ( document.attachEvent ) {
@@ -226,7 +241,7 @@ if ( document.addEventListener ) {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 		if ( document.readyState === "complete" ) {
 			document.detachEvent( "onreadystatechange", DOMContentLoaded );
-			Simples.ready();
+			Simples.readyHandler();
 		}
 	};
 } 
@@ -247,7 +262,7 @@ function doScrollCheck() {
 	}
 
 	// and execute any waiting functions
-	Simples.ready();
+	Simples.readyHandler();
 }
 
 
@@ -289,23 +304,6 @@ Simples.prototype = {
 		});
 		return results;
 	},
-	ready: function( fn ) {
-		// Attach the listeners
-		Simples.bindReady();
-		
-		// If the DOM is already ready
-		if ( Simples.isReady ) {
-			// Execute the function immediately
-			fn.call( document, SimplesEvent( 'ready' ) );
-
-		// Otherwise, remember the function for later
-		} else if ( readyList ) {
-			// Add the function to the wait list
-			readyList.push( fn );
-		}
-
-		return this;
-	}, 
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
 	push: push,

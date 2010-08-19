@@ -19,7 +19,7 @@
 		<script type="text/javascript" charset="utf-8" src="../../../src/events.js"></script>		  
 		<script type="text/javascript" charset="utf-8" src="../../../src/position.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			Simples(document).ready(function(){
+			Simples.ready(function(){
 				Simples('.relative').bind('click',function() {
 					$('#marker').css( Simples(this).offset() );
 					var pos = Simples(this).position();

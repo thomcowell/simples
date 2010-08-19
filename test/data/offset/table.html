@@ -21,7 +21,7 @@
 		<script type="text/javascript" charset="utf-8" src="../../../src/position.js"></script>
 		<script type="text/javascript" charset="utf-8" src="../../../src/animation.js"></script>  
 		<script type="text/javascript" charset="utf-8">
-			Simples(document).ready(function(){
+			Simples.ready(function(){
 				Simples('table, th, td').bind('click',function() {
 					Simples('#marker').css( Simples(this).offset() );
 					return false;
