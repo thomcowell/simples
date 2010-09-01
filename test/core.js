@@ -262,6 +262,14 @@ test('Simples.each',function(){
 		}
 		counter++;
 	});
+}); 
+
+test('Simples.add',function(){
+	ok( false, "No Tests")
+});
+                          
+test('Simples.find',function(){
+	ok( false, "No Tests")
 });
 
 test('Simples.filter', 14, function(){

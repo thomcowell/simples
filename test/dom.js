@@ -157,8 +157,8 @@ test("attr('tabindex', value)", function() {
 	equals(element.attr('tabindex'), -1, 'set negative tabindex');
 });
 
-test("html('inner')", 6, function(){
-
+test("html('inner')", 8, function(){
+    
 	var div = Simples('<div/>');	
 	function testInner( location, html, endHTML ){
 		location = location || html;
@@ -179,7 +179,10 @@ test("html('inner')", 6, function(){
 		
 	testInner( p, undefined, "<p>DOM Element</p>");
 	testInner( "inner", p, "<p>DOM Element</p>");
-
+    
+    testInner( "inner", 1, "1"); 
+	testInner( "inner", true, "true");
+	
 	var innerHTML = '<p class="test-war-hammer">This should be here</p><span class="test-war-hammer">Super Duper 1</span><span class="test-war-hammer">Super Duper 2</span>'
 	Simples('#test-area').html( innerHTML );
 	testInner( "inner", Simples('.test-war-hammer'), innerHTML );
@@ -233,20 +236,20 @@ test("html('top')", 3, function(){
 test("html('bottom')", 3, function(){
 	var contents = '<span>1</span><span>2</span><span>3</span><span>4</span>', div = Simples('<div/>');
 	
-	function testTop( html, endHTML ){    
+	function testBottom( html, endHTML ){    
 		endHTML = endHTML || html;
 		div[0].innerHTML = contents;
 		div.html( 'bottom', html );
 		equal( div[0].innerHTML, contents+endHTML, "should insert at the bottom "+endHTML );
 	}
 
-	testTop( "<p>I am Bottom</p>" );
+	testBottom( "<p>I am Bottom</p>" ); 
 	
 	var p = document.createElement('p');
 	p.innerText = "DOM Element";	
-	testTop( p, "<p>DOM Element</p>" );
+	testBottom( p, "<p>DOM Element</p>" );
 	
-	testTop( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
+	testBottom( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
 });
 
 test("html('remove')",function(){

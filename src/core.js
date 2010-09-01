@@ -304,6 +304,10 @@ Simples.prototype = {
 		});
 		return results;
 	},
+	add : function( elems ){
+		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
+		return this;
+	},
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
 	push: push,
