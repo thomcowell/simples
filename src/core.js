@@ -24,58 +24,7 @@ var toString = Object.prototype.toString,
 	readyList = [];
 
 function Simples( selector, context ) {
-
-	if ( !(this instanceof Simples) ){	// or this.each !== Simples.prototype.each
-		return new Simples( selector, context );  		
-	} else if( selector instanceof Simples ){
-		this.push.apply( this, slice.call( selector, 0 ) );
-		return this;
-	}
-	  	
-	// Handle $(""), $(null), or $(undefined) 		
-	if ( !selector ){
-		return this;
-	}
-	
-	// Handle $(DOMElement)
-	if ( selector.nodeType || ( selector.document && selector.document.nodeType ) ) {
-		this.context = this[0] = selector;
-		this.length = 1;
-		return this;
-	}
-	
-	// The body element only exists once, optimize finding it
-	if ( selector === "body" && !context ) {
-		this.context = document;
-		this[0] = document.body;
-		this.selector = "body";
-		this.length = 1;
-		return this;
-	}
-	  
-	var objClass = toString.call( selector );
-	if( objClass === StringClass ){
-		var result = SimplesSelector( selector, context );
-		this.context = result.context;
-		this.selector = result.selector;
-
-		this.push.apply( this, result.elems );
-	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
-
-		this.push.apply( this, slice.call( selector, 0 ) );
-    } else if( objClass === ArrayClass ){
-        if( context === true ){
-	         this.push.apply( this, selector );
-		} else {
-			for(var d=0,e=selector.length;d<e;d++){
-				if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
-					this.push.call( this, selector[d] );
-				}
-			}
-		}
-	}
-	
-    return this;
+	return new Simples.fn.init( selector, context );  		
 }      
 
 /**
@@ -113,10 +62,10 @@ Simples.merge = function( first /* obj1, obj2..... */) {
 Simples.merge({
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		if( this.prototype && toString.call( addMethods ) === ObjectClass ){
+		if( toString.call( addMethods ) === ObjectClass ){
 			for (var key in addMethods) {
 		        if ( hasOwn.call( addMethods, key ) ) {
-		            this.prototype[key] = addMethods[key];
+		            Simples.fn[key] = addMethods[key];
 		        }
 		    }
 		}		
@@ -250,7 +199,58 @@ function doScrollCheck() {
 }
 
 
-Simples.prototype = {
+Simples.fn = Simples.prototype = { 
+	init : function( selector, context ){
+
+		if ( !this.each ){	// or this.each !== Simples.prototype.each
+			return new Simples.fn.init( selector, context );  		
+		}
+	    
+		// Handle $(""), $(null), or $(undefined) 		
+		if ( !selector ){
+			return this;
+		}
+
+		// Handle $(DOMElement)
+		if ( selector.nodeType || ( selector.document && selector.document.nodeType ) ) {
+			this.context = this[0] = selector;
+			this.length = 1;
+			return this;
+		}
+		
+		// The body element only exists once, optimize finding it
+		if ( selector === "body" && !context ) {
+			this.context = document;
+			this[0] = document.body;
+			this.selector = "body";
+			this.length = 1;
+			return this;
+		}
+	  
+		var objClass = toString.call( selector );
+		if( objClass === StringClass ){
+			this.context = context;
+			this.selector = selector;
+		
+			return SimplesSelector( selector, context, this );
+
+		} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
+
+			this.push.apply( this, slice.call( selector, 0 ) );
+	    } else if( objClass === ArrayClass ){
+	        if( context === true ){
+				// shortcut to use native push
+		        this.push.apply( this, selector );
+			} else {
+				for(var d=0,e=selector.length;d<e;d++){
+					if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
+						this.push.call( this, selector[d] );
+					}
+				}
+			}
+		}
+		return this;		
+	},
 	length : 0,
 	selector : '',
 	version : '@VERSION',  
@@ -304,3 +304,5 @@ Simples.prototype = {
 	sort: [].sort,
 	splice: [].splice
 };      
+
+Simples.fn.init.prototype = Simples.fn
