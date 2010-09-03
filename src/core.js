@@ -24,64 +24,11 @@ var toString = Object.prototype.toString,
 	readyList = [];
 
 function Simples( selector, context ) {
-
-	if ( this.each !== Simples.prototype.each ){	// or this.each !== Simples.prototype.each
-		return new Simples( selector, context );
-	} else if( selector instanceof Simples ){
-		this.push.apply( this, slice.call( selector, 0 ) );
-		return this;
-	}
-	
-	// Handle $(""), $(null), or $(undefined)
-	if ( !selector ){
-		return this;
-	}
-	
-	// Handle $(DOMElement)
-	if ( selector.nodeType || ( selector.document && selector.document.nodeType ) ) {
-		this.context = this[0] = selector;
-		this.length = 1;
-		return this;
-	}
-	
-	// The body element only exists once, optimize finding it
-	if ( selector === "body" && !context ) {
-		this.context = document;
-		this[0] = document.body;
-		this.selector = "body";
-		this.length = 1;
-		return this;
-	}
-	  
-	var objClass = toString.call( selector );
-	if( objClass === StringClass ){
-		this.context = context;
-		this.selector = selector;
-		
-		return Simples.Selector( selector, context, this );
-
-	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
-
-		this.push.apply( this, slice.call( selector, 0 ) );
-    } else if( objClass === ArrayClass ){
-        if( context === true ){
-			// shortcut to use native push
-	        this.push.apply( this, selector );
-		} else {
-			for(var d=0,e=selector.length;d<e;d++){
-				if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
-					this.push.call( this, selector[d] );
-				}
-			}
-		}
-	}
-	
-    return this;
+	return new Simples.fn.init( selector, context );
 }      
 
 /**
  * @name merge
- * @namespace
  * @description used to merge objects into one
  * @param {Object} obj native javascript object to be merged
  * @param {Object|Array} obj native javascript object or array to be merged onto first
@@ -110,16 +57,15 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     return target;
 };
 
-// call with Simples to make sure context is correct
 Simples.merge({
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		if( this.prototype && toString.call( addMethods ) === ObjectClass ){
+		if( toString.call( addMethods ) === ObjectClass ){
 			for (var key in addMethods) {
-				if ( hasOwn.call( addMethods, key ) ) {
-					this.prototype[key] = addMethods[key];
-				}
-			}
+		        if ( hasOwn.call( addMethods, key ) ) {
+		            Simples.fn[key] = addMethods[key];
+		        }
+		    }
 		}
 	},  
 	isEmptyObject : function( obj ) {
@@ -266,7 +212,56 @@ function doScrollCheck() {
 }
 
 
-Simples.prototype = {
+Simples.fn = Simples.prototype = { 
+	init : function( selector, context ){
+
+		// Handle $(""), $(null), or $(undefined) 		
+		if ( !selector ){
+			return this;
+		} else if( selector.selector !== undefined ){
+			return selector;
+		}
+
+		// Handle $(DOMElement)
+		if ( selector.nodeType || ( selector.document && selector.document.nodeType ) ) {
+			this.context = this[0] = selector;
+			this.length = 1;
+			return this;
+		}
+		
+		// The body element only exists once, optimize finding it
+		if ( selector === "body" && !context ) {
+			this.context = document;
+			this[0] = document.body;
+			this.selector = "body";
+			this.length = 1;
+			return this;
+		}
+	  
+		var objClass = toString.call( selector );
+		if( objClass === StringClass ){
+			this.context = context;
+			this.selector = selector;
+		
+			return Simples.Selector( selector, context, this );
+
+		} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
+
+			this.push.apply( this, slice.call( selector, 0 ) );
+	    } else if( objClass === ArrayClass ){
+	        if( context === true ){
+				// shortcut to use native push
+		        this.push.apply( this, selector );
+			} else {
+				for(var d=0,e=selector.length;d<e;d++){
+					if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
+						this.push.call( this, selector[d] );
+					}
+				}
+			}
+		}
+		return this;		
+	},
 	length : 0,
 	selector : '',
 	version : '@VERSION',  
@@ -314,3 +309,5 @@ Simples.prototype = {
 	sort: [].sort,
 	splice: [].splice
 };      
+
+Simples.fn.init.prototype = Simples.fn

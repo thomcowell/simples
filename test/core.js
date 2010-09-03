@@ -113,36 +113,27 @@ test('merge works as expected with 3 argument', 8, function(){
 	}
 });
 
-test('extend works as expected with 1 arguments', 10, function(){
-	function Class(){ this.start = false; return this; }
-	
-	var length = 0;
-	for(var func in Class.prototype ){
-		length++;
-	}
-	
-	same( length, 0, "Should have an empty prototype chain");
+test('extend works as expected with 1 arguments', 4, function(){
 	
 	var funcs = { 
 		__start__ : function(){ this.start = new Date(); },
 		__stop__ : function(){ this.start = false; },
 		__reset__ : function(){ this.reset = new Date(); }
 	};
-    // to ensure that the window doesn't have the properties in funcs 
-	for( var f in funcs ){
-		same( window[ f ], undefined, "Should not have the same functions window."+f+" => undefined");
-	}
-
-	Simples.extend.call( window, funcs );
-    // now test that the window doesn't have the properties in funcs	
-	for( var e in funcs ){
-		same( window[ e ], undefined, "Should not have the same functions window."+e+" => undefined");
+	
+	var length = 0;
+	for(var name in funcs ){
+		if( !Simples.fn[ name ] ){
+			length++;
+		}
 	}
 	
-	Simples.extend.call( Class, funcs );
+	same( length, 3, "Should not have funcs in prototype chain");
 	
-	for( var key in Class.prototype ){
-		same( funcs[ key ], Class.prototype[key], "Should have the same functions Class.prototype."+key+" => "+funcs[ key ]);
+	Simples.extend( funcs );
+	
+	for( var key in funcs ){
+		same( funcs[ key ], Simples.fn[key], "Should have the same functions Simples.fn."+key+" => "+funcs[ key ]);
 	}
 
 });
