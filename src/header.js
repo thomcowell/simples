@@ -1,4 +1,5 @@
-/*!
+/** 
+ * @license 
  * Simples JavaScript Library v@VERSION
  * http://simples.eightsquarestudio.com/
  * Copyright (c) 2009 - @CURRENT_YEAR, Thomas Cowell

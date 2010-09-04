@@ -25,14 +25,14 @@ var toString = Object.prototype.toString,
 
 function Simples( selector, context ) {
 
-	if ( !(this instanceof Simples) ){	// or this.each !== Simples.prototype.each
-		return new Simples( selector, context );  		
+	if ( this.each !== Simples.prototype.each ){	// or this.each !== Simples.prototype.each
+		return new Simples( selector, context );
 	} else if( selector instanceof Simples ){
 		this.push.apply( this, slice.call( selector, 0 ) );
 		return this;
 	}
-	  	
-	// Handle $(""), $(null), or $(undefined) 		
+	
+	// Handle $(""), $(null), or $(undefined)
 	if ( !selector ){
 		return this;
 	}
@@ -58,7 +58,7 @@ function Simples( selector, context ) {
 		this.context = context;
 		this.selector = selector;
 		
-		return SimplesSelector( selector, context, this );
+		return Simples.Selector( selector, context, this );
 
 	} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
@@ -83,28 +83,28 @@ function Simples( selector, context ) {
  * @name merge
  * @namespace
  * @description used to merge objects into one
- * @param {Object} obj native javascript object to be merged  
- * @param {Object|Array} obj native javascript object or array to be merged onto first  	
+ * @param {Object} obj native javascript object to be merged
+ * @param {Object|Array} obj native javascript object or array to be merged onto first
  **/
-Simples.merge = function( first /* obj1, obj2..... */) { 
-	// if only 1 argument is passed in assume Simples is the target
-    var target = ( arguments.length === 1 && !( this === window || this === document ) ) ? this : toString.call( first ) === ObjectClass ? first : {};
-	// set i to value based on whether there are more than 1 arguments
-    var i = arguments.length > 1 ? 1 : 0;
-	// Loop over arguments
-    for (var l=arguments.length; i<l; i++) {
-		// if object apply directly to target with same keys
-		var isWhat = toString.call( arguments[i] );
-		if( isWhat === ObjectClass ){
-			for (var key in arguments[i]) {
-                if ( hasOwn.call( arguments[i], key ) ) {
+Simples.merge = function(first /* obj1, obj2..... */ ) {
+    // if only 1 argument is passed in assume Simples is the target
+    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first: {};
+    // set i to value based on whether there are more than 1 arguments
+    var i = arguments.length > 1 ? 1: 0;
+    // Loop over arguments
+    for (var l = arguments.length; i < l; i++) {
+        // if object apply directly to target with same keys
+        var isWhat = toString.call(arguments[i]);
+        if (isWhat === ObjectClass) {
+            for (var key in arguments[i]) {
+                if (hasOwn.call(arguments[i], key)) {
                     target[key] = arguments[i][key];
                 }
             }
-		} else if( isWhat === ArrayClass ){
-         	// if array apply directly to target with numerical keys
-			push.apply( target, arguments[i] );
-		}                                            
+        } else if (isWhat === ArrayClass) {
+            // if array apply directly to target with numerical keys
+            push.apply(target, arguments[i]);
+        }
     }
 
     return target;
@@ -116,17 +116,17 @@ Simples.merge({
 		// Detect whether addMethods is an object to extend onto subClass
 		if( this.prototype && toString.call( addMethods ) === ObjectClass ){
 			for (var key in addMethods) {
-		        if ( hasOwn.call( addMethods, key ) ) {
-		            this.prototype[key] = addMethods[key];
-		        }
-		    }
-		}		
+				if ( hasOwn.call( addMethods, key ) ) {
+					this.prototype[key] = addMethods[key];
+				}
+			}
+		}
 	},  
 	isEmptyObject : function( obj ) {
 		for ( var name in obj ) { return false; }
 		return true;
 	},
-	// Has the ready events already been bound?      	
+	// Has the ready events already been bound?
 	isReady : false,       
 	ready: function( fn ) {
 		// Attach the listeners
@@ -300,7 +300,7 @@ Simples.prototype = {
 	find: function( selector ){
 		var results = Simples();
 		this.each(function(){
-			results.push.apply( results, SimplesSelector( selector, this ) );
+			results.push.apply( results, Simples.Selector( selector, this ) );
 		});
 		return results;
 	},

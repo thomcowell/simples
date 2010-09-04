@@ -10,7 +10,7 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 // Wraps the HTML in a TAG, Tag is optional. If the html starts with a Tag, it will wrap the context in that tag.
 function wrapHelper(xhtml, el) {
 	// insert into document fragment to ensure insert occurs without messing up order
- 	if( xhtml.toString().indexOf("[object ") > -1 ){
+	if( xhtml.toString().indexOf("[object ") > -1 ){
 		if( xhtml && xhtml.length !== undefined ){
 			var docFrag = document.createDocumentFragment();
 			xhtml = slice.call( xhtml, 0 );
@@ -23,7 +23,7 @@ function wrapHelper(xhtml, el) {
 		return xhtml;
 	}
     var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
-    xhtml = "" + xhtml
+    xhtml = "" + xhtml;
     if ( VALID_ELEMENTS.test(xhtml) ) {
         result = VALID_ELEMENTS.exec(xhtml);
 		tag = result[1];
@@ -80,7 +80,7 @@ function attrs( elem, name, value ){
 			return elem.getAttribute( name );
 		}
 		return null;  
-	} else if( value === null ){   	
+	} else if( value === null ){
 		if ( elem.nodeType === 1 ) {
 			elem.removeAttribute( name );
 		}
@@ -130,8 +130,8 @@ Simples.extend({
 
 			var el = this, parent = el.parentNode, elem;
 			if( el.nodeType === 3 || el.nodeType === 8 ){ return; }
-		    if (location == "inner") {
-			  	var list, len, i = 0;     
+			if (location == "inner") {
+				var list, len, i = 0;
 				cleanData( this, false );
 				var testString = html.toString(); 
 		        if ( testString.indexOf("[object ") === -1 ) {
@@ -224,14 +224,14 @@ Simples.extend({
 		var nameClass = toString.call( name );
 			
 		if( nameClass === ObjectClass ){   
-			this.each(function(){   
+			this.each(function(){
 				for( var key in name ){
 					attrs( this, key, name[key] );
 				}
 			});
 		} else if( nameClass === StringClass ){
-			if( value === undefined ){                
-               	return attrs( this[0], name, value );
+			if( value === undefined ){
+				return attrs( this[0], name, value );
 			} else { 
 				this.each(function(){
 					attrs( this, name, value );

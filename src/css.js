@@ -263,7 +263,7 @@ Simples.merge({
 
 		return Simples.currentCSS( elem, name, extra );	
 	}
-}) 
+});
 
 Simples.extend({
 	css : function( name, value ){ 

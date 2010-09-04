@@ -1,6 +1,6 @@
 
 // ======= AJAX ========== //
-// Constants
+/** @const */
 var DEFAULTS = {
     // Functions to call when the request fails, succeeds,
     // or completes (either fail or succeed)
@@ -26,8 +26,7 @@ var DEFAULTS = {
     // the default is simply to determine what data was returned from the
     // and act accordingly.
     data: null
-},
-ActiveAjaxRequests = 0,    
+},   
 // borrowed from jQuery
 ACCEPTS = {
     xml: "application/xml, text/xml",
@@ -42,6 +41,8 @@ AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
 AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 TYPEOF = /number|string/;
+
+var ActiveAjaxRequests = 0;
 
 function ajaxSettings(opts) {
     DEFAULTS = Simples.merge(DEFAULTS, opts);
@@ -78,10 +79,10 @@ function ajax(url, options) {
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
         if (options.data !== null && options.data !== "") {
-            options.data = serialise(options.data).replace(/&$/, '');
+            options.data = Simples.params(options.data).replace(/&$/, '');
 
             if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === 'string') {
-                options.data += ("&" + serialise(options.additionalData));
+                options.data += ("&" + Simples.params(options.additionalData));
             }
         }
 
@@ -105,8 +106,9 @@ function ajax(url, options) {
             if (httpSuccess(xhr)) {
 
                 // Execute the success callback with the data returned from the server
+                var data;
                 try {
-                    var data = httpData(xhr, options.dataType);
+                    data = httpData(xhr, options.dataType);
                 } catch(e) {
                     options.error(xhr, 'parseerror');
                 }
@@ -218,62 +220,62 @@ function ajax(url, options) {
 
 }
 
-function serialise(obj) {
-
-    if( arguments.length === 1 ){ 
-		var arr = [];
-		var objClass = toString.call( obj );	
-	    if ( objClass === ObjectClass ) {
-	        for (var key in obj) {
-	
-	            arr[ arr.length ] = formatData( key, obj[key] );
-			}
-	    } else if ( objClass === ArrayClass ) {
-	        for (var i = 0, l = obj.length; i < l; i++) {
-	
-	            if ( toString.call( obj[i] ) === ObjectClass ) {
-	
-	                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
-	            }
-	        }                        
-		}
-		return arr.join('&');
-    } else if( arguments.length === 2 ) {
-		return formatData( arguments[0], arguments[1] );
-	}
-}
-
 function formatData(name, value) {
 
-	var str = "";
+    var str = "";
 
-	if( typeof name === 'string' ){
-		var objClass = toString.call( value );
-		if( objClass === NumberClass || objClass === StringClass || objClass === BooleanClass) {
+    if (typeof name === 'string') {
+        var objClass = toString.call(value);
+        if (objClass === NumberClass || objClass === StringClass || objClass === BooleanClass) {
 
-	        str = ( encodeURIComponent(name) + '=' + encodeURIComponent(value) );
-		} else if( objClass === FunctionClass ){
-		
-		 	str = formatData( name, value() );
-	    } else if ( objClass === ObjectClass ) {
-	        var arr = [];
+            str = (encodeURIComponent(name) + '=' + encodeURIComponent(value));
+        } else if (objClass === FunctionClass) {
 
-	        for (var key in value) { 
+            str = formatData(name, value());
+        } else if (objClass === ObjectClass) {
+            var arr = [];
 
-				var result = formatData(name + "[" + key + "]", value[ key ] );
-	            if( result ){ arr.push( result ); }
-	        }
+            for (var key in value) {
 
-	        str = arr.join('&');
-	    } else if ( objClass === ArrayClass ) {
-			str = formatData( name, value.join(',') );
-		} 
-	}
-	return str;
+                var result = formatData(name + "[" + key + "]", value[key]);
+                if (result) {
+                    arr.push(result);
+                }
+            }
+
+            str = arr.join('&');
+        } else if (objClass === ArrayClass) {
+            str = formatData(name, value.join(','));
+        }
+    }
+    return str;
 }
 
 Simples.merge({
     ajax: ajax,
     ajaxSettings: ajaxSettings,
-    params: serialise
+    params: function(obj) {
+
+	    if( arguments.length === 1 ){ 
+			var arr = [];
+			var objClass = toString.call( obj );	
+		    if ( objClass === ObjectClass ) {
+		        for (var key in obj) {
+
+		            arr[ arr.length ] = formatData( key, obj[key] );
+				}
+		    } else if ( objClass === ArrayClass ) {
+		        for (var i = 0, l = obj.length; i < l; i++) {
+
+		            if ( toString.call( obj[i] ) === ObjectClass ) {
+
+		                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
+		            }
+		        }                        
+			}
+			return arr.join('&');
+	    } else if( arguments.length === 2 ) {
+			return formatData( arguments[0], arguments[1] );
+		}
+	}
 });
