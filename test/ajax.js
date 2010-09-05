@@ -33,44 +33,28 @@ test("formatData - when passing in bad key",5,function(){
 	equal( formatData([1,2,3],'sandwich'), "", "null key should be represented" );	
 });
 
-test("serialise - when passing in 2 arguments string key and string, number or boolean value",4,function(){
+test("Simples.params - when passing in 2 arguments string key and string, number or boolean value",4,function(){
 	  
-	equal( serialise('ham','sandwich'), "ham=sandwich", "string value should be represented" );
-	equal( serialise('ham',29), "ham=29", "number value should be represented" );	
-	equal( serialise('ham',true), "ham=true", "boolean true value should be represented" );
-	equal( serialise('ham',false), "ham=false", "boolean false value should be represented" );
+	equal( Simples.params('ham','sandwich'), "ham=sandwich", "string value should be represented" );
+	equal( Simples.params('ham',29), "ham=29", "number value should be represented" );	
+	equal( Simples.params('ham',true), "ham=true", "boolean true value should be represented" );
+	equal( Simples.params('ham',false), "ham=false", "boolean false value should be represented" );
 });
 
-test("serialise - when passing in 1 argument as an object",4,function(){
+test("Simples.params - when passing in 1 argument as an object",4,function(){
 	  
-	equal( serialise({sandwich:'grilled',fried:{green:function(){ return 'bacon'; },red:"eggs"}}), "sandwich=grilled&fried%5Bgreen%5D=bacon&fried%5Bred%5D=eggs", "string value should be represented" );
-	equal( serialise({sandwich:'grilled',fried:{green:'bacon',red:"eggs"}}), "sandwich=grilled&fried%5Bgreen%5D=bacon&fried%5Bred%5D=eggs", "string value should be represented" );
-	equal( serialise({sandwich:'grilled',fried:{green:true,red:false}}), "sandwich=grilled&fried%5Bgreen%5D=true&fried%5Bred%5D=false", "string value should be represented" );	 	
-	equal( serialise({sandwich:12,fried:{green:true,red:[1,2,3]}}), "sandwich=12&fried%5Bgreen%5D=true&fried%5Bred%5D=1%2C2%2C3", "string value should be represented" );
+	equal( Simples.params({sandwich:'grilled',fried:{green:function(){ return 'bacon'; },red:"eggs"}}), "sandwich=grilled&fried%5Bgreen%5D=bacon&fried%5Bred%5D=eggs", "string value should be represented" );
+	equal( Simples.params({sandwich:'grilled',fried:{green:'bacon',red:"eggs"}}), "sandwich=grilled&fried%5Bgreen%5D=bacon&fried%5Bred%5D=eggs", "string value should be represented" );
+	equal( Simples.params({sandwich:'grilled',fried:{green:true,red:false}}), "sandwich=grilled&fried%5Bgreen%5D=true&fried%5Bred%5D=false", "string value should be represented" );	 	
+	equal( Simples.params({sandwich:12,fried:{green:true,red:[1,2,3]}}), "sandwich=12&fried%5Bgreen%5D=true&fried%5Bred%5D=1%2C2%2C3", "string value should be represented" );
 });
 
-test("serialise - when passing in 1 argument as an array",5,function(){
+test("Simples.params - when passing in 1 argument as an array",5,function(){
 	  
-	equal( serialise([{name:"ham",value:"sandwich"}]), "ham=sandwich", "string value should be represented" );
-	equal( serialise([{name:"ham",value:12}]), "ham=12", "number value should be represented" );
-	equal( serialise([{name:"ham",value:true}]), "ham=true", "boolean true value should be represented" );	
-	equal( serialise([{name:"ham",value:false}]), "ham=false", "boolean false value should be represented" );
-	equal( serialise([1,true,false,"there",function(){ return 'red'; }]), "", "an array not of objects value should be represented" );
+	equal( Simples.params([{name:"ham",value:"sandwich"}]), "ham=sandwich", "string value should be represented" );
+	equal( Simples.params([{name:"ham",value:12}]), "ham=12", "number value should be represented" );
+	equal( Simples.params([{name:"ham",value:true}]), "ham=true", "boolean true value should be represented" );	
+	equal( Simples.params([{name:"ham",value:false}]), "ham=false", "boolean false value should be represented" );
+	equal( Simples.params([1,true,false,"there",function(){ return 'red'; }]), "", "an array not of objects value should be represented" );
 });
-      
-test("network stuff",function(){
-	ok( false, "test not written");
-})
-// test("Simples.ajax", 3, function(){
-// 	Simples.ajax({
-// 		url: url("data/name.html"),
-// 		beforeSend: function(){ ok(true, "beforeSend"); },
-// 		success: function(){ ok(true, "success"); },
-// 		error: function(){ ok(false, "error"); },
-// 		complete: function(){
-// 		  ok(true, "complete");
-// 		  setTimeout(function(){ start(); }, 13);
-// 		}
-// 	});
-// });     
 

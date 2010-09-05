@@ -113,47 +113,38 @@ test('merge works as expected with 3 argument', 8, function(){
 	}
 });
 
-test('extend works as expected with 1 arguments', 10, function(){
-	function Class(){ this.start = false; return this; }
-	
-	var length = 0;
-	for(var func in Class.prototype ){
-		length++;
-	}
-	
-	same( length, 0, "Should have an empty prototype chain");
+test('extend works as expected with 1 arguments', 4, function(){
 	
 	var funcs = { 
 		__start__ : function(){ this.start = new Date(); },
 		__stop__ : function(){ this.start = false; },
 		__reset__ : function(){ this.reset = new Date(); }
 	};
-    // to ensure that the window doesn't have the properties in funcs 
-	for( var f in funcs ){
-		same( window[ f ], undefined, "Should not have the same functions window."+f+" => undefined");
-	}
-
-	Simples.extend.call( window, funcs );
-    // now test that the window doesn't have the properties in funcs	
-	for( var e in funcs ){
-		same( window[ e ], undefined, "Should not have the same functions window."+e+" => undefined");
+	
+	var length = 0;
+	for(var name in funcs ){
+		if( !Simples.fn[ name ] ){
+			length++;
+		}
 	}
 	
-	Simples.extend.call( Class, funcs );
+	same( length, 3, "Should not have funcs in prototype chain");
 	
-	for( var key in Class.prototype ){
-		same( funcs[ key ], Class.prototype[key], "Should have the same functions Class.prototype."+key+" => "+funcs[ key ]);
+	Simples.extend( funcs );
+	
+	for( var key in funcs ){
+		same( funcs[ key ], Simples.fn[key], "Should have the same functions Simples.fn."+key+" => "+funcs[ key ]);
 	}
 
 });
 
 module("Core: instantiating an instance of Simples where select isn't called", { 
 	setup : function(){
-		window.old_select = SimplesSelector;
-		window.SimplesSelector = function(){ throw new Error("shouldn't call select in selector.js"); };              
+		window.old_select = Simples.Selector;
+		window.Simples.Selector = function(){ throw new Error("shouldn't call select in selector.js"); };              
 	},
 	teardown : function(){
-		SimplesSelector = window.old_select;
+		Simples.Selector = window.old_select;
 	}
 });
 
@@ -243,11 +234,11 @@ test("Simples constructor when instantiated with Window", 5, function(){
 module("Core: instantiating an instance of Simples"); 
 
 test("Simples constructor when instantiated with a call through to selector", 4, function(){
-	var results = SimplesSelector('#row-wrapper');
+	var results = Simples.Selector('#row-wrapper', null, { push:[].push, selector : "#row-wrapper" });
 	var s_obj = Simples('#row-wrapper');
 	ok( s_obj instanceof Simples, "should return an instance of Simples" );  		
  
-	equal( s_obj[0], results.elems[0], "should return with an Element, when supplied" );  
+	equal( s_obj[0], results[0], "should return with an Element, when supplied" );  
 	equal( s_obj.context, results.context, "should set the context to the element" );
 	equal( s_obj.selector, results.selector, "should set the selector to an empty string because no string selector supplied" );	                             
 });
@@ -262,6 +253,14 @@ test('Simples.each',function(){
 		}
 		counter++;
 	});
+}); 
+
+test('Simples.add',function(){
+	ok( false, "No Tests")
+});
+                          
+test('Simples.find',function(){
+	ok( false, "No Tests")
 });
 
 test('Simples.filter', 14, function(){

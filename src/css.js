@@ -252,7 +252,7 @@ Simples.merge({
 
 		return style[ name ]; 
 	},
-	style : function( elem, name, extra ){
+	getStyle : function( elem, name, extra ){
 
 		if( name === "width" || name === "height" ){
 			return Simples.getWidthHeight( elem, name, extra );
@@ -263,7 +263,7 @@ Simples.merge({
 
 		return Simples.currentCSS( elem, name, extra );	
 	}
-}) 
+});
 
 Simples.extend({
 	css : function( name, value ){ 

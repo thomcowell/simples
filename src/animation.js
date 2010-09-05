@@ -34,7 +34,7 @@ var REGEX_PIXEL = /px\s?$/,
 			
 			if( !this.timerID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				this.timerID = window.setInterval(function(){ AnimationController.step() }, this.interval ); 
+				this.timerID = window.setInterval(function(){ AnimationController.step(); }, this.interval ); 
 				if( frame > 0 ){
 					animation.step( new Date().getTime() );
 				}
@@ -53,7 +53,7 @@ var REGEX_PIXEL = /px\s?$/,
 			var now = new Date().getTime();    
 			for( var id in this.animations ){
 				this.animations[ id ].step( now );
-			}   	       
+			}
 		} else if( this.timerID ){
 			window.clearInterval( this.timerID );
 			this.timerID = null;
@@ -86,8 +86,8 @@ function Animation( elem, setStyle, opts ){
 	if( !( this instanceof Animation ) ){
 		return new Animation( elem, setStyle, opts );
 	}
-	
-	opts = opts || {}; 
+
+	opts = opts || {};
 	this[0] = elem; 
 	this.length = 1;
 	this._id = AnimationController.guid++;
@@ -101,11 +101,11 @@ function Animation( elem, setStyle, opts ){
 	
 	// check for supported css animated features and prep for animation
 	for( var key in setStyle ){
-	   	var cKey = key.replace( RDASH_ALPHA, fcamelCase );
-		var opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
+		var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
+			opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 		if( opacity || AnimationController.allowTypes.test( cKey ) ){
-			this._start[ cKey ] = ( Simples.style( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
+			this._start[ cKey ] = ( Simples.getStyle( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
 			this._finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
 		}                                        
 	}
@@ -174,8 +174,9 @@ function CompositeAnimation( animations ){
 	return this;
 }
 
-for( var key in Animation.prototype ) (function( name ){ 
-		CompositeAnimation.prototype[ name ] = function(){
+(function( CA ){
+	function addMethod( name ){
+		CA.prototype[ name ] = function(){
 			for(var i=0,l=this.length;i<l;i++){
 				if( this[ i ][ name ] ){
 					this[ i ][ name ].apply( this[ i ], arguments );
@@ -183,11 +184,16 @@ for( var key in Animation.prototype ) (function( name ){
 			}
 			return this;
 		};
-	})( key );
+	}
+	
+	for( var key in Animation.prototype ){
+		addMethod( key );
+	}
+})( CompositeAnimation );
 
 Simples.merge({
     animationDefaults: function( opts ){
-	  	opts = opts || {};
+		opts = opts || {};
 	
 		AnimationController.frameRate = opts.frameRate || AnimationController.frameRate;
 		

@@ -116,7 +116,7 @@ var SimplesEvents = {
 		events = events || [];
 		var results = [];
 		// clear out data for functions
-       	for( var i=0,l=events.length;i<l;i++ ){
+		for( var i=0,l=events.length;i<l;i++ ){
 			if( callback === undefined || events[ i ].guid === callback.guid ){
 				// check whether it is a W3C browser or not
 				if ( elem.removeEventListener ) {
@@ -148,7 +148,7 @@ var SimplesEvents = {
 		var data = readData( elem, 'events' ) || {};
 		
 		if( type === undefined ){
-			for( type in data ){
+			if( type in data ){
 				data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
 				if( data[ type ].length === 0 ){
 					delete data[ type ];
@@ -250,11 +250,11 @@ var SimplesEvents = {
 	handler : function( callback ){ 
 		
 	    return function( event ) {
-
-			event = arguments[0] = SimplesEvents.fix( event || window.event );
+			var args = slice.call( arguments );
+			event = args[0] = SimplesEvents.fix( event || window.event );
 			event.originalFn = callback; 
 
-	        if ( callback.apply( this, arguments ) === false ) { 
+	        if ( callback.apply( this, args ) === false ) { 
 				event.preventDefault();
 				event.stopPropagation();
 			}

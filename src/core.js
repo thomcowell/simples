@@ -24,41 +24,39 @@ var toString = Object.prototype.toString,
 	readyList = [];
 
 function Simples( selector, context ) {
-	return new Simples.fn.init( selector, context );  		
+	return new Simples.fn.init( selector, context );
 }      
 
 /**
  * @name merge
- * @namespace
  * @description used to merge objects into one
- * @param {Object} obj native javascript object to be merged  
- * @param {Object|Array} obj native javascript object or array to be merged onto first  	
+ * @param {Object} obj native javascript object to be merged
+ * @param {Object|Array} obj native javascript object or array to be merged onto first
  **/
-Simples.merge = function( first /* obj1, obj2..... */) { 
-	// if only 1 argument is passed in assume Simples is the target
-    var target = ( arguments.length === 1 && !( this === window || this === document ) ) ? this : toString.call( first ) === ObjectClass ? first : {};
-	// set i to value based on whether there are more than 1 arguments
-    var i = arguments.length > 1 ? 1 : 0;
-	// Loop over arguments
-    for (var l=arguments.length; i<l; i++) {
-		// if object apply directly to target with same keys
-		isWhat = toString.call( arguments[i] );
-		if( isWhat === ObjectClass ){
-			for (var key in arguments[i]) {
-                if ( hasOwn.call( arguments[i], key ) ) {
+Simples.merge = function(first /* obj1, obj2..... */ ) {
+    // if only 1 argument is passed in assume Simples is the target
+    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first: {};
+    // set i to value based on whether there are more than 1 arguments
+    var i = arguments.length > 1 ? 1: 0;
+    // Loop over arguments
+    for (var l = arguments.length; i < l; i++) {
+        // if object apply directly to target with same keys
+        var isWhat = toString.call(arguments[i]);
+        if (isWhat === ObjectClass) {
+            for (var key in arguments[i]) {
+                if (hasOwn.call(arguments[i], key)) {
                     target[key] = arguments[i][key];
                 }
             }
-		} else if( isWhat === ArrayClass ){
-         	// if array apply directly to target with numerical keys
-			push.apply( target, arguments[i] );
-		}                                            
+        } else if (isWhat === ArrayClass) {
+            // if array apply directly to target with numerical keys
+            push.apply(target, arguments[i]);
+        }
     }
 
     return target;
 };
 
-// call with Simples to make sure context is correct
 Simples.merge({
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
@@ -68,21 +66,36 @@ Simples.merge({
 		            Simples.fn[key] = addMethods[key];
 		        }
 		    }
-		}		
+		}
 	},  
 	isEmptyObject : function( obj ) {
 		for ( var name in obj ) { return false; }
 		return true;
 	},
-	// Has the ready events already been bound?      	
+	// Has the ready events already been bound?
 	isReady : false,       
+	ready: function( fn ) {
+		// Attach the listeners
+		Simples.bindReady();
+		
+		// If the DOM is already ready
+		if ( Simples.isReady ) {
+			// Execute the function immediately
+			fn.call( document, SimplesEvent( 'ready' ) );
+
+		// Otherwise, remember the function for later
+		} else if ( readyList ) {
+			// Add the function to the wait list
+			readyList.push( fn );
+		}
+	},
 	// Handle when the DOM is ready
-	ready : function() {
+	readyHandler : function() {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
 			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 			if ( !document.body ) {
-				return setTimeout( Simples.ready, 13 );
+				return setTimeout( Simples.readyHandler, 13 );
 			}
 
 			// Remember that the DOM is ready
@@ -116,7 +129,7 @@ Simples.merge({
 		// Catch cases where $(document).ready() is called after the
 		// browser event has already occurred.
 		if ( document.readyState === "complete" ) {
-			return Simples.ready();
+			return Simples.readyHandler();
 		}
 
 		// Mozilla, Opera and webkit nightlies currently support this event
@@ -125,7 +138,7 @@ Simples.merge({
 			document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
 
 			// A fallback to window.onload, that will always work
-			window.addEventListener( "load", Simples.ready, false );
+			window.addEventListener( "load", Simples.readyHandler, false );
 
 		// If IE event model is used
 		} else if ( document.attachEvent ) {
@@ -134,7 +147,7 @@ Simples.merge({
 			document.attachEvent("onreadystatechange", DOMContentLoaded);
 
 			// A fallback to window.onload, that will always work
-			window.attachEvent( "onload", Simples.ready );
+			window.attachEvent( "onload", Simples.readyHandler );
 
 			// If IE and not a frame
 			// continually check to see if the document is ready
@@ -166,7 +179,7 @@ Simples.merge({
 if ( document.addEventListener ) {
 	DOMContentLoaded = function() {
 		document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
-		Simples.ready();
+		Simples.readyHandler();
 	};
 
 } else if ( document.attachEvent ) {
@@ -174,7 +187,7 @@ if ( document.addEventListener ) {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 		if ( document.readyState === "complete" ) {
 			document.detachEvent( "onreadystatechange", DOMContentLoaded );
-			Simples.ready();
+			Simples.readyHandler();
 		}
 	};
 } 
@@ -195,20 +208,18 @@ function doScrollCheck() {
 	}
 
 	// and execute any waiting functions
-	Simples.ready();
+	Simples.readyHandler();
 }
 
 
 Simples.fn = Simples.prototype = { 
 	init : function( selector, context ){
 
-		if ( !this.each ){	// or this.each !== Simples.prototype.each
-			return new Simples.fn.init( selector, context );  		
-		}
-	    
 		// Handle $(""), $(null), or $(undefined) 		
 		if ( !selector ){
 			return this;
+		} else if( selector.selector !== undefined ){
+			return selector;
 		}
 
 		// Handle $(DOMElement)
@@ -232,7 +243,7 @@ Simples.fn = Simples.prototype = {
 			this.context = context;
 			this.selector = selector;
 		
-			return SimplesSelector( selector, context, this );
+			return Simples.Selector( selector, context, this );
 
 		} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
 
@@ -281,23 +292,17 @@ Simples.fn = Simples.prototype = {
 		
 		return result;
 	},
-	ready: function( fn ) {
-		// Attach the listeners
-		Simples.bindReady();
-		
-		// If the DOM is already ready
-		if ( Simples.isReady ) {
-			// Execute the function immediately
-			fn.call( document, SimplesEvent( 'ready' ) );
-
-		// Otherwise, remember the function for later
-		} else if ( readyList ) {
-			// Add the function to the wait list
-			readyList.push( fn );
-		}
-
+	find: function( selector ){
+		var results = Simples();
+		this.each(function(){
+			results.push.apply( results, Simples.Selector( selector, this ) );
+		});
+		return results;
+	},
+	add : function( elems ){
+		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
 		return this;
-	}, 
+	},
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
 	push: push,

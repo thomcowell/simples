@@ -109,7 +109,7 @@ if ( browserMatch.browser ) {
 	Simples.browser.version = browserMatch.version;
 }
 
-Simples(document).ready(function(){
+Simples.ready(function(){
 	var div = document.createElement("div");
 	div.style.width = div.style.paddingLeft = "1px";
 
