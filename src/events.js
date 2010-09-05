@@ -6,7 +6,7 @@ function returnTrue() {
 	return true;
 }
 
-function SimplesEvent( event ){
+Simples.Event = function( event ){
 	// Allow instantiation without the 'new' keyword
 	if ( !this.isDefaultPrevented ) {
 		return new SimplesEvent( event );
@@ -31,7 +31,7 @@ function SimplesEvent( event ){
 	return this;   
 }
 
-SimplesEvent.prototype = {
+Simples.Event.prototype = {
 	preventDefault: function() {
 		this.isDefaultPrevented = returnTrue;
 
@@ -70,7 +70,7 @@ SimplesEvent.prototype = {
 	isImmediatePropagationStopped: returnFalse
 };
 
-var SimplesEvents = {
+Simples.Events = {
 	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
@@ -251,7 +251,7 @@ var SimplesEvents = {
 		
 	    return function( event ) {
 			var args = slice.call( arguments );
-			event = args[0] = SimplesEvents.fix( event || window.event );
+			event = args[0] = Simples.Events.fix( event || window.event );
 			event.originalFn = callback; 
 
 	        if ( callback.apply( this, args ) === false ) { 
@@ -265,28 +265,31 @@ var SimplesEvents = {
 Simples.extend({
 	bind : function( type, callback ){
 		if( typeof type === "string" && ( toString.call( callback ) === FunctionClass || callback === false ) ){
-			// Loop over elements 
+			// Loop over elements    
+			var attach = Simples.Events.attach;
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment
-				SimplesEvents.attach( this, type, callback );
+				attach( this, type, callback );
 			});
 		}
 		return this;	
 	},
 	unbind : function( type, callback ){
-		// Loop over elements
+		// Loop over elements    
+		var detach = Simples.Events.detach;
 		this.each(function(){
 			// Register each original event and the handled event to allow better detachment    
-			SimplesEvents.detach( this, type, callback );
+			detach( this, type, callback );
 		});
 		return this;
 	}, 
 	trigger : function( type, data ){
 		if( typeof type === "string"){ 
 			// Loop over elements
+			var trigger = Simples.Events.trigger;
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment    
-				SimplesEvents.trigger( this, type, data );
+				trigger( this, type, data );
 			});
 		}
 		return this;
