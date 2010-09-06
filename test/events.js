@@ -6,13 +6,13 @@ test("bind() and unbind() setup data correctly", 4, function() {
 		ok(false, "this callback shouldn't be called");
 	};
 	
-	Simples("#firstp").bind("click", callback);
-    same( callback.guid, SimplesEvents.guid - 1, "should have the guid set" );
-	ok( typeof callback.handled === "function", 'should attach handler function to function' );
-	same( readData(Simples("#firstp")[0], "events"), {click:[{handler: callback.handled, guid:callback.guid}]},"Event handler bound correctly." );
+	Simples("#firstp").bind( "click", callback );
+    same( callback.guid, Simples.Events.guid - 1, "should have the guid set" );
+	same( Simples.data(Simples("#firstp")[0], "handlers").click, [ Simples.Events.handler ]'should attach handler function to function' );
+	same( Simples.data(Simples("#firstp")[0], "events"), {click:[{callback: callback, guid:callback.guid}]},"Event handler bound correctly." );
 	
 	Simples('#firstp').unbind( 'click' );
-	same( readData( Simples("#firstp")[0], "events"), {}, "Event handler unbound when using data.");
+	same( Simples.data( Simples("#firstp")[0], "events"), {}, "Event handler unbound when using data.");
 });
 
 test("check event bound bind() and unbind() and trigger() correctly", 3, function(){ 
@@ -340,7 +340,7 @@ test("trigger(eventObject, [data], [fn])", 18, function() {
 		Simples('body').html( "bottom", $parent[0] );
 		$parent.html( "bottom", $child[0] );
 	
-	var event = SimplesEvent("noNew");	
+	var event = Simples.Event("noNew");	
 	ok( event != window, "Instantiate Simples.Event without the 'new' keyword" );
 	equals( event.type, "noNew", "Verify its type" );
 	

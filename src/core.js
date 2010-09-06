@@ -283,7 +283,7 @@ Simples.fn = Simples.prototype = {
 		
 		var result = new Simples();
 		result.context = this.context;
-		
+
 		this.each(function(i,l){
 			if( testFn.call( this, i, l ) === true ){
 				result.push.call( result, this );
@@ -295,7 +295,7 @@ Simples.fn = Simples.prototype = {
 	find: function( selector ){
 		var results = Simples();
 		this.each(function(){
-			results.push.apply( results, Simples.Selector( selector, this ) );
+			Simples.Selector( selector, this, results );
 		});
 		return results;
 	},

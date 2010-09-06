@@ -9,7 +9,7 @@ function returnTrue() {
 Simples.Event = function( event ){
 	// Allow instantiation without the 'new' keyword
 	if ( !this.isDefaultPrevented ) {
-		return new SimplesEvent( event );
+		return new Simples.Event( event );
 	}
 
 	// Event object
@@ -69,7 +69,7 @@ Simples.Event.prototype = {
 	isPropagationStopped: returnFalse,
 	isImmediatePropagationStopped: returnFalse
 };
-
+	
 Simples.Events = {
 	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
@@ -84,32 +84,35 @@ Simples.Events = {
 		if ( elem.setInterval && ( elem !== window && !elem.frameElement ) ) {
 			elem = window;
 		}
-
+        
 		if( toString.call( callback ) === FunctionClass && canDoData( elem ) ){ 
 			
-			var data = readData( elem, 'events' ) || {};
+			var data = Simples.data( elem ),
+				events = data.events ? data.events : data.events = {},
+				handlers = data.handlers ? data.handlers : data.handlers = {},
+				sEvts = Simples.Events;
 			
-			if( !callback.guid ){
-				callback.guid = this.guid++;
-				callback.handled = this.handler( callback );
+			var guid = !callback.guid ? callback.guid = sEvts.guid++ : callback.guid, 
+				handler = handlers[ type ];
+				
+			if( !handler ){
+				handler = handlers[ type ] = function( elem ){
+					return Simples !== undefined ? sEvts.handler.apply( handler.elem, arguments ) : undefined;
+				};
+				handler.elem = elem;
+				// Attach to the element
+				if ( elem.addEventListener ) {
+
+			        elem.addEventListener(type, handler, false);
+			    } else if ( elem.attachEvent ) {
+
+			        elem.attachEvent("on" + type, handler);
+			    }
 			}
 			
-			var guid = callback.guid, 
-				handled = callback.handled;
+			events[ type ] = events[ type ] || [];
+			events[ type ].push( { callback : callback, guid : guid } );
 			
-			data[ type ] = data[ type ] || [];
-			data[ type ].push( {handler:handled, guid:guid} );
-			
-			addData( elem, 'events', data );
-			
-			// Attach to the element
-			if ( elem.addEventListener ) {
-				
-		        elem.addEventListener(type, handled, false);
-		    } else if ( elem.attachEvent ) {
-			
-		        elem.attachEvent("on" + type, handled);
-		    }
 		}
 	},
 	clearEvent : function( elem, type, events, callback ){
@@ -145,17 +148,18 @@ Simples.Events = {
 			callback = returnFalse;
 		}
 		   
-		var data = readData( elem, 'events' ) || {};
+		var data = readData( elem, 'events' ) || {},
+			sEvts = Simples.Events;
 		
 		if( type === undefined ){
 			if( type in data ){
-				data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
+				data[ type ] = sEvts.clearEvent( elem, type, data[ type ], callback );
 				if( data[ type ].length === 0 ){
 					delete data[ type ];
 				}
 			}
 		} else {
-			data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
+			data[ type ] = sEvts.clearEvent( elem, type, data[ type ], callback );
 			if( data[ type ].length === 0 ){
 				delete data[ type ];
 			}
@@ -197,12 +201,13 @@ Simples.Events = {
 		}
 	    // store a copy of the original event object
 	    // and "clone" to set read-only properties 
-		var originalEvent = event;
+		var originalEvent = event,
+			sEvts = Simples.Events;
 		
-		event = SimplesEvent( originalEvent );
+		event = Simples.Event( originalEvent );
 
-	    for (var i=this.properties.length, prop; i;) {
-	        prop = this.properties[--i];
+	    for (var i=sEvts.properties.length, prop; i;) {
+	        prop = sEvts.properties[--i];
 	        event[ prop ] = originalEvent[ prop ];
 	    }
 
@@ -247,18 +252,38 @@ Simples.Events = {
 	    return event;
 	},       
 	guid : 1e6,
-	handler : function( callback ){ 
-		
-	    return function( event ) {
-			var args = slice.call( arguments );
-			event = args[0] = Simples.Events.fix( event || window.event );
-			event.originalFn = callback; 
+	handler : function( elem, event, data ){ 
+		var events, callbacks;
+		var args = slice.call( arguments );
+		event = args[0] = sEvts.fix( event || window.event );
+        event.currentTarget = this;
+        event.data = data;
 
-	        if ( callback.apply( this, args ) === false ) { 
-				event.preventDefault();
-				event.stopPropagation();
+		events = Simples.data(this, "events");
+		callbacks = (events || {})[ event.type ];
+         
+		if( events && callbacks ){
+			callbacks = callbacks.slice(0);
+			
+			for( var i=0,l=callbacks.length;i<l;i++){ 
+				var callback = callbacks[i];
+				event.callback = callback.callback;
+				
+				var ret = event.callback.apply( this, args );
+				if( ret !== undefined ){
+					event.result = ret;
+					if ( ret === false ) { 
+						event.preventDefault();
+						event.stopPropagation();
+					}
+				}
+				
+				if ( event.isImmediatePropagationStopped() ) {
+					break;
+				}
 			}
-	    };
+		}
+		return event.result;
 	}
 };
 
@@ -289,7 +314,7 @@ Simples.extend({
 			var trigger = Simples.Events.trigger;
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment    
-				trigger( this, type, data );
+				trigger.call( this, type, data );
 			});
 		}
 		return this;
