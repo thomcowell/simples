@@ -11,31 +11,25 @@ function canDoData( elem ){
 	return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 }
 
-function addData( elem, key, value ){
-	if ( canDoData( elem ) ) {
-		if( !elem[ accessID ] ){
-			elem[ accessID ] = elem[ accessID ] || {};
+Simples.merge({
+	data : function( elem, key, value ){
+		if ( canDoData( elem ) && ( key === undefined || typeof key === "string" ) ) {
+			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
+			 if( key && value ){
+				data[ key ] = value;
+			} else if( value === undefined ){
+				if( key === undefined ){
+					return data;
+				} else if( key ) {
+					return data[ key ];
+				}
+			} else if( key && value === null ){
+				delete data[ key ];
+			}
 		}
-		elem[ accessID ][ key ] = value;
-	}	
-}
-
-function readData( elem, key ){
-	if ( canDoData( elem ) ) {
-		if( elem[ accessID ] ){
-			return elem[ accessID ][ key ];
-		}
-	}
-	return null;
-}   
-
-function removeData( elem, key ){
-	if ( canDoData( elem ) ) {
-		if( elem[ accessID ] && elem[ accessID ][ key ] ){
-			delete elem[ accessID ][ key ];
-		}
-	}	
-} 
+		return null;
+	}  
+});
 
 function cleanData( elem, andSelf ){ 
 	// Remove element nodes and prevent memory leaks   
@@ -65,13 +59,14 @@ function cleanData( elem, andSelf ){
 
 Simples.extend({
 	data : function( key, value ){   
-		if( typeof key === 'string' && value !== undefined ){
-			var func = value === null ? removeData : addData;
-			this.each(function(){
-				func( this, key, value );
-			});
-		} else {
-			return this[0] ? readData( this[0], key ) : null;
+		if( typeof key === 'string' ){
+			if( value !== undefined ){
+				this.each(function(){
+					Simples.data( this, key, value );
+				});
+			} else {
+				return this[0] ? Simples.data( this[0], key ) : null;
+			}
 		}
 		return this;
 	}
