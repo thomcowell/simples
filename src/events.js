@@ -29,7 +29,7 @@ Simples.Event = function( event ){
 	this[ accessID ] = true;
 	// return self
 	return this;   
-}
+};
 
 Simples.Event.prototype = {
 	preventDefault: function() {
@@ -96,7 +96,7 @@ Simples.Events = {
 				handler = handlers[ type ];
 				
 			if( !handler ){
-				handler = handlers[ type ] = function( elem ){
+				handler = handlers[ type ] = function( evt ){
 					return Simples !== undefined ? sEvts.handler.apply( handler.elem, arguments ) : undefined;
 				};
 				handler.elem = elem;
@@ -115,25 +115,17 @@ Simples.Events = {
 			
 		}
 	},
-	clearEvent : function( elem, type, events, callback ){
-		events = events || [];
-		var results = [];
-		// clear out data for functions
-		for( var i=0,l=events.length;i<l;i++ ){
-			if( callback === undefined || events[ i ].guid === callback.guid ){
-				// check whether it is a W3C browser or not
-				if ( elem.removeEventListener ) {
-					// remove event listener and unregister element event
-					elem.removeEventListener( type, events[ i ].handler, false );
-				} else if ( elem.detachEvent ) {
+	clearEvent : function( elem, type, events, handlers ){
+		// check whether it is a W3C browser or not
+		if ( elem.removeEventListener ) {
+			// remove event listener and unregister element event
+			elem.removeEventListener( type, handlers[ type ], false );
+		} else if ( elem.detachEvent ) {
 
-					elem.detachEvent( "on" + type, events[ i ].handler );
-				}
-			} else {
-				results.push( events[ i ] );
-			}
+			elem.detachEvent( "on" + type, handlers[ type ] );
 		}
-		return results;
+		if( events && events[type] ){ delete events[ type ]; }
+		if( handlers && handlers[type] ){ delete handlers[ type ]; }
 	},
 	detach : function( elem, type, callback ){
 		
@@ -142,59 +134,62 @@ Simples.Events = {
 		}
 
 		if( type && type.type ){
-			callback = type.originalFn;
 			type = type.type;
 		} else if ( callback === false ) {
 			callback = returnFalse;
 		}
 		   
-		var data = readData( elem, 'events' ) || {},
+		var elemData = Simples.data( elem ),
+			events = elemData.events,
+			handlers = elemData.handlers,
 			sEvts = Simples.Events;
 		
 		if( type === undefined ){
-			if( type in data ){
-				data[ type ] = sEvts.clearEvent( elem, type, data[ type ], callback );
-				if( data[ type ].length === 0 ){
-					delete data[ type ];
-				}
+			for( event in events ){
+				sEvts.clearEvent( elem, event, events, handlers );
 			}
 		} else {
-			data[ type ] = sEvts.clearEvent( elem, type, data[ type ], callback );
-			if( data[ type ].length === 0 ){
-				delete data[ type ];
+			var event = events[ type ];
+
+			for(var i=0;i<event.length;i++){
+				if( callback === undefined || event[i] || callback.guid === event[i].guid ){
+					event.splice( i--, 1 );
+				}
+			}
+
+			if( event.length === 0 ){
+				sEvts.clearEvent( elem, type, events, handlers );
 			}
 		}
-
-		addData( elem, 'events', data );
 	},
 	trigger : function( elem, type, data ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
 		}
-		
+        
+		// elem[ "on"+type ]
+		// Simples.Events.handler( elem, type, data );       
 		if ( canDoData( elem ) ) {
 			// Use browser event generators
 			var e;
 			if( elem.dispatchEvent ){
 				// Build Event
 				e = document.createEvent("HTMLEvents");
-				e.initEvent(type, true, true);
-				if (data){
-					e.data = data;              
-				}
+				e.initEvent(type, true, true); 
+				if( data ){ e.data = data; }
+				e.target = elem;              
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
-				if (data){
-					e = document.createEventObject();
-					e.data = data;
-					e.eventType = "on"+type;
-				}
+				e = document.createEventObject();
+				if( data ){ e.data = data; }
+				e.target = elem;
+				e.eventType = "on"+type;
 				elem.fireEvent( "on"+type, e );
 			} 
-		}		
+		}		                                         
 	},
-	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement originalFn keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
+	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	fix : function( event ){
 		 if( event[ accessID ] ){
 			return event;
@@ -252,14 +247,13 @@ Simples.Events = {
 	    return event;
 	},       
 	guid : 1e6,
-	handler : function( elem, event, data ){ 
+	handler : function( event ){ 
 		var events, callbacks;
 		var args = slice.call( arguments );
-		event = args[0] = sEvts.fix( event || window.event );
+		event = args[0] = Simples.Events.fix( event || window.event );
         event.currentTarget = this;
-        event.data = data;
 
-		events = Simples.data(this, "events");
+		events = Simples.data( this, "events" );
 		callbacks = (events || {})[ event.type ];
          
 		if( events && callbacks ){
@@ -267,9 +261,9 @@ Simples.Events = {
 			
 			for( var i=0,l=callbacks.length;i<l;i++){ 
 				var callback = callbacks[i];
-				event.callback = callback.callback;
+				event.handler = callback.callback;
 				
-				var ret = event.callback.apply( this, args );
+				var ret = event.handler.apply( this, args );
 				if( ret !== undefined ){
 					event.result = ret;
 					if ( ret === false ) { 
@@ -289,7 +283,7 @@ Simples.Events = {
 
 Simples.extend({
 	bind : function( type, callback ){
-		if( typeof type === "string" && ( toString.call( callback ) === FunctionClass || callback === false ) ){
+		if( typeof type === "string" && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
 			var attach = Simples.Events.attach;
 			this.each(function(){
@@ -314,7 +308,7 @@ Simples.extend({
 			var trigger = Simples.Events.trigger;
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment    
-				trigger.call( this, type, data );
+				trigger( this, type, data );
 			});
 		}
 		return this;

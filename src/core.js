@@ -81,7 +81,7 @@ Simples.merge({
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			fn.call( document, SimplesEvent( 'ready' ) );
+			fn.call( document, Simples.Event( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
@@ -111,11 +111,6 @@ Simples.merge({
 
 				// Reset the list of functions
 				readyList = null;
-			}
-
-			// Trigger any bound ready events
-			if ( Simples.prototype.trigger ) {
-				Simples( document.body ).trigger( "ready" );
 			}
 		}
 	},
