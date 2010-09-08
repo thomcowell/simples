@@ -15,16 +15,18 @@ Simples.merge({
 	data : function( elem, key, value ){
 		if ( canDoData( elem ) && ( key === undefined || typeof key === "string" ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
-			 if( key && value ){
-				data[ key ] = value;
+			if( key && value !== undefined ){
+				if( value !== null ){
+					data[ key ] = value; 
+				} else if( value === null ){
+					delete data[ key ];
+				}      
 			} else if( value === undefined ){
 				if( key === undefined ){
 					return data;
 				} else if( key ) {
 					return data[ key ];
 				}
-			} else if( key && value === null ){
-				delete data[ key ];
 			}
 		}
 		return null;

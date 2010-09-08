@@ -24,6 +24,25 @@ test("Simples.data to element with no accessId", 3, function() {
 	same( div[ accessID ][ 'test' ], data, "div should return the same data as provided");   
 });
 
+test("Simples.data to element with random data", 9, function() { 
+	function testDataValue( elem, key, value ){
+		Simples.data( div, key, null );
+		Simples.data( div, key, value );
+		same( div[ accessID ][ key ], value, "div should return the same data as provided - "+ value);   
+	}
+	var div = document.createElement('div');
+
+	testDataValue( div, 'test', 0 );
+	testDataValue( div, 'test', 1 );
+	testDataValue( div, 'test', false );
+	testDataValue( div, 'test', true ); 
+	testDataValue( div, 'test', "string" );
+	testDataValue( div, 'test', {obj:1} );
+	testDataValue( div, 'test', [1,2,3,4] );
+	testDataValue( div, 'test', function(){ return "test"; } );
+	testDataValue( div, 'test', /\w+\s+/ );	
+});
+
 test("Simples.data to element with existing accessId", 1, function() { 
 	var div = document.createElement('div');
 	div[ accessID ] = {};
@@ -32,7 +51,7 @@ test("Simples.data to element with existing accessId", 1, function() {
 	same( div[ accessID ][ 'test' ], data, "div should return the same data as provided");   
 });
 
-test("Simples.data to element with existing accessId", 2, function() { 
+test("Simples.data to element with existing data different key", 2, function() { 
 	var string = 'ready steady go';
 	var div = document.createElement('div');
 	div[ accessID ] = {hammer: string};
@@ -42,21 +61,13 @@ test("Simples.data to element with existing accessId", 2, function() {
 	same( div[ accessID ][ 'hammer' ], string, "div should return the same data as provided");   
 });
 
-test("Simples.data to element with existing accessId", 1, function() { 
+test("Simples.data to element with existing data same key", 1, function() { 
 	var string = 'ready steady go';
 	var div = document.createElement('div');
 	div[ accessID ] = {hammer: string};
 	Simples.data( div, 'hammer', data);
 
 	same( div[ accessID ][ 'hammer' ], data, "div should return the same data as provided");   
-});
-
-test("Simples.data to element with existing accessId", 1, function() { 
-	var div = document.createElement('div');
-	div[ accessID ] = {};
-	Simples.data( div, 'test', data);
-
-	same( div[ accessID ][ 'test' ], data, "div should return the same data as provided");   
 });
 
 test("Simples.data on invalid element", 1, function() { 
