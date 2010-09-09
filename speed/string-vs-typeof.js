@@ -57,7 +57,7 @@
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]";
 	
-	perfTester.log( 'Testing typeOf and toString - '+count+' times' );
+	perfTester.log( '<strong>Testing typeOf and toString - <em>'+count+'</em> times</strong>' );
 	test( isObject, count, 'isObject', window, [{ham:'sandwich'}] );
 	test( toString, count, 'toString - Object', window, [{ham:'sandwich'}, ObjectClass ] );
 	test( isArray, count, 'isArray', window, [[1,2,3]] );

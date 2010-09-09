@@ -7,7 +7,7 @@
 	var elements = Simples('.row'), start = {opacity:1}, end = { opacity:0 }, duration = 2000, 
 		startTime, tween = AnimationController.tweens.easing, counter, now; 
 
-	perfTester.log( 'Testing of animation tweening - '+duration+' milliseconds' );
+	perfTester.log( '<strong>Testing of animation tweening - <em>'+duration+'</em> milliseconds</strong>' );
 	
 	perfTester.queueTest(function(){
 		counter = 0;
@@ -19,7 +19,7 @@
 				Simples.setStyle( elements[i], 'opacity', tween( now - startTime, duration, start.opacity, end.opacity - start.opacity ) );
 			}                      
 		}
-		return 'Testing of with new Date().getTime() for each tween - '+counter+' times'; 
+		return 'Testing <span class="duration">'+duration+' ms</span> <span class="">new Date().getTime() for each loop</span> - <span class="count">'+counter+' times</span>'; 
 	});
 	
 	perfTester.queueTest(function(){
@@ -33,7 +33,7 @@
 			}                      
 		}
     
-		return 'Testing of with new Date().getTime() for each iteration - '+counter+' times';
+		return 'Testing <span class="duration">'+duration+' ms</span> <span class="">new Date().getTime() for each change</span> - <span class="count">'+counter+' times</span>';
 	});
 	
     perfTester.queueTest(function(){
@@ -47,7 +47,7 @@
 			}                      
 		}
     
-		return 'Testing of with new Date().getTime() for each iteration - '+counter+' times';
+		return 'Testing <span class="duration">'+duration+' ms</span> <span class="">new Date().getTime() for each loop</span> - <span class="count">'+counter+' times</span>';
 	});
 	
 	perfTester.queueTest(function(){
@@ -61,7 +61,7 @@
 			}                      
 		}
     
-		return 'Testing of with new Date().getTime() for each tween - '+counter+' times';
+		return 'Testing <span class="duration">'+duration+' ms</span> <span class="">new Date().getTime() for each change</span> - <span class="count">'+counter+' times</span>';
 	});
 	
 })( Simples ); 

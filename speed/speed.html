@@ -22,7 +22,7 @@
 			    
 			function writeMsg( msg ){
 				var p = document.createElement('p'); 
-				p.innerText = msg;
+				p.innerHTML = msg;
 
 				document.body.appendChild( p );
 			}
@@ -36,7 +36,7 @@
 					fn.apply( that, args );
 				}
 				var t2 = new Date().getTime();
-			   	return 'tested '+ msg + ' ' + count + ' times in ' +(t2 - t1)+'ms';
+			   	return 'Testing <span class="count">' + count + ' times</span> <span class="message">' + msg + '</span> <span class="duration">' +(t2 - t1)+'ms</span>';
 			}
 			
 			function testRunner(){
@@ -48,7 +48,7 @@
 						var test = tests.shift();
 						var msg = test.runner.apply( null, test.args );
 						if( msg ){ writeMsg( msg ); }
-						window.setTimeout( testRunner, 13 );
+						window.setTimeout( testRunner, 39 );
 						testRunning = false;
 					} else {
 						h1.innerText = "Speed Test Runner - Complete";
@@ -58,7 +58,7 @@
 			}
 			
 			var h1, spinner;
-			function setUp(){
+			function start(){
 				var doc = document;
 				h1 = doc.createElement('h1');
 				h1.innerText = "Speed Test Runner - Running";
@@ -86,7 +86,7 @@
 				},
 				execute : function(){
 					if( !startTimer ){ 
-						startTimer = window.setTimeout( setUp, 50 );
+						startTimer = window.setTimeout( start, 50 );
 					}
 				}
 			};

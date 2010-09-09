@@ -3,7 +3,7 @@
 	// Test to determine whether the toString call is faster than the typeof and checks
 	// Browser 	| typeof:toString per 50000 calls average ms
 	// Safari 	| 62:92                      
-    var test = perfTester.test, count = 100000;
+    var test = perfTester.test, count = 50000;
 
 	function getElementSwitch( selector, context ){
 
@@ -109,7 +109,7 @@
 		} 
 	}
 	
-	perfTester.log( 'Testing getElementSwitch and getElementIndex - '+count+' times' );
+	perfTester.log( '<strong>Testing getElementSwitch and getElementIndex - <em>'+count+'</em> times</strong>' );
 	test( getElementSwitch, count, 'getElementSwitch - id', this, ['#row-element', document] );
 	test( getElementIndex, count, 'getElementIndex - id', this, ['#row-element', document] );
 	test( getElementSwitch, count, 'getElementSwitch - className', this, ['.cell', document] );
