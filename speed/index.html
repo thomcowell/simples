@@ -31,12 +31,14 @@
 				count = count || 1000000;
 				that = that || window;   
 				fn = typeof fn === "function" ? fn : function(){ window.console ? window.console.log("error") : alert('error'); };
-				var t1 = new Date().getTime();
-				for( var i=0; i< count; i++){
-					fn.apply( that, args );
-				}
+				var err, t1 = new Date().getTime();
+				try{
+					for( var i=0; i< count; i++){
+						fn.apply( that, args );
+					}
+				} catch(e){ err = ( e && e.message ) ? e.message : e; }
 				var t2 = new Date().getTime();
-			   	return 'Testing <span class="count">' + count + ' times</span> <span class="message">' + msg + '</span> <span class="duration">' +(t2 - t1)+'ms</span>';
+			   	return err || 'Testing <span class="count">' + count + ' times</span> <span class="message">' + msg + '</span> <span class="duration">' +(t2 - t1)+'ms</span>';
 			}
 			
 			function testRunner(){
