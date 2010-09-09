@@ -1,6 +1,6 @@
 module("DOM");
 test("hasClass", 6, function() {
-	
+
 	var div = Simples('<div>').html('<div></div><div></div><div></div><div></div><div></div>');
 	function testHasClass( startClass, className, detected ){
 		div[0].className = startClass;
@@ -29,10 +29,11 @@ test("addClass", 3, function() {
 	testAddClass( "red\tdog good help", "hammer", "red dog good help hammer" );
 });
 
-test("removeClass", 5, function() {
+test("removeClass", 6, function() {
 	
 	var div = Simples('<div>'); 
 	function testRemoveClass( startClass, className, endClass ){
+		endClass = endClass === undefined ? startClass : endClass;
 		div[0].className = startClass;
 		div.removeClass( className );
 		equal( div[0].className, endClass, "should not have className "+ className );
@@ -40,7 +41,8 @@ test("removeClass", 5, function() {
 	
 	testRemoveClass( "hammer", "hammer", "" );
 	testRemoveClass( "hammer\nred\tdog good help", "hammer", "red dog good help" );
-	testRemoveClass( "red\tdog goodhammer\nhelp", "hammer", "red dog goodhammer help" );	
+	testRemoveClass( "red\tdog goodhammer\nhelp", "hammer" );
+	testRemoveClass( "red\tdog hammergood help", "hammer" );		
 	testRemoveClass( "red\tdog good hammer\nhelp", "hammer", "red dog good help" );
 	testRemoveClass( "red\tdog good\nhelp hammer", "hammer", "red dog good help" );	
 });
@@ -189,6 +191,27 @@ test("html('inner')", 8, function(){
 	
 	Simples('#test-area').html( innerHTML );
 	testInner( Simples('.test-war-hammer'), undefined, innerHTML );	
+	
+});
+
+test("html('text')", 4, function(){
+    var p = Simples('<p/>');	
+	function testText( text, endText ){
+		if( text === null ){
+			p[0].innerText = endText;
+			equal( p.html("text"), endText, "location:text no html provided" );			
+		} else {
+			endText = endText || text;	
+			p[0].innerText = "";
+			p.html( "text", text );
+			equal( p[0].innerText, endText, "location:text and html:"+text );			
+		}
+	}
+
+	testText( "This is a test" ); 
+	testText( true, "true" ); 
+	testText( {}, "[object Object]" );
+	testText( null, "This is a test" );
 	
 });
 
