@@ -106,77 +106,98 @@ Simples.extend({
 	html : function( location, html ){
 		if (arguments.length === 0) {
 			return this[0] ? this[0].innerHTML : "";
-		} else if ( arguments.length === 1 ){	
-			if( location === "outer" && this[0] ){
-				html = this[0].outerHTML;
-
-				if ( !html ) {
-					var div = this[0].ownerDocument.createElement("div");
-					div.appendChild( this[0].cloneNode(true) );
-					html = div.innerHTML;
-				}
-				
-				return html;
-			} else if( !OTHER_SINGLE_ARGUMENTS.test( arguments[0] ) ) {
-			    html = location;
-			    location = 'inner';
-			} 
 		}
+		 
+		location = location != null ? location : "";
 		
-		location = location || "";
+		if ( location === "outer" && arguments.length === 1 && this[0] ){	
+			html = this[0].outerHTML;
+
+			if ( !html ) {
+				var div = this[0].ownerDocument.createElement("div");
+				div.appendChild( this[0].cloneNode(true) );
+				html = div.innerHTML;
+			}
+			
+			return html;
+		}
+
 		var results = new Simples();
 		
 		this.each(function(index) {   
-
 			var el = this, parent = el.parentNode, elem;
 			if( el.nodeType === 3 || el.nodeType === 8 ){ return; }
-			if (location == "inner") {
-				var list, len, i = 0;
-				cleanData( this, false );
-				var testString = html.toString(); 
-		        if ( testString.indexOf("[object ") === -1 ) {
-		            el.innerHTML = ""+html;
-		            list = el.getElementsByTagName('SCRIPT');
-		            len = list.length;
-		            for (; i < len; i++) {
-		                eval(list[i].text);
-		            }
-		        } else if( testString.indexOf("[object ") > -1 ) {
-		            el.innerHTML = '';
-		            el.appendChild( wrapHelper( html, el ) );
-		        }
-			} else if (location == "outer" && parent ) {     
-				elem = wrapHelper(html, el);
-				cleanData( el );
-		        parent.replaceChild( elem, el);
-		    } else if (location == "top") {
-		        el.insertBefore( wrapHelper(html, el), el.firstChild);
-		    } else if (location == "bottom") {
-		        el.insertBefore( wrapHelper(html, el), null);
-		    } else if (location == "remove" && parent) { 
-				elem = parent;
-				cleanData( el );     
-		        parent.removeChild(el);
-		    } else if (location == "before" && parent) {
-		        parent.insertBefore( wrapHelper(html, parent), el);
-		    } else if (location == "after" && parent) {
-		        parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
-			} else if( location == "empty" ) {
-				cleanData( el, false ); 
-				while ( el.firstChild ) {
-					el.removeChild( el.firstChild );
-				}
-			} else if (location == "wrap" && parent) {  
-				var elems = wrapHelper( html, parent );           
-				var wrap = ( elems.nodeType === 11 ? elems.firstChild : elems );
-				parent.insertBefore( elems, el );
-				wrap.appendChild( el );
-			} else if( location == "unwrap" && parent ){
-				var docFrag = wrapHelper( el.childNodes, el );
-				cleanData( el );
-				elem = docFrag.childNodes;
-				parent.insertBefore( docFrag, el );
-				parent.removeChild( el );
+			
+			switch( location ){
+				case 'outer' :
+					if( parent ){ 
+						elem = wrapHelper(html, el);
+						cleanData( el );
+				        parent.replaceChild( elem, el);						
+					}
+					break;
+				case 'top' :
+					el.insertBefore( wrapHelper(html, el), el.firstChild);
+					break;
+				case 'bottom' : 
+					el.insertBefore( wrapHelper(html, el), null);
+					break;
+				case 'remove' :
+					if( parent ){ 
+						elem = parent;
+						cleanData( el );     
+				        parent.removeChild(el);
+					}
+					break;
+				case 'unwrap' :
+					if( parent ){
+						var docFrag = wrapHelper( el.childNodes, el );
+						cleanData( el );
+						elem = docFrag.childNodes;
+						parent.insertBefore( docFrag, el );
+						parent.removeChild( el );
+					}
+					break;
+				case 'empty' :
+					cleanData( el, false ); 
+					while ( el.firstChild ) {
+						el.removeChild( el.firstChild );
+					}
+					break;
+				case 'before' :
+					if( parent ){
+						parent.insertBefore( wrapHelper(html, parent), el);
+					}
+					break;
+				case 'after' :
+					if( parent ){ 
+					   	parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
+					}
+					break;
+				case 'wrap' :
+					if( parent ){ 
+						var elems = wrapHelper( html, parent );           
+						var wrap = ( elems.nodeType === 11 ? elems.firstChild : elems );
+						parent.insertBefore( elems, el );
+						wrap.appendChild( el );						
+					}
+					break;
+				default :
+				 	var list, len, i = 0;
+					cleanData( this, false );
+					html = html != null ? location : html;
+					var testString = html.toString(); 
+			        if ( testString.indexOf("[object ") === -1 ) {
+			            el.innerHTML = ""+html;
+			            list = el.getElementsByTagName('SCRIPT');
+			            len = list.length;
+			            for (; i < len; i++) {
+			                eval(list[i].text);
+			            }
+			        } else if( testString.indexOf("[object ") > -1 ) {
+			            el.innerHTML = '';
+			            el.appendChild( wrapHelper( html, el ) );
+			        }
 			}
 			if( elem ){
 				results.push.apply( results, slice.call( elem, 0 ) );
