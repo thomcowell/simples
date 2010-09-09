@@ -106,7 +106,12 @@ Simples.extend({
 	html : function( location, html ){
 		if (arguments.length === 0) {
 			return this[0] ? this[0].innerHTML : "";
-		} else if ( arguments.length === 1 ){	
+		}
+		
+		location = location != null ? location : "";
+		var singleArg = OTHER_SINGLE_ARGUMENTS.test( location );
+		
+		if ( arguments.length === 1 ){	
 			if( location === "outer" && this[0] ){
 				html = this[0].outerHTML;
 
@@ -117,66 +122,70 @@ Simples.extend({
 				}
 				
 				return html;
-			} else if( !OTHER_SINGLE_ARGUMENTS.test( arguments[0] ) ) {
+			} else if( !singleArg ) {
 			    html = location;
 			    location = 'inner';
 			} 
 		}
 		
-		location = location || "";
 		var results = new Simples();
 		
 		this.each(function(index) {   
 
 			var el = this, parent = el.parentNode, elem;
 			if( el.nodeType === 3 || el.nodeType === 8 ){ return; }
-			if (location == "inner") {
-				var list, len, i = 0;
-				cleanData( this, false );
-				var testString = html.toString(); 
-		        if ( testString.indexOf("[object ") === -1 ) {
-		            el.innerHTML = ""+html;
-		            list = el.getElementsByTagName('SCRIPT');
-		            len = list.length;
-		            for (; i < len; i++) {
-		                eval(list[i].text);
-		            }
-		        } else if( testString.indexOf("[object ") > -1 ) {
-		            el.innerHTML = '';
-		            el.appendChild( wrapHelper( html, el ) );
-		        }
-			} else if (location == "outer" && parent ) {     
-				elem = wrapHelper(html, el);
-				cleanData( el );
-		        parent.replaceChild( elem, el);
-		    } else if (location == "top") {
-		        el.insertBefore( wrapHelper(html, el), el.firstChild);
-		    } else if (location == "bottom") {
-		        el.insertBefore( wrapHelper(html, el), null);
-		    } else if (location == "remove" && parent) { 
-				elem = parent;
-				cleanData( el );     
-		        parent.removeChild(el);
-		    } else if (location == "before" && parent) {
-		        parent.insertBefore( wrapHelper(html, parent), el);
-		    } else if (location == "after" && parent) {
-		        parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
-			} else if( location == "empty" ) {
-				cleanData( el, false ); 
-				while ( el.firstChild ) {
-					el.removeChild( el.firstChild );
+
+			if( singleArg ){
+				if (location == "remove" && parent) { 
+					elem = parent;
+					cleanData( el );     
+			        parent.removeChild(el);
+			    } else if( location == "unwrap" && parent ){
+					var docFrag = wrapHelper( el.childNodes, el );
+					cleanData( el );
+					elem = docFrag.childNodes;
+					parent.insertBefore( docFrag, el );
+					parent.removeChild( el );
+				} else if( location == "empty" ) {
+					cleanData( el, false ); 
+					while ( el.firstChild ) {
+						el.removeChild( el.firstChild );
+					}
+				} 
+			} else {
+				if (location == "inner") {
+					var list, len, i = 0;
+					cleanData( this, false );
+					var testString = html.toString(); 
+			        if ( testString.indexOf("[object ") === -1 ) {
+			            el.innerHTML = ""+html;
+			            list = el.getElementsByTagName('SCRIPT');
+			            len = list.length;
+			            for (; i < len; i++) {
+			                eval(list[i].text);
+			            }
+			        } else if( testString.indexOf("[object ") > -1 ) {
+			            el.innerHTML = '';
+			            el.appendChild( wrapHelper( html, el ) );
+			        }
+				} else if (location == "outer" && parent ) {     
+					elem = wrapHelper(html, el);
+					cleanData( el );
+			        parent.replaceChild( elem, el);
+			    } else if (location == "top") {
+			        el.insertBefore( wrapHelper(html, el), el.firstChild);
+			    } else if (location == "bottom") {
+			        el.insertBefore( wrapHelper(html, el), null);
+			    } else if (location == "before" && parent) {
+			        parent.insertBefore( wrapHelper(html, parent), el);
+			    } else if (location == "after" && parent) {
+			        parent.insertBefore( wrapHelper(html, parent), el.nextSibling);
+				} else if (location == "wrap" && parent) {  
+					var elems = wrapHelper( html, parent );           
+					var wrap = ( elems.nodeType === 11 ? elems.firstChild : elems );
+					parent.insertBefore( elems, el );
+					wrap.appendChild( el );
 				}
-			} else if (location == "wrap" && parent) {  
-				var elems = wrapHelper( html, parent );           
-				var wrap = ( elems.nodeType === 11 ? elems.firstChild : elems );
-				parent.insertBefore( elems, el );
-				wrap.appendChild( el );
-			} else if( location == "unwrap" && parent ){
-				var docFrag = wrapHelper( el.childNodes, el );
-				cleanData( el );
-				elem = docFrag.childNodes;
-				parent.insertBefore( docFrag, el );
-				parent.removeChild( el );
 			}
 			if( elem ){
 				results.push.apply( results, slice.call( elem, 0 ) );
@@ -191,7 +200,7 @@ Simples.extend({
 				this.innerText = text;
 			});
 		} else {
-			return this[0] && this[0].innerText;
+			return this[0] ? this[0].innerText : "";
 		}
 	},
 	// attributes	
