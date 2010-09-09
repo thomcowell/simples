@@ -73,9 +73,7 @@ Simples.merge({
 		return { browser: match[1] || "", version: match[2] || "0" };
 	},
 	browser : {}
-});
-
-var browserMatch = Simples.uaMatch( navigator.userAgent ); 
+}); 
 
 script.type = "text/javascript";
 try {
@@ -104,6 +102,7 @@ if ( div.attachEvent && div.fireEvent ) {
 	div.cloneNode(true).fireEvent("onclick");
 }
 
+var browserMatch = Simples.uaMatch( navigator.userAgent );
 if ( browserMatch.browser ) {
 	Simples.browser[ browserMatch.browser ] = true;
 	Simples.browser.version = browserMatch.version;

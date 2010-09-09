@@ -270,7 +270,7 @@ test("trigger() bubbling", 14, function() {
 	equals( ap, 1, "ap bubble" );
 });
 
-test("trigger(type, [data], [fn])", 9, function() {
+test("trigger(type, [data])", 9, function() {
 
 	var handler = function(event) {
 		equals( event.type, "click", "check passed data" );
@@ -309,7 +309,8 @@ test("trigger(type, [data], [fn])", 9, function() {
 	}
 	ok( pass, "Trigger on a table with a colon in the even type, see #3533" );
 
-	var form = Simples("<form/>").attr('action','');
+	var form = Simples("<form/>").attr('action','about:blank');
+	form.html("<input name='dah' type='hidden'/><input id='submit' name='submit' type='submit'/>")
 	Simples('body').html( "bottom", form[0] );
 
 	// Make sure it can be prevented locally
@@ -333,7 +334,7 @@ test("trigger(type, [data], [fn])", 9, function() {
 
 	Simples(document).unbind("submit");
 
-	form.html("remove");
+	form.html( "remove" );
 });
 
 test("trigger(eventObject, [data], [fn])", 18, function() {

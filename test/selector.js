@@ -1,5 +1,5 @@
 module("Selector"); 
-
+QUERY_SELECTOR = false;
 test('getElements with only selector', 9, function(){ 
 	var id = getElements( '#test-area' );
 	same( id.length, 1, "should return an aray with 1 element");
@@ -101,7 +101,7 @@ test('simple selector', 14, function(){
 	// same( input[0].tagName, 'INPUT', "name=hammer -- should have a tagName of body");  	
 });
 
-test('chained selector', 19, function(){
+test('chained selector', 20, function(){
 	var rows1 = Simples.Selector('#row-wrapper .row');
 	same( rows1.context, document, "should have a context of document");	
 	same( rows1.selector, '#row-wrapper .row', "#row-wrapper .row -- should have a selector of #row-wrapper .row");	
@@ -116,8 +116,9 @@ test('chained selector', 19, function(){
 
 	var id = Simples.Selector('body #test-area');
 	same( id.context, document, "should have a context of document");	
-	same( id.selector, '#test-area', "body #test-area -- should have a selector of #test-area");	
+	same( id.selector, 'body #test-area', "body #test-area -- should have a selector of #test-area");	
 	same( id.length, 1, "body #test-area -- should find 1 element with the id test-area" );
+	same( id[0].id, "test-area", "body #test-area -- should find 1 element with the id test-area" );
 	
 	var body1 = Simples.Selector('body .row');
 	same( body1.context, document, "should have a context of document");	
@@ -141,15 +142,25 @@ test('multiple selector', 30, function(){
 	same( rows1.context, document, "#row-wrapper, #nothiddendiv -- should have a context of document");	
 	same( rows1.selector, '#row-wrapper, #nothiddendiv', "#row-wrapper, #nothiddendiv -- should have selector");	
 	same( rows1.length, 2, "#row-wrapper, #nothiddendiv -- should find 2 elements" );
-	same( rows1[0].id, 'row-wrapper', "#row-wrapper -- should have a id");
-	same( rows1[1].id, 'nothiddendiv', "#nothiddendiv -- should have a id");
+	var hasIds = {
+		'row-wrapper':false,
+		'nothiddendiv':false
+	};
+	
+	for( var i=0;i<2;i++){
+		var result = hasIds[ rows1[i].id ] = true;
+	}
+	for(var name in hasIds ){
+		ok( hasIds[name], "element should have an id of "+name )
+	}
 	
 	var rows2 = Simples.Selector('.row, #nothiddendiv');
 	same( rows2.context, document, ".row, #nothiddendiv -- should have a context of document");	
 	same( rows2.selector, '.row, #nothiddendiv', ".row, #nothiddendiv -- should have selector");	
 	same( rows2.length, 9, ".row, #nothiddendiv -- should find 9 elements" );
 	same( rows2[0].tagName, 'DIV', ".row, #nothiddendiv -- should have a tagName");
-	same( rows2[8].id, 'nothiddendiv', ".row, #nothiddendiv -- should have a id");	
+	var num = ( rows2[8].id === 'nothiddendiv' ) ? 8 : 0;
+	same( rows2[num].id, 'nothiddendiv', ".row, #nothiddendiv -- should have a id");	
 
 	var id = Simples.Selector('body, #test-area');
 	same( id.context, document, "body, #test-area -- should have a context of document");	
@@ -180,35 +191,28 @@ test('multiple selector', 30, function(){
 	same( id2[1].className, 'row', "body, .row -- should have a className"); 
 });
 
-test('badly constructed selector', 19, function(){
+test('badly constructed selector', 12, function(){
 	var rows1 = Simples.Selector('#row-wrapper.row');
-	same( rows1.selector, '#row-wrapper', "#row-wrapper.row -- should have a selector of #row-wrapper");	
-	same( rows1.length, 1, "#row-wrapper.row -- should find 1 element with the id of row-wrapper" );
-	same( rows1[0].tagName, 'DIV', "#row-wrapper.row -- should have a tagName of div");
+	same( rows1.selector, '#row-wrapper.row', "#row-wrapper.row -- should have a selector of #row-wrapper");	
+	same( rows1.length, 0, "#row-wrapper.row -- should find 1 element with the id of row-wrapper" );
 
 	var rows2 = Simples.Selector('.row.cell');    
-	same( rows2.selector, '.row', ".row.cell -- should have a selector of .row");	
-	same( rows2.length, 8, ".row.cell -- should find 8 elements with the class rows" );
-	same( rows2[0].tagName, 'DIV', ".row.cell -- should have a tagName of div");
+	same( rows2.selector, '.row.cell', ".row.cell -- should have a selector of .row");	
+	same( rows2.length, 0, ".row.cell -- should find 0 elements with the class rows" );
 
 	var rows3 = Simples.Selector('.row.cell.row#test-area');
-	same( rows3.length, 8, ".row.cell.row#test-area -- should find 8 elements with the className of row" );
-	same( rows3.selector, '.row', ".row.cell.row#test-area -- should have a selector of .row.cell.row#test-area");
-	same( rows3[0].className, 'row', ".row.cell.row#test-area -- should have an className of .row.cell.row#test-area");            
-	same( rows3[0].tagName, 'DIV', ".row.cell.row#test-area -- should have a tagName of div");
+	same( rows3.length, 0, ".row.cell.row#test-area -- should find 8 elements with the className of row" );
+	same( rows3.selector, '.row.cell.row#test-area', ".row.cell.row#test-area -- should have a selector of .row.cell.row#test-area");
 		
 	var body1 = Simples.Selector('body.row');
-	same( body1.selector, 'body', "body.row -- should have a selector of body");	
-	same( body1.length, 1, "body.row -- should find 8 elements with the className of row");
-	same( body1[0].tagName, 'BODY', "body.row -- should have a tagName of body");
+	same( body1.selector, 'body.row', "body.row -- should have a selector of body");	
+	same( body1.length, 0, "body.row -- should find 8 elements with the className of row");
 
 	var body2 = Simples.Selector('body#test-area');   
-	same( body2.selector, 'body', "body#test-area -- should have a selector of body");
-	same( body2.length, 1, "body#test-area -- should find 1 elements with the tagName of body");
-	same( body2[0].tagName, 'BODY', "body#test-area -- should have a tagName of body");
+	same( body2.selector, 'body#test-area', "body#test-area -- should have a selector of body");
+	same( body2.length, 0, "body#test-area -- should find 1 elements with the tagName of body");
 		
 	var body3 = Simples.Selector('.row#cell-test');
-	same( body3.selector, '.row', ".row#cell-test -- should have a selector of .row");	
-	same( body3.length, 8, ".row#cell-test -- should find 8 elements with the className of row");
-	same( body3[0].tagName, 'DIV', "body#test-area -- should have a tagName of body");
+	same( body3.selector, '.row#cell-test', ".row#cell-test -- should have a selector of .row");	
+	same( body3.length, 0, ".row#cell-test -- should find 8 elements with the className of row");
 });
