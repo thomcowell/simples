@@ -18,7 +18,7 @@ Simples.merge({
 			if( key && value !== undefined ){
 				if( value !== null ){
 					data[ key ] = value; 
-				} else if( value === null ){
+				} else {
 					delete data[ key ];
 				}      
 			} else if( value === undefined ){

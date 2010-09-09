@@ -134,6 +134,7 @@ Simples.Events = {
 		}
 
 		if( type && type.type ){
+			callback = type.handler;
 			type = type.type;
 		} else if ( callback === false ) {
 			callback = returnFalse;
@@ -152,7 +153,7 @@ Simples.Events = {
 			var event = events[ type ];
 
 			for(var i=0;i<event.length;i++){
-				if( callback === undefined || event[i] || callback.guid === event[i].guid ){
+				if( callback === undefined || callback.guid === event[i].guid ){
 					event.splice( i--, 1 );
 				}
 			}
