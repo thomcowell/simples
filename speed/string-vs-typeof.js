@@ -14,6 +14,14 @@
 		};
 	})();
 
+	function isString( obj ){
+		return typeof obj === 'string';
+	}
+		
+	function isStringChar( obj ){
+		return obj && !!obj.charAt;
+	}
+
 	function isDomNode( obj ){ 
 		return typeof obj === 'object' && ( obj.nodeType === 1 || obj.nodeType === 9 );
 	}
@@ -49,7 +57,7 @@
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]";
 	
-	perfTester.write( 'Testing typeOf and toString - '+count+' times' );
+	perfTester.log( 'Testing typeOf and toString - '+count+' times' );
 	test( isObject, count, 'isObject', window, [{ham:'sandwich'}] );
 	test( toString, count, 'toString - Object', window, [{ham:'sandwich'}, ObjectClass ] );
 	test( isArray, count, 'isArray', window, [[1,2,3]] );
@@ -62,6 +70,8 @@
 	test( toString, count, 'toString - Function', window, [function(){}, FunctionClass] );		   	
 	test( isWindow, count, 'isWindow', window, [window] );
 	test( toString, count, 'toString - Window', window, [window, WindowClass] );
-	perfTester.write();
+	test( isString, count, 'isString', window, ["I am a string"] ); 
+	test( isStringChar, count, 'isStringChar', window, ["I am a string"] ); 
+	test( toString, count, 'toString - isString', window, ["I am a string", StringClass] );
 	
 })( Simples );

@@ -11,7 +11,14 @@
   	<title>Simples Speed Tests</title>
     <script type="text/javascript" charset="utf-8">
 		var perfTester = (function(){ 
-			var messages = [];
+			var messages = [],
+				slice = [].slice,
+				tests = [],
+				startTimer,
+				toString = Object.prototype.toString, 
+				ArrayClass = "[object Array]",
+				testRunning = false; 
+			
 			    
 			function writeMsg( msg ){
 				var p = document.createElement('p'); 
@@ -19,30 +26,67 @@
 
 				document.body.appendChild( p );
 			}
-    		return {
-				test : function( fn, count, msg, that, args ){
-					count = count || 1000000;
-					that = that || window;   
-					fn = typeof fn === "function" ? fn : function(){ window.console ? window.console.log("error") : alert('error'); };
-					var t1 = new Date().getTime();
-					for( var i=0; i< count; i++){
-						fn.apply( that, args );
+			
+			function testExecute( fn, count, msg, that, args ){
+				count = count || 1000000;
+				that = that || window;   
+				fn = typeof fn === "function" ? fn : function(){ window.console ? window.console.log("error") : alert('error'); };
+				var t1 = new Date().getTime();
+				for( var i=0; i< count; i++){
+					fn.apply( that, args );
+				}
+				var t2 = new Date().getTime();
+			   	return 'tested '+ msg + ' ' + count + ' times in ' +(t2 - t1)+'ms';
+			}
+			
+			function testRunner(){
+				if( !testRunning ){
+					if( tests.length ){ 
+						spinner.innerText = "Running Test - remaining "+ tests.length;
+						var w = spinner.offsetWidth;
+						testRunning = true;
+						var test = tests.shift();
+						var msg = test.runner.apply( null, test.args );
+						if( msg ){ writeMsg( msg ); }
+						window.setTimeout( testRunner, 13 );
+						testRunning = false;
+					} else {
+						h1.innerText = "Speed Test Runner - Complete";
+						spinner.innerText = "";            
 					}
-					var t2 = new Date().getTime();
-
-				   	messages.push( 'tested '+ msg + ' ' + count + ' times in ' +(t2 - t1)+'ms' );
+				}
+			}
+			
+			var h1, spinner;
+			function setUp(){
+				var doc = document;
+				h1 = doc.createElement('h1');
+				h1.innerText = "Speed Test Runner - Running";
+				
+				spinner = doc.createElement('p');
+				spinner.innerText = "Initialising....";
+				doc.body.insertBefore( spinner, doc.body.firstChild );
+				doc.body.insertBefore( h1, spinner );
+				
+				window.setTimeout( testRunner, 50 );
+			}
+			
+			return {
+				test : function( fn, count, msg, that, args ){
+					tests.push( { runner : testExecute, args : slice.call( arguments, 0 ) } );
+				},
+				queueTest : function( runner, args ){                                       
+					if( typeof runner === "function" ){
+						args = toString.call( args ) === ArrayClass ? args : []
+						tests.push({ runner : runner, args : args });
+					}
 				},
 				log : function( msg ){
-					messages.push( msg );
+					tests.push( { runner: writeMsg, args : slice.call( arguments, 0 ) } );
 				},
-				write : function( msg ){
-					if( typeof msg === "string" ){
-						writeMsg( msg );
-					} else {
-						for( var i=0,l=messages.length;i<l;i++){
-							writeMsg( messages[i] );
-						} 
-						messages = [];
+				execute : function(){
+					if( !startTimer ){ 
+						startTimer = window.setTimeout( setUp, 50 );
 					}
 				}
 			};
@@ -130,6 +174,9 @@
 	<script type="text/javascript" charset="utf-8" src="nested-loops.js"></script>
 	<script type="text/javascript" charset="utf-8" src="tweening-each-vs-group.js"></script>	
 	
+	<script type="text/javascript" charset="utf-8">
+		perfTester.execute();
+	</script>
 </body>                                                          
 </html>
 	

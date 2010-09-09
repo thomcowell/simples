@@ -109,7 +109,7 @@
 		} 
 	}
 	
-	perfTester.write( 'Testing getElementSwitch and getElementIndex - '+count+' times' );
+	perfTester.log( 'Testing getElementSwitch and getElementIndex - '+count+' times' );
 	test( getElementSwitch, count, 'getElementSwitch - id', this, ['#row-element', document] );
 	test( getElementIndex, count, 'getElementIndex - id', this, ['#row-element', document] );
 	test( getElementSwitch, count, 'getElementSwitch - className', this, ['.cell', document] );
@@ -122,6 +122,5 @@
 	test( getElementSwitch, count, 'getElementSwitch - className', this, ['.cell', document] );
 	test( getElementIndex, count, 'getElementIndex - tagName', this, ['span', document] );		
 	test( getElementSwitch, count, 'getElementSwitch - tagName', this, ['span', document] );
-	perfTester.write();
 	
 })( Simples );  

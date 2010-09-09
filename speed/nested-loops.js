@@ -23,11 +23,10 @@
 		});		
 	}
 	
-	perfTester.write( 'Testing of looping css - '+count+' times' );
+	perfTester.log( 'Testing of looping css - '+count+' times' );
 	test( forThenFunction, count, 'forThenFunction' );
 	test( functionThenFor, count, 'functionThenFor' );
 	test( functionThenFor, count, 'functionThenFor' );	
 	test( forThenFunction, count, 'forThenFunction' );
-	perfTester.write();
 	
 })( Simples );
