@@ -1,18 +1,19 @@
 module("Events");
 
-test("bind() and unbind() setup data correctly", 4, function() {
+test("bind() and unbind() setup data correctly", 5, function() {
 
 	var callback = function(event) {
 		ok(false, "this callback shouldn't be called");
 	};
 	
-	Simples("#firstp").bind("click", callback);
-    same( callback.guid, SimplesEvents.guid - 1, "should have the guid set" );
-	ok( typeof callback.handled === "function", 'should attach handler function to function' );
-	same( readData(Simples("#firstp")[0], "events"), {click:[{handler: callback.handled, guid:callback.guid}]},"Event handler bound correctly." );
-	
-	Simples('#firstp').unbind( 'click' );
-	same( readData( Simples("#firstp")[0], "events"), {}, "Event handler unbound when using data.");
+	Simples("#firstp").bind( "click", callback );
+    same( callback.guid, Simples.Events.guid - 1, "should have the guid set" );
+	ok( !!Simples.data( Simples("#firstp")[0], "handlers").click, 'should attach handler function to function' );
+	same( Simples.data( Simples("#firstp")[0], "events").click, [ {callback: callback, guid: callback.guid }],"Event handler bound correctly." );
+
+	Simples("#firstp").unbind( 'click' );
+	same( Simples.data( Simples("#firstp")[0], "events"), {}, "Event handler unbound when using data.");
+	same( Simples.data( Simples("#firstp")[0], "handlers"), {}, "Event handler unbound when using data.");
 });
 
 test("check event bound bind() and unbind() and trigger() correctly", 3, function(){ 
@@ -42,7 +43,8 @@ test("check event bound bind() and unbind() and trigger() correctly", 3, functio
 	counter = 2;
 	Simples("#firstp")[0].onclick = function(){
 		ok( counter === 2, counter === 2 ? "Event is correctly bound. - onclick" : "Event should not be bound. - onclick" );
-	}
+	};
+	
 	Simples("#firstp").trigger( 'click' );
 	Simples("#firstp")[0].onclick = null;
 });
@@ -81,12 +83,13 @@ test("bind(), trigger change on select", 3, function() {
 	function selectOnChange(event) {
 		equals( Simples( event.target ).data( "pos" ), counter++, "Event.data is not a global event object" );
 	};
+
 	Simples("#form select").each(function(i){
-		Simples(this).data('pos', i).bind('change', selectOnChange);
+		Simples( this ).data( 'pos', i ).bind( 'change', selectOnChange );
 	}).trigger('change');
 });
 
-test("bind()only on real nodes", 1, function() {
+test("bind() only on real nodes", 1, function() {
 
 	// using contents will get comments regular, text, and comment nodes
 	Simples("#nonnodes").traverse("childNodes").bind("tester", function () {
@@ -340,7 +343,7 @@ test("trigger(eventObject, [data], [fn])", 18, function() {
 		Simples('body').html( "bottom", $parent[0] );
 		$parent.html( "bottom", $child[0] );
 	
-	var event = SimplesEvent("noNew");	
+	var event = Simples.Event("noNew");	
 	ok( event != window, "Instantiate Simples.Event without the 'new' keyword" );
 	equals( event.type, "noNew", "Verify its type" );
 	
@@ -353,7 +356,7 @@ test("trigger(eventObject, [data], [fn])", 18, function() {
 	event.stopPropagation();
 	equals( event.isPropagationStopped(), true, "Verify isPropagationStopped" );
 	
-	event.isPropagationStopped = function(){ return false };
+	event.isPropagationStopped = function(){ return false; };
 	event.stopImmediatePropagation();
 	equals( event.isPropagationStopped(), true, "Verify isPropagationStopped" );
 	equals( event.isImmediatePropagationStopped(), true, "Verify isPropagationStopped" );
@@ -411,5 +414,5 @@ test("Simples.Event.currentTarget", 2, function(){
 	// Cleanup
 	$elem.unbind();
 	
-	same( readData( $elem[0], "events"), {}, "should have no events" );
+	same( Simples.data( $elem[0], "events"), {}, "should have no events" );
 });

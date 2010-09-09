@@ -6,10 +6,10 @@ function returnTrue() {
 	return true;
 }
 
-function SimplesEvent( event ){
+Simples.Event = function( event ){
 	// Allow instantiation without the 'new' keyword
 	if ( !this.isDefaultPrevented ) {
-		return new SimplesEvent( event );
+		return new Simples.Event( event );
 	}
 
 	// Event object
@@ -29,9 +29,9 @@ function SimplesEvent( event ){
 	this[ accessID ] = true;
 	// return self
 	return this;   
-}
+};
 
-SimplesEvent.prototype = {
+Simples.Event.prototype = {
 	preventDefault: function() {
 		this.isDefaultPrevented = returnTrue;
 
@@ -69,8 +69,8 @@ SimplesEvent.prototype = {
 	isPropagationStopped: returnFalse,
 	isImmediatePropagationStopped: returnFalse
 };
-
-var SimplesEvents = {
+	
+Simples.Events = {
 	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
@@ -84,53 +84,48 @@ var SimplesEvents = {
 		if ( elem.setInterval && ( elem !== window && !elem.frameElement ) ) {
 			elem = window;
 		}
-
+        
 		if( toString.call( callback ) === FunctionClass && canDoData( elem ) ){ 
 			
-			var data = readData( elem, 'events' ) || {};
+			var data = Simples.data( elem ),
+				events = data.events ? data.events : data.events = {},
+				handlers = data.handlers ? data.handlers : data.handlers = {},
+				sEvts = Simples.Events;
 			
-			if( !callback.guid ){
-				callback.guid = this.guid++;
-				callback.handled = this.handler( callback );
+			var guid = !callback.guid ? callback.guid = sEvts.guid++ : callback.guid, 
+				handler = handlers[ type ];
+				
+			if( !handler ){
+				handler = handlers[ type ] = function( evt ){
+					return Simples !== undefined ? sEvts.handler.apply( handler.elem, arguments ) : undefined;
+				};
+				handler.elem = elem;
+				// Attach to the element
+				if ( elem.addEventListener ) {
+
+			        elem.addEventListener(type, handler, false);
+			    } else if ( elem.attachEvent ) {
+
+			        elem.attachEvent("on" + type, handler);
+			    }
 			}
 			
-			var guid = callback.guid, 
-				handled = callback.handled;
+			events[ type ] = events[ type ] || [];
+			events[ type ].push( { callback : callback, guid : guid } );
 			
-			data[ type ] = data[ type ] || [];
-			data[ type ].push( {handler:handled, guid:guid} );
-			
-			addData( elem, 'events', data );
-			
-			// Attach to the element
-			if ( elem.addEventListener ) {
-				
-		        elem.addEventListener(type, handled, false);
-		    } else if ( elem.attachEvent ) {
-			
-		        elem.attachEvent("on" + type, handled);
-		    }
 		}
 	},
-	clearEvent : function( elem, type, events, callback ){
-		events = events || [];
-		var results = [];
-		// clear out data for functions
-		for( var i=0,l=events.length;i<l;i++ ){
-			if( callback === undefined || events[ i ].guid === callback.guid ){
-				// check whether it is a W3C browser or not
-				if ( elem.removeEventListener ) {
-					// remove event listener and unregister element event
-					elem.removeEventListener( type, events[ i ].handler, false );
-				} else if ( elem.detachEvent ) {
+	clearEvent : function( elem, type, events, handlers ){
+		// check whether it is a W3C browser or not
+		if ( elem.removeEventListener ) {
+			// remove event listener and unregister element event
+			elem.removeEventListener( type, handlers[ type ], false );
+		} else if ( elem.detachEvent ) {
 
-					elem.detachEvent( "on" + type, events[ i ].handler );
-				}
-			} else {
-				results.push( events[ i ] );
-			}
+			elem.detachEvent( "on" + type, handlers[ type ] );
 		}
-		return results;
+		if( events && events[type] ){ delete events[ type ]; }
+		if( handlers && handlers[type] ){ delete handlers[ type ]; }
 	},
 	detach : function( elem, type, callback ){
 		
@@ -139,70 +134,76 @@ var SimplesEvents = {
 		}
 
 		if( type && type.type ){
-			callback = type.originalFn;
+			callback = type.handler;
 			type = type.type;
 		} else if ( callback === false ) {
 			callback = returnFalse;
 		}
 		   
-		var data = readData( elem, 'events' ) || {};
+		var elemData = Simples.data( elem ),
+			events = elemData.events,
+			handlers = elemData.handlers,
+			sEvts = Simples.Events;
 		
 		if( type === undefined ){
-			if( type in data ){
-				data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
-				if( data[ type ].length === 0 ){
-					delete data[ type ];
-				}
+			for( event in events ){
+				sEvts.clearEvent( elem, event, events, handlers );
 			}
 		} else {
-			data[ type ] = this.clearEvent( elem, type, data[ type ], callback );
-			if( data[ type ].length === 0 ){
-				delete data[ type ];
+			var event = events[ type ];
+
+			for(var i=0;i<event.length;i++){
+				if( callback === undefined || callback.guid === event[i].guid ){
+					event.splice( i--, 1 );
+				}
+			}
+
+			if( event.length === 0 ){
+				sEvts.clearEvent( elem, type, events, handlers );
 			}
 		}
-
-		addData( elem, 'events', data );
 	},
 	trigger : function( elem, type, data ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
 		}
-		
+        
+		// elem[ "on"+type ]
+		// Simples.Events.handler( elem, type, data );       
 		if ( canDoData( elem ) ) {
 			// Use browser event generators
 			var e;
 			if( elem.dispatchEvent ){
 				// Build Event
 				e = document.createEvent("HTMLEvents");
-				e.initEvent(type, true, true);
-				if (data){
-					e.data = data;              
-				}
+				e.initEvent(type, true, true); 
+				if( data ){ e.data = data; }
+				e.target = elem;              
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
-				if (data){
-					e = document.createEventObject();
-					e.data = data;
-					e.eventType = "on"+type;
-				}
+				e = document.createEventObject();
+				if( data ){ e.data = data; }
+				e.target = elem;
+				e.eventType = "on"+type;
 				elem.fireEvent( "on"+type, e );
 			} 
-		}		
+		}		                                         
 	},
-	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement originalFn keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
+	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	fix : function( event ){
 		 if( event[ accessID ] ){
 			return event;
 		}
 	    // store a copy of the original event object
 	    // and "clone" to set read-only properties 
-		var originalEvent = event;
+		var originalEvent = event,
+			sEvts = Simples.Events;
 		
-		event = SimplesEvent( originalEvent );
+		event = Simples.Event( originalEvent );
 
-	    for (var i=this.properties.length, prop; i;) {
-	        prop = this.properties[--i];
+	    for (var i=sEvts.properties.length, prop; i;) {
+	        prop = sEvts.properties[--i];
 	        event[ prop ] = originalEvent[ prop ];
 	    }
 
@@ -247,46 +248,68 @@ var SimplesEvents = {
 	    return event;
 	},       
 	guid : 1e6,
-	handler : function( callback ){ 
-		
-	    return function( event ) {
-			var args = slice.call( arguments );
-			event = args[0] = SimplesEvents.fix( event || window.event );
-			event.originalFn = callback; 
+	handler : function( event ){ 
+		var events, callbacks;
+		var args = slice.call( arguments );
+		event = args[0] = Simples.Events.fix( event || window.event );
+        event.currentTarget = this;
 
-	        if ( callback.apply( this, args ) === false ) { 
-				event.preventDefault();
-				event.stopPropagation();
+		events = Simples.data( this, "events" );
+		callbacks = (events || {})[ event.type ];
+         
+		if( events && callbacks ){
+			callbacks = callbacks.slice(0);
+			
+			for( var i=0,l=callbacks.length;i<l;i++){ 
+				var callback = callbacks[i];
+				event.handler = callback.callback;
+				
+				var ret = event.handler.apply( this, args );
+				if( ret !== undefined ){
+					event.result = ret;
+					if ( ret === false ) { 
+						event.preventDefault();
+						event.stopPropagation();
+					}
+				}
+				
+				if ( event.isImmediatePropagationStopped() ) {
+					break;
+				}
 			}
-	    };
+		}
+		return event.result;
 	}
 };
 
 Simples.extend({
 	bind : function( type, callback ){
-		if( typeof type === "string" && ( toString.call( callback ) === FunctionClass || callback === false ) ){
-			// Loop over elements 
+		if( typeof type === "string" && ( callback === false || toString.call( callback ) === FunctionClass ) ){
+			// Loop over elements    
+			var attach = Simples.Events.attach;
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment
-				SimplesEvents.attach( this, type, callback );
+				attach( this, type, callback );
 			});
 		}
 		return this;	
 	},
 	unbind : function( type, callback ){
-		// Loop over elements
+		// Loop over elements    
+		var detach = Simples.Events.detach;
 		this.each(function(){
 			// Register each original event and the handled event to allow better detachment    
-			SimplesEvents.detach( this, type, callback );
+			detach( this, type, callback );
 		});
 		return this;
 	}, 
 	trigger : function( type, data ){
 		if( typeof type === "string"){ 
 			// Loop over elements
+			var trigger = Simples.Events.trigger;
 			this.each(function(){
 				// Register each original event and the handled event to allow better detachment    
-				SimplesEvents.trigger( this, type, data );
+				trigger( this, type, data );
 			});
 		}
 		return this;

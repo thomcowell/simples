@@ -81,7 +81,7 @@ Simples.merge({
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			fn.call( document, SimplesEvent( 'ready' ) );
+			fn.call( document, Simples.Event( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
@@ -111,11 +111,6 @@ Simples.merge({
 
 				// Reset the list of functions
 				readyList = null;
-			}
-
-			// Trigger any bound ready events
-			if ( Simples.prototype.trigger ) {
-				Simples( document.body ).trigger( "ready" );
 			}
 		}
 	},
@@ -283,7 +278,7 @@ Simples.fn = Simples.prototype = {
 		
 		var result = new Simples();
 		result.context = this.context;
-		
+
 		this.each(function(i,l){
 			if( testFn.call( this, i, l ) === true ){
 				result.push.call( result, this );
@@ -295,7 +290,7 @@ Simples.fn = Simples.prototype = {
 	find: function( selector ){
 		var results = Simples();
 		this.each(function(){
-			results.push.apply( results, Simples.Selector( selector, this ) );
+			Simples.Selector( selector, this, results );
 		});
 		return results;
 	},

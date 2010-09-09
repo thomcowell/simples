@@ -68,6 +68,7 @@ test('create selector', 16, function(){
 	var div4 = Simples.Selector('<div />');   
 	same( div4.context, document, "should have a context of document");
 	same( div4.selector, '<div />', "<div /> -- should have a selector of <div />");	
+
 	same( div4.length, 1, "should create 1 elements as a div" );
 	same( div4[0].tagName, 'DIV', "should have created the element as a div");
 });
