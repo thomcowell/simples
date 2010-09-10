@@ -395,6 +395,11 @@ test("trigger(eventObject, [data], [fn])", 18, function() {
 	//$child.bind('foo', error );
 	
 	$child.trigger( "foo", [1,2,3] ).unbind();
+	
+	$child.bind("foo",function( e ){
+		ok( true, "This assertion was called");
+		e.stopPropagation();
+	});
 
 	// Will error if it bubbles
 	$child.trigger('foo');

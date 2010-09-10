@@ -2,11 +2,11 @@
 var TAG = /<(\w+)\s?\/?>/,
 	// TAG_STRIP = /\b[\.|\#\|\[].+/g, 
 	// TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
-	FIRST_ID = '#',
+	FIRST_ID = /\s#/,
 	// ATTR_NAME_IS = /\[name\=([^\]]+)\]/,
 	// Is it a simple selector
 	// isSimple = /^.[^:#\[\.,]*$/,
-	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
+	// TAG_STRIP = /\b[\.\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
 	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined";
@@ -32,7 +32,7 @@ Simples.Selector = function(selector, context, results) {
             return results;
         }
         // clean up selector
-        selector = selector.replace(TAG_STRIP, '');
+        // selector = selector.replace(TAG_STRIP, '');
         // get last id in selector
         var index = selector.lastIndexOf(FIRST_ID);
         selector = selector.substring(index > 0 ? index: 0);
