@@ -275,19 +275,14 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	filter : function( testFn ){
-		
-		var result = new Simples();
-		result.context = this.context;
-
-		this.each(function(i,l){
-			if( testFn.call( this, i, l ) === true ){
-				result.push.call( result, this );
-			}
-		});
-		
-		return result;
+		var i = 0,c = 0,l = this.length;
+		while( i<l ){
+			if( testFn.call( this[c], i, l ) !== true ){ this.splice( c--, 1 ); }
+			c++; i++;
+		}
+		return this;
 	},
-	find: function( selector ){
+	find: function( selector ){ 
 		var results = Simples();
 		this.each(function(){
 			Simples.Selector( selector, this, results );

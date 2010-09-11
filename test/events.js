@@ -270,7 +270,7 @@ test("trigger() bubbling", 14, function() {
 	equals( ap, 1, "ap bubble" );
 });
 
-test("trigger(type, [data])", 9, function() {
+test("trigger(type, [data])", 10, function() {
 
 	var handler = function(event) {
 		equals( event.type, "click", "check passed data" );
@@ -309,7 +309,7 @@ test("trigger(type, [data])", 9, function() {
 	}
 	ok( pass, "Trigger on a table with a colon in the even type, see #3533" );
 
-	var form = Simples("<form/>").attr('action','about:blank');
+	var form = Simples("<form/>").attr({'action':'http://www.eightsquarestudio.com/submitTest','method':'POST'});
 	form.html("<input name='dah' type='hidden'/><input id='submit' name='submit' type='submit'/>")
 	Simples('body').html( "bottom", form[0] );
 
@@ -324,20 +324,23 @@ test("trigger(type, [data])", 9, function() {
 
 	form.unbind("submit");
 
-	Simples(document).bind("submit",function(){
+	Simples(document).bind("submit",function(e){        
+		same( e.data, [1,2,3], "will only call when submit is triggered on childNode of form");
 		ok( true, "Make sure bubble works up to document." );
 		return false;
 	});
 
-	// Trigger 1
-	form.trigger("submit");
+	// Trigger 1 Won't Work to document
+	form.trigger("submit", ['a,b,c']);                   
+	// Trigger 2 Will Work to document
+    form.find('[name=submit]').trigger('submit', [1,2,3])
 
 	Simples(document).unbind("submit");
 
 	form.html( "remove" );
 });
 
-test("trigger(eventObject, [data], [fn])", 18, function() {
+test("trigger(eventObject, [data], [fn])", 20, function() {
 	
 	var $parent = Simples('<div>').attr('id', 'par').hide(),
 		$child = Simples('<p>').attr('id','child').html('foo');
@@ -402,9 +405,21 @@ test("trigger(eventObject, [data], [fn])", 18, function() {
 	});
 
 	// Will error if it bubbles
-	$child.trigger('foo');
+	$child.trigger('foo').unbind(); 
+    
+	$link = Simples('<a>').attr('href','http://www.eightsquarestudio.com').html('text','Eight Square Studio');
+	$child.html( "bottom", $link );
+
+	$child.bind("click",function( e ){
+		ok( true, "This assertion was called");
+		e.preventDefault();
+	});
 	
-	$child.unbind();
+	$parent.unbind().bind('click',function(){
+		ok( true, "The bubble should reach this, but the page should re-direct!");
+	});
+	
+	$link.trigger('click').unbind();
 	$parent.unbind().html('remove');
 });
 
