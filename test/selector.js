@@ -18,24 +18,24 @@ test('getElements with only selector', 9, function(){
 });  
 
 test('getElements with context', 16, function(){
-	var body = document.body;
+	var body = document.body, tag, id;
 	
-	var id = getElements( '#test-area', body );
+	id = getElements( '#test-area', body );
 	same( id.length, 1, "should return an aray with 1 element");
 	same( id[0].tagName, 'DIV', "should return a div");
 	same( id[0].id, 'test-area', "should return an element with the same id"); 
 	
-	var className = getElements( '.row', document.getElementById('row-wrapper') );
+	className = getElements( '.row', document.getElementById('row-wrapper') );
 	same( className.length, 8, "should return an aray with 8 elements");
 	same( className[0].tagName, 'DIV', "should return a div");
 	same( className[0].className, 'row', "should return an element with the same className");
 	
-	var tag = getElements( 'h2', body );
+	tag = getElements( 'h2', body );
 	same( tag.length, 2, "should return an aray with 2 elements");
 	same( tag[0].tagName, 'H2', "should return a div");
 	same( tag[0].className, '', "should return an element with no className");
 	
-	var tag = getElements( '[name=checkedtestcheckboxes]', body );
+	tag = getElements( '[name=checkedtestcheckboxes]', body );
 	same( tag.length, 2, "should return an aray with 2 elements");
 	same( tag[0].type, 'checkbox', "should return a type of checkbox");
 	same( tag[0].tagName, 'INPUT', "should return a tagName of input");
@@ -151,7 +151,7 @@ test('multiple selector', 30, function(){
 		var result = hasIds[ rows1[i].id ] = true;
 	}
 	for(var name in hasIds ){
-		ok( hasIds[name], "element should have an id of "+name )
+		ok( hasIds[name], "element should have an id of "+name );
 	}
 	
 	var rows2 = Simples.Selector('.row, #nothiddendiv');

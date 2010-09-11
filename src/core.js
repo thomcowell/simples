@@ -210,7 +210,7 @@ function doScrollCheck() {
 Simples.fn = Simples.prototype = { 
 	init : function( selector, context ){
 
-		// Handle $(""), $(null), or $(undefined) 		
+		// Handle $(""), $(null), or $(undefined)
 		if ( !selector ){
 			return this;
 		} else if( selector.selector !== undefined ){
@@ -261,16 +261,10 @@ Simples.fn = Simples.prototype = {
 	selector : '',
 	version : '@VERSION',  
 	each : function( callback ){
-		                                                     
-		if( this.length === 1){
-
-			callback.call( this[0], 1, 1 );
-		} else if( this.length > 1 ) {
-			
-			for(var i=0,l=this.length;i<l;i++){
-				
-				callback.call( this[i], i, l );
-			}
+		var i=0,l=this.length;
+		while(i<l){
+			callback.call( this[i], i, l );
+			i++;
 		}
 		return this;
 	},
@@ -283,10 +277,10 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	find: function( selector ){ 
-		var results = Simples();
-		this.each(function(){
-			Simples.Selector( selector, this, results );
-		});
+		var results = Simples(), i=0,l=this.length;
+		while(i<l){
+			Simples.Selector( selector, this[i++], results );
+		}
 		return results;
 	},
 	add : function( elems ){

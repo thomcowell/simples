@@ -146,8 +146,8 @@ Simples.Events = {
 			sEvts = Simples.Events;
 		
 		if( type === undefined ){
-			for( event in events ){
-				sEvts.clearEvent( elem, event, events, handlers );
+			for( var eventType in events ){
+				sEvts.clearEvent( elem, eventType, events, handlers );
 			}
 		} else {
 			var event = events[ type ];
@@ -167,9 +167,6 @@ Simples.Events = {
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
 		}
-        
-		// elem[ "on"+type ]
-		// Simples.Events.handler( elem, type, data );       
 		if ( canDoData( elem ) ) {
 			// Use browser event generators
 			var e;
@@ -286,31 +283,31 @@ Simples.extend({
 	bind : function( type, callback ){
 		if( typeof type === "string" && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
-			var attach = Simples.Events.attach;
-			this.each(function(){
+			var attach = Simples.Events.attach,i=0,l=this.length;
+			while(i<l){
 				// Register each original event and the handled event to allow better detachment
-				attach( this, type, callback );
-			});
+				attach( this[i++], type, callback );
+			}
 		}
 		return this;	
 	},
 	unbind : function( type, callback ){
 		// Loop over elements    
-		var detach = Simples.Events.detach;
-		this.each(function(){
+		var detach = Simples.Events.detach,i=0,l=this.length;
+		while(i<l){
 			// Register each original event and the handled event to allow better detachment    
-			detach( this, type, callback );
-		});
+			detach( this[i++], type, callback );
+		}
 		return this;
 	}, 
 	trigger : function( type, data ){
 		if( typeof type === "string"){ 
 			// Loop over elements
-			var trigger = Simples.Events.trigger;
-			this.each(function(){
+			var trigger = Simples.Events.trigger,i=0,l=this.length;
+			while(i<l){
 				// Register each original event and the handled event to allow better detachment    
-				trigger( this, type, data );
-			});
+				trigger( this[i++], type, data );
+			}
 		}
 		return this;
 	}

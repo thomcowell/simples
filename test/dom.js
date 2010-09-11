@@ -280,10 +280,19 @@ test("html('remove')",function(){
 	
 	parent[0].innerHTML = contents;
 	equal( parent.html(), contents, "ensure setup correct");
-	div = Simples('span', parent );
-	div.html( 'remove' );
+	span = Simples('span', parent );
+	span.html( 'remove' );
 	equal( parent[0].innerHTML, "", "should remove all children of parent" );
-
+	
+	parent[0].innerHTML = contents;
+	equal( parent.html(), contents, "ensure setup correct");
+	
+	span = Simples('span', parent );
+	span.slice( -1 ).html( 'remove' );
+	equal( parent[0].innerHTML, '<span>1</span><span>2</span><span>3</span>', "should remove all children of parent" );
+	
+	span.slice( 1 ).html( 'remove' );
+	equal( parent[0].innerHTML, '<span>1</span><span>3</span>', "should remove all children of parent" );
 });
    
 test("html('before')", 3, function(){
@@ -397,18 +406,19 @@ test("traverse",function(){
 	}), Simples( document.body ), "fetch body" );
 });
 
-test("slice", 10, function(){             
+test("slice", 14, function(){             
 	var contents = '<span id="one"></span><span id="two"></span><span id="three"></span><span id="four"></span>', div = Simples('<div/>');
 	
 	function testSlice( start, end ){
 		count = end || 1;                                       
 		var nodes = div.html( contents )[0].childNodes;
-		var test = Simples( nodes );
+		var test = Simples( nodes ), testLength = test.length;
 		var result = test.slice( start, end );           
 		if( start < 0 ){
 			count = Math.abs( start ); 
 			start = nodes.length + start;
-		}
+		}   
+		equal( test.length, testLength, "should not affect original object");
 		equal( result.length, count, "should have the same length" ); 
 		for( var i=0;i<count;i++){
 			same( result[i], nodes[ start+ i ], "should have the same elements");
@@ -419,5 +429,5 @@ test("slice", 10, function(){
 	testSlice( 1, 2 );
 	testSlice( -1 );
 	testSlice( -2 );
-});
-// prepend append => 'string' and nodes check order                                	
+}); 
+// prepend append => 'string' and nodes check order

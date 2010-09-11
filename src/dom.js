@@ -76,8 +76,8 @@ Simples.merge({
 			}
 		}
 	},
-	domManip : function( elem, location, html ){          
- 		var el, parent = elem.parentNode;
+	domManip : function( elem, location, html ){
+		var el, parent = elem.parentNode;
 		if( !elem || !elem.nodeType ){ return; }
 		
 		switch( location ){
@@ -85,10 +85,9 @@ Simples.merge({
 				elem.innerText = html;
 				break;
 			case 'remove' :
-				if( parent ){ 
-					el = parent;
+				if( parent ){
 					cleanData( elem );     
-			        parent.removeChild(elem);
+					parent.removeChild(elem);
 				}
 				break;
 			default :  
@@ -131,7 +130,7 @@ Simples.merge({
 						break;
 					case 'after' :
 						if( parent ){ 
-						   	parent.insertBefore( wrapHelper(html, parent), elem.nextSibling);
+							parent.insertBefore( wrapHelper(html, parent), elem.nextSibling);
 						}
 						break;
 					case 'wrap' :
@@ -143,10 +142,9 @@ Simples.merge({
 						}
 						break;
 					default :  
-					 	var list, len, i = 0;
 						cleanData( this, false );
 						html = html != null ? html : location;
-						var testString = html.toString(); 
+						var list, len, i = 0, testString = html.toString();
 						if ( testString.indexOf("[object ") === -1 ) {
 							elem.innerHTML = ""+html;
 							list = elem.getElementsByTagName('SCRIPT');
@@ -221,29 +219,24 @@ Simples.merge({
 				// it must be this
 				elem.setAttribute(name, ""+value);
 			}
-		}	
+		}
 	}
 });
 
 Simples.extend({
-	html : function( location, html ){  
+	html : function( location, html ){
 
 		if ( arguments.length === 0 || ( arguments.length === 1 && SINGLE_ARG_READ.test( location ) ) ) {
 			return Simples.domRead( this[0], location );
 		}
-		 
 		location = location != null ? location : "";
 
-		var results = new Simples();
-		
-		this.each(function(index) { 
-			var elem = Simples.domManip( this, location, html );
-			if( elem ){
-				results.push.apply( results, slice.call( elem, 0 ) );
-			}
-		});
+		var c=0,i=0,l=this.length, results;
+		while(i<l){
+			Simples.domManip( this[i++], location, html );
+		}
 
-		return results.length ? results : this;
+		return this;
 	},
 	// attributes	
 	hasClass : function( className ){

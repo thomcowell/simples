@@ -278,18 +278,14 @@ Simples.extend({
 		
 		var nameClass = toString.call( name );
 		if( nameClass === StringClass && value !== undefined ){
-			
-			this.each(function(){
-				Simples.setStyle( this, name, value );
-			});
+			var i=0,l=this.length;
+			while( i<l ){
+				Simples.setStyle( this[i++], name, value );
+			}
 		} else if( nameClass === ObjectClass ) {
-			
-			this.each(function(){  
-				for( var key in name ){  
-					// don't set styles on text and comment nodes
-					Simples.setStyle( this, key, name[ key ] );
-				}
-			});
+			for( var key in name ){
+				this.css( key, name[ key ] );
+			}
 		}
 		return this;
 	},
