@@ -2,28 +2,27 @@
 var TAG = /<(\w+)\s?\/?>/,
 	// TAG_STRIP = /\b[\.|\#\|\[].+/g, 
 	// TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
-	FIRST_ID = '#',
+	FIRST_ID = /\s#/,
 	// ATTR_NAME_IS = /\[name\=([^\]]+)\]/,
 	// Is it a simple selector
 	// isSimple = /^.[^:#\[\.,]*$/,
-	TAG_STRIP = /\b[\.\#\|\[\=].+/g,
+	// TAG_STRIP = /\b[\.\#\|\[\=].+/g,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
 	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined";
 
 Simples.Selector = function(selector, context, results) {
     results = results || [];
+	results.selector = selector;
+	results.context = context || document;
 
     if (typeof(selector) === 'string') {
-        // if (QUERY_SELECTOR && selector.indexOf('<') < 0) {
-        //     results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
-        //     return results;
-        // }    
+        if (QUERY_SELECTOR && selector.indexOf('<') < 0) {
+            results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
+            return results;
+        }
         // if it is a multi select split and short cut the process
         if (COMMA_WITH_BOUNDARY.test(selector)) {
-            results.selector = selector;
-            results.context = (context && context.nodeType === 9 ? context: document);
-
             var get = selector.split(COMMA_WITH_BOUNDARY);
 
             for (var x = 0, y = get.length; x < y; x++) {
@@ -33,7 +32,7 @@ Simples.Selector = function(selector, context, results) {
             return results;
         }
         // clean up selector
-        selector = selector.replace(TAG_STRIP, '');
+        // selector = selector.replace(TAG_STRIP, '');
         // get last id in selector
         var index = selector.lastIndexOf(FIRST_ID);
         selector = selector.substring(index > 0 ? index: 0);
@@ -46,7 +45,6 @@ Simples.Selector = function(selector, context, results) {
         } else {
             // allow another document to be used for context where getting by id
             results.context = context = (selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0) ? (context && context.nodeType === 9 ? context: document) : (context || document);
-            results.selector = selector;
             var split = selector.split(SPACE_WITH_BOUNDARY);
 
             for (var i = 0, l = split.length; i < l; i++) {

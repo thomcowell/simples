@@ -255,18 +255,46 @@ test('Simples.each',function(){
 	});
 }); 
 
-test('Simples.add',function(){
-	ok( false, "No Tests")
+test('Simples.add', 8, function(){
+	s_obj = Simples('<div/>');
+	s_obj.add( '<p/>' );
+	same( s_obj.length, 2, "should have 2 elements");
+	same( s_obj[1].tagName, 'P', "should have p element as last");
+	
+	s_obj.add( document.createElement('span') );
+	same( s_obj.length, 3, "should have 3 elements");
+	same( s_obj[2].tagName, 'SPAN', "should have p element as last");
+	
+	s_obj.add( Simples('<a/>') );
+	same( s_obj.length, 4, "should have 4 elements");
+	same( s_obj[3].tagName, 'A', "should have p element as last");
+	                                                              
+	s_obj.add( [ document.createElement('strong') ] );
+	same( s_obj.length, 5, "should have 5 elements");
+	same( s_obj[4].tagName, 'STRONG', "should have p element as last");
 });
                           
 test('Simples.find',function(){
-	ok( false, "No Tests")
+	var oldSelector = Simples.Selector,
+		parent = Simples('#row-wrapper');
+
+	Simples.Selector = function(){
+		ok( true, "This function was called.");
+		var args = slice.call( arguments, 0 );
+		same( args[0], '.row', "Should have a selector of .row");		
+		same( args[1], parent[0], "should have the context of parent selected element");
+		ok( args[2] instanceof Simples, "Should pass in instance of Simples as 3rd argument.")
+	}
+	
+	rows = parent.find('.row');
+	Simples.Selector = oldSelector;
 });
 
-test('Simples.filter', 14, function(){
+test('Simples.filter', 14, function(){ 
+
 	var s_obj = Simples('div'), counter=0, length = s_obj.length, set = Simples('.row');
 
-	var results = s_obj.filter(function(i,l){ 
+	s_obj.filter(function(i,l){ 
 		if( i !== counter ){
 			ok( false, "i doesn't equal counter ");
 		} 
@@ -277,16 +305,17 @@ test('Simples.filter', 14, function(){
 		return this.className === "row";
 	});
 
-	ok( results instanceof Simples, "should return an instance of Simples"); 
-	equal( results.length, set.length, "should return the same length" ); 
+	ok( s_obj instanceof Simples, "should return an instance of Simples"); 
+	equal( s_obj.length, set.length, "should return the same length" ); 
 	for(var i=0,l=set.length;i<l;i++){
-		same( results[i], set[i], "should return an instance of Simples");	
+		same( s_obj[i], set[i], "should return an instance of Simples");	
 	}
-	same( results.selector, '', "node list of .row -- should have empty selector");	              
-	same( results.context, document, "node list of .row -- should have empty context");
-	equal( results.length, 8, "should return an instance of Simples");
+	same( s_obj.selector, 'div', "node list of .row -- should have empty selector");	              
+	same( s_obj.context, document, "node list of .row -- should have empty context");
+	equal( s_obj.length, 8, "should return an instance of Simples");
 	
-	var badResponses = s_obj.filter(function(i,l){  
+	s_obj = Simples('div');
+	s_obj.filter(function(i,l){  
 		if(i===0){ 
 			return undefined; 
 		} else if( i===(length-1) ){
@@ -300,5 +329,5 @@ test('Simples.filter', 14, function(){
 		}
 		return {};
 	});
-	equal( badResponses.length, 0, "should return an instance of Simples");   
+	equal( s_obj.length, 0, "should return an instance of Simples");   
 });
