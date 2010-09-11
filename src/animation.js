@@ -89,7 +89,6 @@ function Animation( elem, setStyle, opts ){
 
 	opts = opts || {};
 	this[0] = elem; 
-	this.length = 1;
 	this._id = AnimationController.guid++;
 	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop;
 	this._reverse = opts.reverse === true;
@@ -120,9 +119,10 @@ Animation.prototype = {
 		
 		return this;
 	}, 
-	stop : function( shouldReverse ){     
+	stop : function( jumpToEnd, shouldReverse ){
 		
-		AnimationController.stop( this ); 
+		AnimationController.stop( this );
+		if( jumpToEnd ){ this.reset( true ); }
 		this._callback.call( this[0], this );
 		
 		return shouldReverse === false ? this : ( this._reverse || shouldReverse ) ? this.reverse() : this; 
@@ -135,14 +135,14 @@ Animation.prototype = {
 		
 		return shouldStart === false ? this : ( this._autoStart || shouldStart ) ? this.start() : this; 
 	},
-	reset : function(){
+	reset : function( resetToEnd ){
 		
 		if( this._startTime ){
-			this.stop( false );
+			this.stop( null, false );
 		}
-
-		for( var name in this._start ){
-			Simples.setStyle( this[0], name, this._start[ name ] );
+        var cssObj = resetToEnd ? this._finish : this._start;
+		for( var name in cssObj ){
+			Simples.setStyle( this[0], name, cssObj[ name ] );
 		}
 
 		return this;
@@ -209,16 +209,24 @@ Simples.merge({
 });
 
 Simples.extend({
-    animate: function( css, opts ){
-		var animations = [];
-		if( css ){		
-			this.each(function(){  
-				var anim = Animation( this, css, opts );
-				if( anim ){
-					animations.push( anim );
-				}
-			});
+	animations : function(){
+		var data = [], i=0,l=this.length;
+		while( i<l ){
+			data.concat( Simples.data( this, 'animations' ) || [] );
 		}
-		return animations.length > 1 ? new CompositeAnimation( animations ) : animations[0];
+		return data.length === 1 ? data[0] : new CompositeAnimation( data );
+	},
+    animate: function( css, opts ){
+		if( css ){
+			for(var i=0,l=this.length;i<l;i++){
+				var anim = Animation( this[i], css, opts );
+				if( anim ){
+					var data = Simples.data( this[i] );
+					data = data.animations ? data.animations : data.animations = [];
+					data.push( anim );
+				}
+			}
+		}
+		return this;
 	}
 });	

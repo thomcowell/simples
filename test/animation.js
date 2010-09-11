@@ -80,7 +80,7 @@ test("Animation.start()", 5, function() {
 	same( anim, t_start_anim[0], "should call AnimationController.start with animation");
 });
 	
-test("Animation.stop()", 8, function() {
+test("Animation.stop()", 9, function() {
 	var start, anim = Animation( Simples('#test-area')[0], {'opacity': 0}, {
 		callback:function( animation ){
 			ok( true, "should call callback");
@@ -113,6 +113,7 @@ test("Animation.stop()", 8, function() {
 	equal( anim._startTime, start, "should set the frame to 0");
 	same( anim, t_stop_anim[0], "should call AnimationController.start");
 	
+	ok( false, "Add test to jumpToEnd when specified.")
 });
 
 test("Animation.reverse()", 6, function() { 
