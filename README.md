@@ -4,7 +4,7 @@
 What you need to build your own Simples
 ---------------------------------------
 * Make sure that you have Java installed (if you want to build a minified version of Simples).
-If not, go to this page and download "Java Runtime Environment (JRE) 5.0"  
+If not, go to this page and download "Java Runtime Environment (JRE) 6.0"  
 [http://java.sun.com/javase/downloads/index.jsp](http://java.sun.com/javase/downloads/index.jsp)
 
 * You can run a basic rake task to build an non-minified version of simples
@@ -25,7 +25,7 @@ Here are each of the individual items that are buildable from the Makefile.
 
 Pull in all the external dependencies (QUnit) for the project.
 
-`ant jquery`
+`ant simples`
 
 The standard, uncompressed, Simples code.  
 Makes: ./dist/simples.js
