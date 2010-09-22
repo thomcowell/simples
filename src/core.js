@@ -5,7 +5,7 @@ var toString = Object.prototype.toString,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf,
 	trim = String.prototype.trim,
-// references to class outputs	
+/* references to class outputs	 */
 	ArrayClass = '[object Array]',
 	ObjectClass = '[object Object]',
 	NodeListClass = '[object NodeList]', 
@@ -30,12 +30,12 @@ function Simples( selector, context ) {
 /**
  * @name merge
  * @description used to merge objects into one
- * @param {Object} obj native javascript object to be merged
+ * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj native javascript object or array to be merged onto first
  **/
-Simples.merge = function(first /* obj1, obj2..... */ ) {
+Simples.merge = function(target /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
-    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first: {};
+    target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(target) === ObjectClass ? target : {};
     // set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1: 0;
     // Loop over arguments

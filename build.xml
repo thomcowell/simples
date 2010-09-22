@@ -5,7 +5,14 @@
 	
     <property description="Folder for simples and min target" name="dist" value="./dist" />
     <property description="Folder for simples src" name="src" value="./src" />
-
+	
+	<property name="current_year" value="./src" /> 
+	<tstamp>
+	      <format property="current.year" pattern="yyyy"/>
+	</tstamp> 
+	<tstamp>
+	      <format property="current.time" pattern="EEE dd MMM HH:mm:ss yyyy ZZZZZ"/>
+	</tstamp>
     <property name="SIMPLE" value="${dist}/simples.js" />
     <property name="SIMPLE_MIN" value="${dist}/simples.min.js" />
 	
@@ -33,7 +40,8 @@
 			<filelist dir="${src}" files="${filelist}"/>
         </concat>
     	<replaceregexp match="@VERSION" replace="${version}" flags="g" byline="true" file="${SIMPLE}" />
-		<replaceregexp match="Date: " replace="Date: ${date}" file="${SIMPLE}" />
+		<replaceregexp match="@CURRENT_YEAR" replace="${current.year}" flags="g" byline="true" file="${SIMPLE}" />
+		<replaceregexp match="Date: " replace="Date: ${current.time}" file="${SIMPLE}" />
         <echo message="${SIMPLE} built." />
     </target>
 
@@ -58,16 +66,10 @@
 			<arg value="--js" />
 			<mapper type="glob" from="simples.js" to="tmpmin" />
 		</apply>
-		<concat destfile="${SIMPLE_MIN}">
-			<filelist files="${SIMPLE}, dist/tmpmin"/>
-			<filterchain>
-				<headfilter lines="15"/>
-			</filterchain>
-		</concat>
 		<concat destfile="${SIMPLE_MIN}" append="yes">
 			<filelist files="dist/tmpmin"/>
 		</concat>
-		<delete file="dist/tmpmin"/>
+		<delete file="dist/tmpmin"/>  
         <echo message="${SIMPLE_MIN} built." />
     </target>
 
