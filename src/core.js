@@ -33,9 +33,9 @@ function Simples( selector, context ) {
  * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj native javascript object or array to be merged onto first
  **/
-Simples.merge = function(target /* obj1, obj2..... */ ) {
+Simples.merge = function(first /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
-    target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(target) === ObjectClass ? target : {};
+    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first : {};
     // set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1: 0;
     // Loop over arguments
