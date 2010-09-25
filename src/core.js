@@ -294,4 +294,4 @@ Simples.fn = Simples.prototype = {
 	splice: [].splice
 };      
 
-Simples.fn.init.prototype = Simples.fn
+Simples.fn.init.prototype = Simples.fn;

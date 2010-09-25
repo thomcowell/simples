@@ -485,18 +485,23 @@ test("animate negative height", 1, function() {
     });	
 });
 
-test("animate duration 0", 10, function() {
+test("animate duration 0", 11, function() {
 	stop();
 	
 	var $elems = Simples('#test-area, #nothiddendiv'), counter = 0;
 	
 	equals( AnimationController.length, 0, "Make sure no animation was running from another test" );
-
-	var anim = $elems.slice(0).animate( {a:1}, { duration: 0, callback : function(){
+    
+	var elem = $elems.slice(0);
+	
+	elem.slice(0).animate( {a:1}, { duration: 0, callback : function(){
 		ok( true, "Animate a simple property." );
 		counter++;
 	}});
-	
+	debugger;
+	var anims = elem.data('animations');
+	equals( anims.length, 1, "should have 1 animation" );
+	var anim = anims[0];
 	equals( anim._duration, 0, "should not set default duration" );
 	
 	// Failed until [6115]
