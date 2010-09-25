@@ -62,7 +62,11 @@ var REGEX_PIXEL = /px\s?$/,
 	stop : function( animation ){
 		if( animation && hasOwn.call( this.animations, animation._id ) ){
 			delete animation._startTime;
-			delete this.animations[ animation._id ];        
+			if( animation[0] && !( animation.store || animation._reverse ) ){
+				var data = animation[0].data('animations') || {};
+				delete data[ animation._id ];
+			}
+			delete this.animations[ animation._id ];  
 			this.length--;
 		}
 	}
@@ -164,11 +168,18 @@ Animation.prototype = {
 }; 
 
 function CompositeAnimation( animations ){
+	var objType = toString.call(animations);
 	if( animations instanceof Animation ){
-		animations = [ animations ];
-	}
-	if( toString.call(animations) === ArrayClass ){
+		this[0] = animations; 
+		this.length = 1;
+	} else if( objType === ArrayClass ){
 		push.apply( this, animations );
+	} else if( objType === ObjectClass ){
+		var id, i=0;
+		for( id in animations ){
+			this[i++] = animations[ id ];
+		}
+		this.length = i;
 	}
 	
 	return this;
@@ -210,20 +221,22 @@ Simples.merge({
 
 Simples.extend({
 	animations : function(){
-		var data = [], i=0,l=this.length;
-		while( i<l ){
-			data.concat( Simples.data( this, 'animations' ) || [] );
+		var data = {},i=this.length;
+		while( i ){
+			Simples.merge( data, Simples.data( this[i--], 'animations' ) );
 		}
-		return data.length === 1 ? data[0] : new CompositeAnimation( data );
+		return new CompositeAnimation( data );
 	},
     animate: function( css, opts ){
 		if( css ){
-			for(var i=0,l=this.length;i<l;i++){
-				var anim = Animation( this[i], css, opts );
+			var i=this.length;
+			while( i ){
+				var elem = this[i--],
+					anim = Animation( elem, css, opts );
 				if( anim ){
-					var data = Simples.data( this[i] );
-					data = data.animations ? data.animations : data.animations = [];
-					data.push( anim );
+					var data = Simples.data( elem );
+					data = data.animations ? data.animations : data.animations = {};
+					data[ anim._id ] = anim;
 				}
 			}
 		}
