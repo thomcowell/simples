@@ -57,8 +57,7 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     return target;
 };
 
-Simples.merge({ 
-	buildInstanceWrapper : true,
+Simples.merge({
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
 		if( toString.call( addMethods ) === ObjectClass ){
