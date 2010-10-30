@@ -63,6 +63,9 @@ Simples.Animation = {
 		
 		return anim;   	
 	},
+	/**
+	 * anim {Object} animation to perform action on
+	 */
 	start : function( anim ){                            
 		
 		if( anim && anim.id ){ 
@@ -82,6 +85,9 @@ Simples.Animation = {
 			}
 		}
 	},
+	/**
+	 * anim {Object} animation to perform action on
+	 */
 	reverse : function( anim ){
 	 	var start = anim.start, finish = anim.finish;
 
@@ -89,12 +95,19 @@ Simples.Animation = {
 		anim.finish = start;
 		
 		if( anim.startTime ){
-			anim.startTime = new Date().getTime() - Math.max( anim.duration - anim.startTime, 0 );
+			var now = new Date().getTime(),
+				diff = now - anim.startTime;
+
+			anim.startTime = now - ( anim.duration - diff );
 		}
 		
 		this.length--;
 		this.start( anim );   
-	},
+	}, 
+	/**
+	 * anim {Object} animation to perform action on
+	 * resetToEnd {Boolean} whether to reset to finish (true) or start (false||undefined) state
+	 */
 	reset : function( anim, resetToEnd ){
 
 		var cssObj = resetToEnd ? anim.finish : anim.start,
@@ -188,7 +201,7 @@ if( Simples.buildInstanceWrapper ){
 		Simples.fn.animate = function( css, opts ){
 			var i=this.length;
 			while( i ){
-				Simples.animate( this[ --i ], name, opt );
+				Simples.animate( this[ --i ], css, opts );
 			}
 			return this;			
 		};

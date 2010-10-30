@@ -14,6 +14,43 @@ function testObject( Obj, name, type ){
  	equal( toString.call( Obj[ name ] ), "[object "+ type+"]", "should have "+name+" of type [object "+ type+"]" );
 }
 
+function isWithIn( expected, actual, range, message ){ 
+	function escapeHtml(s) {
+		s = s === null ? "" : s + "";
+		return s.replace(/[\&"<>\\]/g, function(s) {
+			switch(s) {
+				case "&": return "&amp;";
+				case "\\": return "\\\\";
+				case '"': return '\"';
+				case "<": return "&lt;";
+				case ">": return "&gt;";
+				default: return s;
+			}
+		});
+	}
+	
+	var result = false;
+	if( !isNaN( actual ) ){
+		result = ( expected + range ) > actual && ( expected - range ) < actual;
+	}
+	message = escapeHtml(message) || (result ? "okay" : "failed");
+	message = '<span class="test-message">' + message + "</span>";
+	expected = escapeHtml(QUnit.jsDump.parse(expected));
+	actual = escapeHtml(QUnit.jsDump.parse(actual));
+	var output = message + ', expected: <span class="test-expected">' + expected + '</span>';
+	if (!result) {
+		output += ' result: <span class="test-actual">' + actual + '</span>, diff: ' + QUnit.diff(expected, actual);
+	}
+	
+	// can't use ok, as that would double-escape messages
+	QUnit.log(result, output);
+	QUnit.config.assertions.push({
+		result: result,
+		message: output
+	});
+	
+}
+
 function createAnim( id, elemId ){
 	var elem;
 	if ( elemId ){
@@ -188,7 +225,7 @@ test("step() thorough", 52, function(){
 	
 	for( var id=0;id<10;id++){
 		var anim = Simples.Animation.animations[ id ];
-		equal( anim[0].style.opacity, "0.5", "should set the opacity to 0.5" );
+		isWithIn( 0.5, anim[0].style.opacity, 0.05, "should set the opacity to be 0.5 +/- 0.05" );
 	}
 	
 	Simples.Animation._stop = Simples.Animation.stop;
@@ -206,52 +243,114 @@ test("step() thorough", 52, function(){
 	
 	for( var id=0;id<10;id++){
 		var anim = Simples.Animation.animations[ id ];
-		equal( anim[0].style.opacity, "0.5", "should set the opacity to 0.5" );
+		isWithIn( 0.5, anim[0].style.opacity, 0.05, "should set the opacity to 0.5 +/- 0.05" );
 	}
 	
 	Simples.Animation.stop = Simples.Animation._stop;
 });
 
-test("stop() thorough", 30, function(){
-
-	for( var id=0;id<10;id++){
-		Simples.Animation.animations[ id ] = createAnim( id );
-		Simples.Animation.length = id+1;
-		Simples.Animation.animations[ id ]._startTime = new Date().getTime();
+test("stop() thorough", 33, function(){
+	var shouldBeCalled = false;
+   	Simples.Animation._reset = Simples.Animation.reset;
+	Simples.Animation.reset = function( animation, resetToEnd ){
+		ok( shouldBeCalled, "should be called");
+		equal( anim, animation, "should be the animation stop is called with");
+		ok( resetToEnd, "should reset to the end when stopping with jump to end." )
 	}
+	
+	for( var id=0;id<10;id++){
+		var anim = createAnim( id );
+		Simples.Animation.animations[ id ] = anim
+		Simples.Animation.length = id+1;
+		anim.startTime = new Date().getTime();
+	}
+	
 	var length = 10;
 	for( var i=0;i<10;i++){
 		var animation = Simples.Animation.animations[ i ];
 		Simples.Animation.stop( animation );
-		equal( animation._startTime, undefined, "should not have a startTime" );
-		equal( Simples.Animation.animations[ i ], undefined, "should not have a record of the animation - "+animation._id );
+		equal( animation.startTime, undefined, "should not have a startTime" );
+		equal( Simples.Animation.animations[ i ], undefined, "should not have a record of the animation - "+animation.id );
 		equal( Simples.Animation.length, --length, "should decrement length" );
 	}
-	
-});
+	var id = 12,
+		anim = createAnim( id );
 
-test("reset()", 4, function(){ 
-	window.__clearInterval__ = window.clearInterval;
-	window.clearInterval = function( id ){
-		ok( true, "should call clearInterval" );
-		window.__clearInterval__( id );
-	};
-	  
-	for( var id=0;id<10;id++){
-		Simples.Animation.animations[ id ] = createAnim( id );
-		Simples.Animation.length = id+1;
-		Simples.Animation.animations[ id ]._startTime = new Date().getTime();
-	}
+	shouldBeCalled = true;
+	Simples.Animation.length = 1;
+	Simples.Animation.animations[ id ] = anim;
 	
+	Simples.Animation.stop( anim, true );
+	
+	Simples.Animation.reset = Simples.Animation._reset;
+}); 
+
+test("reverse()", 12, function(){
+	var id = 79, willStart = true, length=9, startAnim, time;
+	
+	Simples.Animation.length = length;
+	Simples.Animation._start = Simples.Animation.start;
+	Simples.Animation.start = function( anim ){
+		ok( willStart, "should call stop");
+		equal( startAnim.id, anim.id, "should pass in valid anim" );
+		equal( startAnim.finish, anim.start, "should reverse css start");
+		equal( startAnim.start, anim.finish, "should reverse css finish");
+		if( time != null){
+			isWithIn( time, anim.startTime, 20, "should set the correct time +/- 20ms");
+		} else {
+			equal( time, anim.startTime, "should have the correct startTime");
+		}   	
+		equal( --length, Simples.Animation.length, "should reduce the length when calling start");
+	};
+    
+	var anim = createAnim( id );
+	startAnim = clone( anim );
+	
+	Simples.Animation.reverse( anim );
+
+	var anim = createAnim( id ),
+		now = new Date().getTime();
+	time = now - 400;
+	anim.startTime = now - 200;
+	startAnim = clone( anim );
+		
+	Simples.Animation.reverse( anim );
+	
+	Simples.Animation.start = Simples.Animation._start; 	
+})
+
+
+test("reset()", 6, function(){ 
+	var id = 53, willStop = false;
+	
+	Simples.Animation._stop = Simples.Animation.stop;
+	Simples.Animation.stop = function( anim, resetToEnd ){
+		ok( willStop, "should call stop");
+		equal( anim.id, id, "should pass in valid anim" );
+		equal( resetToEnd, undefined, "should tell stop to resetToEnd" );
+	};
+	
+	var anim = createAnim( id );
+	anim[0].style.opacity = 0.5;
+	Simples.Animation.animations[ id ] = anim
+	Simples.Animation.length = 1;
 	Simples.Animation.timerID = 3434;
 	
-	Simples.Animation.reset();
+	Simples.Animation.reset( anim );
+	equal( 1, anim[0].style.opacity, "will reset to start");
 	
-	ok( !Simples.Animation.timerID, "should clear timerID");
-	equal( Simples.Animation.length, 0, "should reset the length to 0");
-	same( Simples.Animation.animations, {}, "should have an empty list of animations");
+    anim[0].style.opacity = 0.5;
 	
-	window.clearInterval = window.__clearInterval__; 
+	Simples.Animation.reset( anim, true );
+	equal( 0, anim[0].style.opacity, "will reset to start");
+	
+	anim.startTime = 7236723;
+	willStop = true
+	anim[0].style.opacity = 0.5;
+	Simples.Animation.reset( anim, true );
+	equal( 0, anim[0].style.opacity, "will reset to start");
+			
+	Simples.Animation.stop = Simples.Animation._stop;
 }); 
 
 module( "Simples( element ).animate()", {
