@@ -15,8 +15,16 @@ function testObject( Obj, name, type ){
 }
 
 function createAnim( id, elemId ){
+	var elem;
+	if ( elemId ){
+		elem = document.getElementById( elemId );
+	}
+	if( !elem ){
+		elem = document.createElement('div');
+		elem.style.opacity = 1;
+	}
 	return {     
-		0 : document.getElementById( elemId || 'test-area'),
+		0 : elem,
 		id: id,  
 		callback : Simples.noop,
 		duration : 600,
@@ -117,7 +125,7 @@ test("create() with opts", 31, function(){
 	Simples.Animation.start = Simples.Animation._start;
 });
 
-test("start() basics", 9, function(){
+test("start() basics", 10, function(){
 	//setup
 	Simples.Animation._step = Simples.Animation.step;
 	// test setup
@@ -148,12 +156,13 @@ test("start() basics", 9, function(){
 	equal( Simples.Animation.length, 1, "should have one animation" );
 	equal( Simples.Animation.timerID, id, "should have one timer" );
 	equal( Simples.Animation.interval, 1000, "should have one animation" );	
-	
+	 
+	ok( false, "needs more tests");
 	// cleanup	
 	Simples.Animation.step = Simples.Animation._step;
 });
 
-test("step() thorough", 12, function(){
+test("step() thorough", 52, function(){
 
 	window.clearInterval = function( id ){
 		ok( true, "should call clearInterval" );
@@ -168,16 +177,35 @@ test("step() thorough", 12, function(){
 		var anim = createAnim( id );
 		Simples.Animation.animations[ id ] = anim;
 		Simples.Animation.length = id+1;
-		anim = new Date().getTime() - 300;
+		anim.startTime = new Date().getTime() - 300;
 	}
 	
 	Simples.Animation.step();
 	
 	for( var id=0;id<10;id++){
 		var anim = Simples.Animation.animations[ id ];
-		Simples.Animation.length = id+1;
-		Simples.Animation.startTime = new Date().getTime() - 300;
+		equal( anim[0].style.opacity, "0.5", "should set the opacity to 0.5" );
 	}
+	
+	Simples.Animation._stop = Simples.Animation.stop;
+    var count = 0;
+	Simples.Animation.stop = function( anim, resetToEnd ){
+		ok( true, "should call stop");
+		equal( anim.id, count++, "should pass in valid anim" );
+		ok( resetToEnd, "should tell stop to resetToEnd")
+	};
+	for( id=0;id<10;id++){
+		Simples.Animation.animations[ id ].startTime = new Date().getTime() - 610;		
+	}	
+	
+	Simples.Animation.step();
+	
+	for( var id=0;id<10;id++){
+		var anim = Simples.Animation.animations[ id ];
+		equal( anim[0].style.opacity, "0.5", "should set the opacity to 0.5" );
+	}
+	
+	Simples.Animation.stop = Simples.Animation._stop;
 });
 
 test("stop() thorough", 30, function(){
