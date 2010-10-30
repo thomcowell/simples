@@ -58,9 +58,11 @@ function createAnim( id, elemId ){
 	}
 	if( !elem ){
 		elem = document.createElement('div');
+		document.body.appendChild( elem );
 		elem.style.opacity = 1;
 	}
-	return {     
+	var data = {},
+	anim = {     
 		0 : elem,
 		id: id,  
 		callback : Simples.noop,
@@ -69,6 +71,9 @@ function createAnim( id, elemId ){
 		start : { opacity : 1 },
 		finish : { opacity : 0 } 
 	};
+	data[ id ] = anim;
+	Simples.data( elem, 'animations', data );
+	return anim;
 }
 
 var testArea = document.getElementById('test-area');
@@ -85,6 +90,8 @@ module("Simples.Animation", {
 	teardown:function(){                                                    
 		window.clearInterval = window.__clearInterval__;
 		window.clearInterval( Simples.Animation.timerID );
+		Simples.Animation.timerID = null;
+		Simples.Animation.animations = {};
 	}
 });
 test("test singleton", 8, function(){
@@ -99,12 +106,14 @@ test("test singleton", 8, function(){
 	testObject( Simples.Animation, 'stop', 'Function' );
 });
 
-test("create()", 8, function(){
+test("create()", 9, function(){
 	var elem = testArea;
 		
 	Simples.Animation._start = Simples.Animation.start;
 	Simples.Animation.start = function( anim ){
+		var data = Simples.data( anim[0], "animations" )
 		ok( true, "expected start to be called");
+		
 		equal( anim[0], elem, "expected anim to have elem passed in" );
 		equal( anim.id, Simples.Animation.guid - 1, "to have the guid assigned" );
 		equal( anim.duration, 600, "should have default duration" );
@@ -112,6 +121,7 @@ test("create()", 8, function(){
 		equal( typeof anim.callback, "function", "should always set a callback function" );
 		same( anim.start, {opacity:1}, "should have the start state" );
 		same( anim.finish, {opacity:0}, "should have the finish state" );
+		equal( anim, data[ anim.id ], "elem data should have anim");
 	}
 	
 	Simples.Animation.create( elem, { opacity: 0 } );
@@ -249,7 +259,7 @@ test("step() thorough", 52, function(){
 	Simples.Animation.stop = Simples.Animation._stop;
 });
 
-test("stop() thorough", 33, function(){
+test("stop() thorough", 34, function(){
 	var shouldBeCalled = false;
    	Simples.Animation._reset = Simples.Animation.reset;
 	Simples.Animation.reset = function( animation, resetToEnd ){
@@ -281,6 +291,8 @@ test("stop() thorough", 33, function(){
 	Simples.Animation.animations[ id ] = anim;
 	
 	Simples.Animation.stop( anim, true );
+
+	ok( Simples.isEmptyObject( Simples.data( anim[0], "animations" ) ), "should remove animations on stop" );
 	
 	Simples.Animation.reset = Simples.Animation._reset;
 }); 
@@ -317,8 +329,7 @@ test("reverse()", 12, function(){
 	Simples.Animation.reverse( anim );
 	
 	Simples.Animation.start = Simples.Animation._start; 	
-})
-
+});
 
 test("reset()", 6, function(){ 
 	var id = 53, willStop = false;
@@ -355,6 +366,9 @@ test("reset()", 6, function(){
 
 module( "Simples( element ).animate()", {
    setup : function(){
+		Simples.Animation.timerID = null;
+		Simples.Animation.animations = {};
+		Simples.Animation.length = 0;
 		Simples.Animation.frameRate = 24;
 		Simples.Animation.interval = Math.round( 1000 / 24 );
 		Simples.Animation.guid = 1e6;
@@ -375,7 +389,7 @@ test("with no properties", 2, function() {
 		count++;
 	}});
 
-	equals( 0, count, "Make sure that callback is called for each element in the set." );
+	equals( divs.length, count, "Make sure that callback is called for each element in the set." );
 
 	stop();
 
@@ -388,7 +402,7 @@ test("with no properties", 2, function() {
 	}});
 });
 
-test("animate(Hash, Object, Function)", 2, function() { 
+test("animate(Hash, Object)", 2, function() { 
 
 	stop();
 	var hash = {opacity: 'show'},
@@ -397,16 +411,15 @@ test("animate(Hash, Object, Function)", 2, function() {
 		
 	var anim = Simples('#foo').animate({opacity: 'show'}, {
 		callback: function( animate ) {
-			ok( !animate._start.opacity, 'Should not set opacity' ); 
+			ok( !animate.start.opacity, 'Should not set opacity' ); 
 			equal( Simples('#foo').css('opacity'), startOpacity, "shouldn't change the opacity");
 			QUnit.start();
 		},
 		duration:100
 	}); 
-	
-	
-}); 
 
+}); 
+	
 test("animate negative height", 1, function() {
 	
     stop();
@@ -422,25 +435,30 @@ test("animate negative height", 1, function() {
 test("animate duration 0", 11, function() {
 	stop();
 	
-	var $elems = Simples('#test-area, #nothiddendiv'), counter = 0;
+	var $elems = Simples('#test-area, #nothiddendiv').data('animations', null ), counter = 0, anim;
 	
 	equals( Simples.Animation.length, 0, "Make sure no animation was running from another test" );
     
-	var elem = $elems.slice(0);
-	
-	elem.slice(0).animate( {a:1}, { duration: 0, callback : function(){
+	var elem = $elems.slice(0).css("opacity", 1);
+
+	elem.slice(0).animate( {a:1}, { duration : 0, callback : function( animation ){
+		anim = animation;
 		ok( true, "Animate a simple property." );
 		counter++;
 	}});
-	debugger;
-	var anims = elem.data('animations');
-	equals( anims.length, 1, "should have 1 animation" );
-	var anim = anims[0];
-	equals( anim._duration, 0, "should not set default duration" );
+
+	var anims = elem.data('animations'), count = 0;
 	
+	for( var id in anims ){
+		count++;
+	}
+	
+	equals( count, 0, "should have 0 animation on the elem" );
+	equals( anim.duration, 0, "should not set default duration" );
+
 	// Failed until [6115]
 	equals( Simples.Animation.length, 0, "Make sure synchronic animations are not left on Simples.Animation.length" );
-	
+
 	equals( counter, 1, "One synchronic animations" );
 	
 	$elems.animate( { a:2 }, { duration: 0, callback : function(){
@@ -464,10 +482,10 @@ test("animate duration 0", 11, function() {
 
 test("animate hyphenated properties", 1, function(){
 	stop();
-	var elem = Simples("#nothiddendiv")
+	Simples("#nothiddendiv")
 		.css("font-size", 10)
 		.animate({"font-size": 20}, { duration:200, callback:function(){
-				equals( this.style.fontSize, "20px", "The font-size property was animated." );
+				equals( this.style.fontSize, "20px", "The font-size property was animated" );
 				QUnit.start();                                         
 			}
 		});
