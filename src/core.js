@@ -57,7 +57,8 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     return target;
 };
 
-Simples.merge({
+Simples.merge({ 
+	buildInstanceWrapper : true,
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
 		if( toString.call( addMethods ) === ObjectClass ){
@@ -294,4 +295,4 @@ Simples.fn = Simples.prototype = {
 	splice: [].splice
 };      
 
-Simples.fn.init.prototype = Simples.fn
+Simples.fn.init.prototype = Simples.fn;

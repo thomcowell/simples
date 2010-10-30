@@ -1,15 +1,16 @@
-var REGEX_PIXEL = /px\s?$/,
-	AnimationController = {
+var REGEX_PIXEL = /px\s?$/;
+
+Simples.Animation = {
 	animations : {},
 	frameRate : 24,
 	length : 0,
 	guid : 1e6,
 	allowTypes : /padding|margin|height|width|top|left|right|bottom|fontSize/,
 	tweens : {
-		easing : function( frame, frameCount, start, delta) {
+		easing : function( frame, frameCount, start, delta ) {
 			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
 		},
-		linear : function( frame, frameCount, start, delta){
+		linear : function( frame, frameCount, start, delta ){
 			return start + ( delta * ( frame/frameCount ));
 		},
 		quadratic : function( frame, frameCount, start, delta ){
@@ -18,207 +19,184 @@ var REGEX_PIXEL = /px\s?$/,
 	},  
 	timerID : null,
 	interval : Math.round( 1000 / this.frameRate ),
-	start : function( animation, frame ){                            
+	/**
+	 * elem {Element}
+	 * setStyle {Object} 
+	 * opts {Object}  
+	 * opts.callback {Function}
+	 * opts.reverse {Boolean}
+	 * opts.duration {Object}
+	 */
+	create : function( elem, setStyle, opts ){
+		opts = opts || {};
+		if ( !( elem && elem.nodeType ) || Simples.isEmptyObject( setStyle ) ) {
+			if (typeof opts.callback === "function") {
+				opts.callback.call(elem);
+			}
+			return null;
+		}
 
-		if( animation && animation instanceof Animation ){ 
-			if( !hasOwn.call( this.animations, animation._id ) ){
+		var anim = {
+			0 : elem,
+			id : Simples.Animation.guid++,
+			callback : ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop,
+			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
+			tween : ( typeof opts.tween === "function" ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
+			start : {},
+			finish : {}
+		};
+
+		// check for supported css animated features and prep for animation
+		for( var key in setStyle ){
+			var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
+				opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
+
+			if( opacity || Simples.Animation.allowTypes.test( cKey ) ){
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
+			}                                        
+		}
+
+		var data = Simples.data(elem);
+		data.animations = data.animations || {};
+		data.animations[anim.id] = anim;
+
+		if( opts.manualStart !== true ){
+			Simples.Animation.start( anim );
+		}
+		return anim;   	
+	},
+	/**
+	 * anim {Object} animation to perform action on
+	 */
+	start : function( anim ){                            
+
+		if( anim && anim.id ){ 
+			if( !hasOwn.call( this.animations, anim.id ) ){
 				this.length++;
-				this.animations[ animation._id ] = animation;
-				if( animation._duration === 0 ){
-					animation.stop(); 
-				} else{
-					frame = ( frame > 0 ) ? ( animation._duration / AnimationController.frameRate * frame ) : 0;
-					animation._startTime = new Date().getTime() - frame;
+				this.animations[ anim.id ] = anim;
+				if( anim.duration === 0 ){
+					this.stop( anim ); 
+				} else if( !anim.startTime ){
+					anim.startTime = new Date().getTime();
 				}
-			}    
+			}
 			
 			if( !this.timerID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				this.timerID = window.setInterval(function(){ AnimationController.step(); }, this.interval ); 
-				if( frame > 0 ){
-					animation.step( new Date().getTime() );
-				}
+				this.timerID = window.setInterval(function(){ Simples.Animation.step(); }, this.interval );
 			}
 		}
 	},
-	reset : function(){    
-		for( var id in this.animations ){
-			this.stop( this.animations[ id ] );
+	/**
+	 * anim {Object} animation to perform action on
+	 */
+	reverse : function( anim ){
+	 	var start = anim.start, finish = anim.finish;
+
+		anim.start = finish;
+		anim.finish = start;
+		
+		if( anim.startTime ){
+			var now = new Date().getTime(),
+				diff = now - anim.startTime;
+
+			anim.startTime = now - ( anim.duration - diff );
 		}
-		window.clearInterval( this.timerID );
-		this.timerID = null;
+		
+		this.length--;
+		this.start( anim );   
+	}, 
+	/**
+	 * anim {Object} animation to perform action on
+	 * resetToEnd {Boolean} whether to reset to finish (true) or start (false||undefined) state
+	 */
+	reset : function( anim, resetToEnd ){
+
+		var cssObj = resetToEnd ? anim.finish : anim.start,
+			elem = anim[0];
+			
+		for( var name in cssObj ){
+			Simples.setStyle( elem, name, cssObj[ name ] );
+		}
+		
+		if( anim.startTime ){
+			this.stop( anim );
+		}
 	},
 	step : function(){    
 		if( this.length ){ 
 			var now = new Date().getTime();    
 			for( var id in this.animations ){
-				this.animations[ id ].step( now );
+				var anim = this.animations[ id ],
+					diff = now - anim.startTime,
+					elem = anim[0],
+					duration = anim.duration;
+					
+				if ( diff > duration ) {
+					this.stop( anim, true );
+				} else {
+					for( var name in anim.start ){
+						var start = anim.start[ name ];
+						Simples.setStyle( elem, name, anim.tween( diff, duration, start, anim.finish[ name ] - start ) );
+					
+					}
+				}
 			}
 		} else if( this.timerID ){
 			window.clearInterval( this.timerID );
 			this.timerID = null;
 		}
 	},
-	stop : function( animation ){
-		if( animation && hasOwn.call( this.animations, animation._id ) ){
-			delete animation._startTime;
-			delete this.animations[ animation._id ];        
+	stop : function( animation, jumpToEnd ){
+		if( animation && hasOwn.call( this.animations, animation.id ) ){
+
+			animation.startTime = null;
+
+			if ( jumpToEnd ){
+				this.reset( animation, true )
+			}
+
+			var data = Simples.data( animation[0] );
+			data.animations = data.animations || {};
+			delete data.animations[ animation.id ];
+
+			animation.callback.call(animation[0], animation);
+			delete this.animations[ animation.id ];
 			this.length--;
 		}
 	}
 };
- 
-/**
- * elem {Element}
- * setStyle {Object} 
- * opts {Object}  
- * opts.callback {Function}
- * opts.reverse {Boolean}
- * opts.manualStart {Boolean}
- * opts.duration {Object}
- */
-function Animation( elem, setStyle, opts ){
-	// sanity check arguments                           
-	if( !( elem && elem.nodeType === 1 && setStyle && !Simples.isEmptyObject( setStyle ) ) ){  
-		return null;
-	} 
-	// check instance invoked
-	if( !( this instanceof Animation ) ){
-		return new Animation( elem, setStyle, opts );
-	}
-
-	opts = opts || {};
-	this[0] = elem; 
-	this.length = 1;
-	this._id = AnimationController.guid++;
-	this._callback = ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop;
-	this._reverse = opts.reverse === true;
-	this._autoStart = opts.manualStart !== true;
-	this._duration = ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600;
-	this._tween = AnimationController.tweens[ opts.tween ] || AnimationController.tweens.easing;
-	this._start = {};
-	this._finish = {};	
-	
-	// check for supported css animated features and prep for animation
-	for( var key in setStyle ){
-		var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
-			opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
-
-		if( opacity || AnimationController.allowTypes.test( cKey ) ){
-			this._start[ cKey ] = ( Simples.getStyle( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
-			this._finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
-		}                                        
-	}
-	
-	return this._autoStart ? this.start() : this;
-}
-
-Animation.prototype = {
-	start : function( frame ){
-
-		AnimationController.start( this, frame );
-		
-		return this;
-	}, 
-	stop : function( shouldReverse ){     
-		
-		AnimationController.stop( this ); 
-		this._callback.call( this[0], this );
-		
-		return shouldReverse === false ? this : ( this._reverse || shouldReverse ) ? this.reverse() : this; 
-	},                          
-	reverse : function( shouldStart ){
-		var start = this._start, finish = this._finish;
-
-		this._start = finish;
-		this._finish = start;
-		
-		return shouldStart === false ? this : ( this._autoStart || shouldStart ) ? this.start() : this; 
-	},
-	reset : function(){
-		
-		if( this._startTime ){
-			this.stop( false );
-		}
-
-		for( var name in this._start ){
-			Simples.setStyle( this[0], name, this._start[ name ] );
-		}
-
-		return this;
-	},
-	step : function( now ){
-		now = ( now || new Date().getTime() ) - this._startTime;
-		
-		for( var name in this._start ){
-			Simples.setStyle( this[0], name, this._tween( now > this._duration ? this._duration : now, this._duration, this._start[ name ], this._finish[ name ] - this._start[ name ] ) );
-		}
-		
-		if ( now > this._duration ) {
-
-			this.stop();
-		} 
-
-		return this;
-	}
-}; 
-
-function CompositeAnimation( animations ){
-	if( animations instanceof Animation ){
-		animations = [ animations ];
-	}
-	if( toString.call(animations) === ArrayClass ){
-		push.apply( this, animations );
-	}
-	
-	return this;
-}
-
-(function( CA ){
-	function addMethod( name ){
-		CA.prototype[ name ] = function(){
-			for(var i=0,l=this.length;i<l;i++){
-				if( this[ i ][ name ] ){
-					this[ i ][ name ].apply( this[ i ], arguments );
-				}
-			}
-			return this;
-		};
-	}
-	
-	for( var key in Animation.prototype ){
-		addMethod( key );
-	}
-})( CompositeAnimation );
 
 Simples.merge({
-    animationDefaults: function( opts ){
-		opts = opts || {};
-	
-		AnimationController.frameRate = opts.frameRate || AnimationController.frameRate;
-		
-		if( opts.tweens ){
-			for( var key in opts.tweens ){
-				if( !hasOwn.call( AnimationController.tweens, key ) ){
-					AnimationController.tweens[ key ] = opts.tweens[ key ];
+	animate : Simples.Animation.create,
+	animations : function( elem, action ) {
+		if( elem && Simples.Animation[ action ] ){
+			var anims = Simples.data( elem, "animation" );
+
+			if( anims && action != ("create" || "step") ){
+				for( var id in anims ){
+					var anim = anims[ id ];
+					Simples.Animation[ action ]( anim, arguments[2] );
 				}
 			}
 		}
-	},
-	Animation : Animation
+	}
 });
 
 Simples.extend({
-    animate: function( css, opts ){
-		var animations = [];
-		if( css ){		
-			this.each(function(){  
-				var anim = Animation( this, css, opts );
-				if( anim ){
-					animations.push( anim );
-				}
-			});
+	animations: function(action) {
+		var i = this.length;
+		while (i) {
+			Simples.animations( this[--i], action, arguments[1] );
 		}
-		return animations.length > 1 ? new CompositeAnimation( animations ) : animations[0];
+		return this;
+	},
+	animate: function(css, opts) {
+		var i = this.length;
+		while (i) {
+			Simples.animate( this[--i], css, opts );
+		}
+		return this;
 	}
-});	
+});
