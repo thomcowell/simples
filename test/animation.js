@@ -139,7 +139,7 @@ test("start() basics", 10, function(){
 	equal( Simples.Animation.interval, Math.round( 1000 / 24 ), "should have a default interval" );
 	equal( Simples.Animation.timerID, undefined, "should have a frameRate of undefined" );
 
-	var anim = Simples.Animation.create( Simples('#test-area')[0], {'opacity': 0 }, { manualStart:true } ),
+	var anim = createAnim( 1e6 ),
 		id = Simples.Animation.timerID;
 
 	Simples.Animation.start( anim );
@@ -157,7 +157,11 @@ test("start() basics", 10, function(){
 	equal( Simples.Animation.timerID, id, "should have one timer" );
 	equal( Simples.Animation.interval, 1000, "should have one animation" );	
 	 
-	ok( false, "needs more tests");
+	var startTime = new Date().getTime() - 200;
+    anim.startTime = startTime;
+
+	Simples.Animation.start( anim );
+	equal( anim.startTime, startTime, "should not alter existing startTime" );
 	// cleanup	
 	Simples.Animation.step = Simples.Animation._step;
 });
