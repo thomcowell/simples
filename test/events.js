@@ -21,6 +21,7 @@ test("check event bound bind() and unbind() and trigger() correctly", 3, functio
 	var counter = 0;
    	var first = function(event) {
 		ok( counter === 0, "Event " + (counter === 0 ? "is correctly" : "should not be" ) +" bound. - First" ); 
+		counter++;
 	};
 	
 	Simples("#firstp").bind("click", first ); 
@@ -32,6 +33,7 @@ test("check event bound bind() and unbind() and trigger() correctly", 3, functio
 	counter = 1;
 	var callback = function(event) {
 		ok( counter === 1, counter === 1 ? "Event is correctly bound. - callback" : "Event should not be bound. - callback" );
+		counter++;
 	};
 	
 	Simples("#firstp").bind("click", callback );
@@ -43,6 +45,7 @@ test("check event bound bind() and unbind() and trigger() correctly", 3, functio
 	counter = 2;
 	Simples("#firstp")[0].onclick = function(){
 		ok( counter === 2, counter === 2 ? "Event is correctly bound. - onclick" : "Event should not be bound. - onclick" );
+		counter++;
 	};
 	
 	Simples("#firstp").trigger( 'click' );
@@ -311,7 +314,7 @@ test("trigger(type, [data])", 10, function() {
 
 	var form = Simples("<form/>").attr({'action':'http://www.eightsquarestudio.com/submitTest','method':'POST'});
 	form.html("<input name='dah' type='hidden'/><input id='submit' name='submit' type='submit'/>")
-	Simples('body').html( "bottom", form[0] );
+	Simples('body').html( "bottom", form );
 
 	// Make sure it can be prevented locally
 	form.bind("submit", function(){
@@ -323,17 +326,19 @@ test("trigger(type, [data])", 10, function() {
 	form.trigger("submit");
 
 	form.unbind("submit");
-
+    
+	var data = ['a,b,c'];
 	Simples(document).bind("submit",function(e){        
-		same( e.data, [1,2,3], "will only call when submit is triggered on childNode of form");
+		same( e.data, data, "will only call when submit is triggered on childNode of form");
 		ok( true, "Make sure bubble works up to document." );
 		return false;
 	});
 
 	// Trigger 1 Won't Work to document
-	form.trigger("submit", ['a,b,c']);                   
+	form.trigger("submit", data);                   
 	// Trigger 2 Will Work to document
-    form.find('[name=submit]').trigger('submit', [1,2,3])
+	data = [1,2,3];
+    form.find('input').slice(0).trigger('submit', data );
 
 	Simples(document).unbind("submit");
 

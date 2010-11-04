@@ -70,7 +70,19 @@ Simples.merge({
 
 					return html;
 				case "text" :
-					return elem.innerText;
+					var str = "", elems = elem.childNodes;
+					for ( var i = 0; elems[i]; i++ ) {
+						elem = elems[i];
+
+						// Get the text from text nodes and CDATA nodes
+						if ( elem.nodeType === 3 || elem.nodeType === 4 ) {
+							str += elem.nodeValue;
+						// Traverse everything else, except comment nodes
+						} else if ( elem.nodeType !== 8 ) {
+							str += Simples.domRead( elem, "text" );
+						}
+					}
+					return str;
 				default :
 					return elem.innerHTML;
 			}
@@ -82,7 +94,11 @@ Simples.merge({
 		
 		switch( location ){
 			case 'text' :
-				elem.innerText = html;
+				cleanData( elem );
+				while ( elem.firstChild ) {
+					elem.removeChild( elem.firstChild );
+				}
+				elem.appendChild( (elem && elem.ownerDocument || document).createTextNode( html.toString() ) );
 				break;
 			case 'remove' :
 				if( parent ){

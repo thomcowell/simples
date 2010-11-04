@@ -175,7 +175,6 @@ Simples.Events = {
 				e = document.createEvent("HTMLEvents");
 				e.initEvent(type, true, true); 
 				if( data ){ e.data = data; }
-				e.target = elem;              
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
