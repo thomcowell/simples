@@ -102,7 +102,7 @@ test("test singleton", 8, function(){
 	testObject( Simples.Animation, 'interval', 'Number' );
 	testObject( Simples.Animation, 'tweens', 'Object' );		
 	testObject( Simples.Animation, 'start', 'Function' );
-	testObject( Simples.Animation, 'step', 'Function' );
+	testObject( Simples.Animation, '_step', 'Function' );
 	testObject( Simples.Animation, 'stop', 'Function' );
 });
 
@@ -174,10 +174,10 @@ test("create() with opts", 31, function(){
 
 test("start() basics", 10, function(){
 	//setup
-	Simples.Animation._step = Simples.Animation.step;
+	Simples.Animation._step_ = Simples.Animation._step;
 	// test setup
-	Simples.Animation.step = function(){
-		ok( false, "Should not have called step" );
+	Simples.Animation._step = function(){
+		ok( false, "Should not have called _step" );
 	};
 
 	Simples.Animation.frameRate = 1;
@@ -210,17 +210,17 @@ test("start() basics", 10, function(){
 	Simples.Animation.start( anim );
 	equal( anim.startTime, startTime, "should not alter existing startTime" );
 	// cleanup	
-	Simples.Animation.step = Simples.Animation._step;
+	Simples.Animation._step = Simples.Animation._step_;
 });
 
-test("step() thorough", 52, function(){
+test("_step() thorough", 52, function(){
 
 	window.clearInterval = function( id ){
 		ok( true, "should call clearInterval" );
 	};
 	
 	Simples.Animation.timerID = 34324;
- 	Simples.Animation.step();
+ 	Simples.Animation._step();
 
 	equal( Simples.Animation.timerID, undefined, "when timerID but no animations should stop timer");
 	
@@ -231,7 +231,7 @@ test("step() thorough", 52, function(){
 		anim.startTime = new Date().getTime() - 300;
 	}
 	
-	Simples.Animation.step();
+	Simples.Animation._step();
 	
 	for( var id=0;id<10;id++){
 		var anim = Simples.Animation.animations[ id ];
@@ -249,7 +249,7 @@ test("step() thorough", 52, function(){
 		Simples.Animation.animations[ id ].startTime = new Date().getTime() - 610;		
 	}	
 	
-	Simples.Animation.step();
+	Simples.Animation._step();
 	
 	for( var id=0;id<10;id++){
 		var anim = Simples.Animation.animations[ id ];
@@ -297,7 +297,7 @@ test("stop() thorough", 34, function(){
 	Simples.Animation.reset = Simples.Animation._reset;
 }); 
 
-test("reverse()", 12, function(){
+test("reverse()", 11, function(){
 	var id = 79, willStart = true, length=9, startAnim, time;
 	
 	Simples.Animation.length = length;
@@ -307,27 +307,32 @@ test("reverse()", 12, function(){
 		equal( startAnim.id, anim.id, "should pass in valid anim" );
 		equal( startAnim.finish, anim.start, "should reverse css start");
 		equal( startAnim.start, anim.finish, "should reverse css finish");
-		if( time != null){
-			isWithIn( time, anim.startTime, 20, "should set the correct time +/- 20ms");
-		} else {
-			equal( time, anim.startTime, "should have the correct startTime");
-		}   	
-		equal( --length, Simples.Animation.length, "should reduce the length when calling start");
+		equal( null, anim.startTime, "should set the correct time +/- 20ms");
+		equal( length, Simples.Animation.length, "should reduce the length when calling start");
 	};
-    
+
 	var anim = createAnim( id );
 	startAnim = clone( anim );
-	
+
 	Simples.Animation.reverse( anim );
 
 	var anim = createAnim( id ),
 		now = new Date().getTime();
+
 	time = now - 400;
-	anim.startTime = now - 200;
+	anim.startTime = now - 200; 
+	length = 8;
+	willStart = false;
 	startAnim = clone( anim );
 		
 	Simples.Animation.reverse( anim );
 	
+	equal( startAnim.id, anim.id, "should pass in valid anim" );
+	equal( startAnim.finish, anim.start, "should reverse css start");
+	equal( startAnim.start, anim.finish, "should reverse css finish");
+	isWithIn( time, anim.startTime, 20, "should set the correct time +/- 20ms");
+	equal( length, Simples.Animation.length, "should reduce the length when calling start");
+
 	Simples.Animation.start = Simples.Animation._start; 	
 });
 
