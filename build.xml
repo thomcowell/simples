@@ -33,6 +33,9 @@
         <echo message="Building ${SIMPLE}" />
         <mkdir dir="${dist}" /> 
 		
+		<delete dir="${dist}"/>
+		<mkdir dir="${dist}"/>
+
 		<exec executable="git" outputproperty="last.commit">
 			<arg line="log -1 --pretty='%cd'"/>
 		</exec>
@@ -59,7 +62,7 @@
 				<include name="simples.js" />
 			</fileset>
 			<arg line="-jar" />
-			<arg path="build/google-compiler-20091218.jar" />
+			<arg path="build/google-compiler-20100330.jar" />
 			<arg value="--warning_level" />
 			<arg value="QUIET" />
 			<arg value="--js_output_file" />
