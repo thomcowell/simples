@@ -19,7 +19,7 @@
 		<script type="text/javascript" charset="utf-8">
 			Simples.ready(function(){ 	
 				Simples('body').bind('click', function() {
-					Simples('#marker').css( Simples(this).offset() );
+					Simples('#marker').css( Simples.offset(this) );
 					return false;
 				});
 			});

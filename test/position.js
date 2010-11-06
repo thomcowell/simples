@@ -316,11 +316,11 @@ testoffset("scroll", 16, function( Simples, win ) {
 	
 	
 	// scroll offset tests .scrollTop/Left
-	equals( Simples('#scroll-1').scrollTop(), 5, "Simples('#scroll-1').scrollTop()" );
-	equals( Simples('#scroll-1').scrollLeft(), 5, "Simples('#scroll-1').scrollLeft()" );
+	equals( Simples('#scroll-1').scroll("top"), 5, "Simples('#scroll-1').scrollTop()" );
+	equals( Simples('#scroll-1').scroll("left"), 5, "Simples('#scroll-1').scrollLeft()" );
 	
-	equals( Simples('#scroll-1-1').scrollTop(), 0, "Simples('#scroll-1-1').scrollTop()" );
-	equals( Simples('#scroll-1-1').scrollLeft(), 0, "Simples('#scroll-1-1').scrollLeft()" );
+	equals( Simples('#scroll-1-1').scroll("top"), 0, "Simples('#scroll-1-1').scrollTop()" );
+	equals( Simples('#scroll-1-1').scroll("left"), 0, "Simples('#scroll-1-1').scrollLeft()" );
 	
 	// equals( Simples('body').scrollTop(), 0, "Simples('body').scrollTop()" );
 	// equals( Simples('body').scrollLeft(), 0, "Simples('body').scrollTop()" );   
@@ -334,20 +334,20 @@ testoffset("scroll", 16, function( Simples, win ) {
 		ok( true, "Browser doesn't support scroll position." );
 		ok( true, "Browser doesn't support scroll position." );
 	} else {   
-		equals( Simples(win).scrollTop(), 1000, "Simples(window).scrollTop()" );
-		equals( Simples(win).scrollLeft(), 1000, "Simples(window).scrollLeft()" );
+		equals( Simples(win).scroll("top"), 1000, "Simples(window).scrollTop()" );
+		equals( Simples(win).scroll("left"), 1000, "Simples(window).scrollLeft()" );
 	
-		equals( Simples(win.document).scrollTop(), 1000, "Simples(document).scrollTop()" );
-		equals( Simples(win.document).scrollLeft(), 1000, "Simples(document).scrollLeft()" );
+		equals( Simples(win.document).scroll("top"), 1000, "Simples(document).scrollTop()" );
+		equals( Simples(win.document).scroll("left"), 1000, "Simples(document).scrollLeft()" );
 	}
 	
 	// test Simples using parent window/document
 	// Simples reference here is in the iframe
 	window.scrollTo(0,0);
-	equals( Simples(window).scrollTop(), 0, "Simples(window).scrollTop() other window" );
-	equals( Simples(window).scrollLeft(), 0, "Simples(window).scrollLeft() other window" );
-	equals( Simples(document).scrollTop(), 0, "Simples(window).scrollTop() other document" );
-	equals( Simples(document).scrollLeft(), 0, "Simples(window).scrollLeft() other document" );
+	equals( Simples(window).scroll("top"), 0, "Simples(window).scrollTop() other window" );
+	equals( Simples(window).scroll("left"), 0, "Simples(window).scrollLeft() other window" );
+	equals( Simples(document).scroll("top"), 0, "Simples(window).scrollTop() other document" );
+	equals( Simples(document).scroll("left"), 0, "Simples(window).scrollLeft() other document" );
 });
 
 testoffset("body", 2, function( Simples ) {
