@@ -94,7 +94,7 @@ Simples.merge({
 		
 		switch( location ){
 			case 'text' :
-				cleanData( elem );
+				Simples.cleanData( elem );
 				while ( elem.firstChild ) {
 					elem.removeChild( elem.firstChild );
 				}
@@ -102,7 +102,7 @@ Simples.merge({
 				break;
 			case 'remove' :
 				if( parent ){
-					cleanData( elem );     
+					Simples.cleanData( elem );     
 					parent.removeChild(elem);
 				}
 				break;
@@ -114,7 +114,7 @@ Simples.merge({
 					case 'outer' :
 						if( parent ){ 
 							el = wrapHelper(html, elem);
-							cleanData( elem );
+							Simples.cleanData( elem );
 					        parent.replaceChild( el, elem );						
 						}
 						break;
@@ -127,14 +127,14 @@ Simples.merge({
 					case 'unwrap' :
 						if( parent ){
 							var docFrag = wrapHelper( elem.childNodes, elem );
-							cleanData( elem );
+							Simples.cleanData( elem );
 							el = docFrag.childNodes;
 							parent.insertBefore( docFrag, elem );
 							parent.removeChild( elem );
 						}
 						break;
 					case 'empty' :
-						cleanData( elem, false ); 
+						Simples.cleanData( elem, false ); 
 						while ( elem.firstChild ) {
 							elem.removeChild( elem.firstChild );
 						}
@@ -158,7 +158,7 @@ Simples.merge({
 						}
 						break;
 					default :  
-						cleanData( this, false );
+						Simples.cleanData( this, false );
 						html = html != null ? html : location;
 						var list, len, i = 0, testString = html.toString();
 						if ( testString.indexOf("[object ") === -1 ) {

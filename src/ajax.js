@@ -1,34 +1,8 @@
 
 // ======= AJAX ========== //
 /** @const */
-var DEFAULTS = {
-    // Functions to call when the request fails, succeeds,
-    // or completes (either fail or succeed)
-    complete: function() {},
-    error: function() {},
-    success: function() {},
-    additionalData: [],
-    dataType: 'json',
-    async: true,
-	cache:true,
-    type: "GET",
-    timeout: 5000,
-	xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
-		function() {
-			return new window.XMLHttpRequest();
-		} :
-		function() {
-			try {
-				return new window.ActiveXObject("Microsoft.XMLHTTP");
-			} catch(e) {}
-		},
-    // The data type that'll be returned from the server
-    // the default is simply to determine what data was returned from the
-    // and act accordingly.
-    data: null
-},   
 // borrowed from jQuery
-ACCEPTS = {
+var ACCEPTS = {
     xml: "application/xml, text/xml",
     html: "text/html",
     script: "text/javascript, application/javascript",
@@ -75,6 +49,32 @@ function formatData(name, value) {
 }
 
 Simples.merge({
+	ajaxDefaults : {
+	    // Functions to call when the request fails, succeeds,
+	    // or completes (either fail or succeed)
+	    complete: function() {},
+	    error: function() {},
+	    success: function() {},
+	    additionalData: [],
+	    dataType: 'json',
+	    async: true,
+		cache: true,
+	    type: "GET",
+	    timeout: 5000,
+		xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
+			function() {
+				return new window.XMLHttpRequest();
+			} :
+			function() {
+				try {
+					return new window.ActiveXObject("Microsoft.XMLHTTP");
+				} catch(e) {}
+			},
+	    // The data type that'll be returned from the server
+	    // the default is simply to determine what data was returned from the
+	    // and act accordingly.
+	    data: null
+	},
     ajax: function(url, options) {
 
 	    // Load the options object with defaults, if no
@@ -83,7 +83,7 @@ Simples.merge({
 	        throw new Error('A URL must be provided.');
 	    }
 
-	    options = Simples.merge({}, DEFAULTS, options);
+	    options = Simples.merge({}, Simples.ajaxDefaults, options);
 		var type = options.type.toUpperCase(); 
 
 	    // How long to wait before considering the request to be a timeout
@@ -101,7 +101,7 @@ Simples.merge({
 	    if (type === 'POST') {
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-	        if (options.data !== null && options.data !== "") {
+	        if ( options.data ) {
 	            options.data = Simples.params(options.data).replace(/&$/, '');
 
 	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === 'string') {
@@ -243,7 +243,7 @@ Simples.merge({
 
 	},
     ajaxSettings: function(opts) {
-	    DEFAULTS = Simples.merge(DEFAULTS, opts);
+	    Simples.ajaxDefaults = Simples.merge(Simples.ajaxDefaults, opts);
 	},
     params: function(obj) {
 
