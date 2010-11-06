@@ -298,7 +298,7 @@ test("trigger(type, [data])", 10, function() {
 
 	var pass = true;
 	try { 
-		Simples('#form input').slice(0).hide().trigger('focus');
+		Simples('#form input').slice(0).css('display','none').trigger('focus');
 	} catch(e) { 
 		pass = false;
 	}
@@ -347,7 +347,7 @@ test("trigger(type, [data])", 10, function() {
 
 test("trigger(eventObject, [data], [fn])", 20, function() {
 	
-	var $parent = Simples('<div>').attr('id', 'par').hide(),
+	var $parent = Simples('<div>').attr('id', 'par').css('display','none'),
 		$child = Simples('<p>').attr('id','child').html('foo');
 		Simples('body').html( "bottom", $parent[0] );
 		$parent.html( "bottom", $child[0] );
