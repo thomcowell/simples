@@ -5,7 +5,7 @@
  * Copyright (c) 2009 - 2010, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sat Nov 6 15:31:01 2010 +0000
+ * Date: Sat Nov 6 23:16:10 2010 +0000
  */
 (function( window, undefined ) {
 
@@ -28,6 +28,15 @@ var toString = Object.prototype.toString,
 	WindowClass = "[object Window]",
 	FIRST_SPACES = /^\s*/,
 	LAST_SPACES = /\s*$/,
+	STRING = 'string',
+	DOMLOADED = "DOMContentLoaded",
+	READYSTATE = "onreadystatechange",
+	FUNC = "function",
+	OPACITY = "opacity",
+	TOP = "top",
+	LEFT = "left",
+	COMPLETE = "complete",
+	EMPTY_STRING = "",
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -135,14 +144,14 @@ Simples.merge({
 
 		// Catch cases where $(document).ready() is called after the
 		// browser event has already occurred.
-		if ( document.readyState === "complete" ) {
+		if ( document.readyState === COMPLETE ) {
 			return Simples.readyHandler();
 		}
 
 		// Mozilla, Opera and webkit nightlies currently support this event
 		if ( document.addEventListener ) {
 			// Use the handy event callback
-			document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+			document.addEventListener( DOMLOADED, DOMContentLoaded, false );
 
 			// A fallback to window.onload, that will always work
 			window.addEventListener( "load", Simples.readyHandler, false );
@@ -151,7 +160,7 @@ Simples.merge({
 		} else if ( document.attachEvent ) {
 			// ensure firing before onload,
 			// maybe late but safe also for iframes
-			document.attachEvent("onreadystatechange", DOMContentLoaded);
+			document.attachEvent( READYSTATE, DOMContentLoaded);
 
 			// A fallback to window.onload, that will always work
 			window.attachEvent( "onload", Simples.readyHandler );
@@ -176,8 +185,8 @@ Simples.merge({
 	},
 	// Use native String.trim function wherever possible, Otherwise use our own trimming functionality
 	trim : function( text ) {
-		text = text == null ? "" : text;
-		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, "" ).replace( LAST_SPACES, "" );
+		text = text == null ? EMPTY_STRING : text;
+		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
 	},
 	noop : function(){}
 });
@@ -185,15 +194,15 @@ Simples.merge({
 // Cleanup functions for the document ready method
 if ( document.addEventListener ) {
 	DOMContentLoaded = function() {
-		document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+		document.removeEventListener( DOMLOADED, DOMContentLoaded, false );
 		Simples.readyHandler();
 	};
 
 } else if ( document.attachEvent ) {
 	DOMContentLoaded = function() {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-		if ( document.readyState === "complete" ) {
-			document.detachEvent( "onreadystatechange", DOMContentLoaded );
+		if ( document.readyState === COMPLETE ) {
+			document.detachEvent( READYSTATE, DOMContentLoaded );
 			Simples.readyHandler();
 		}
 	};
@@ -208,7 +217,7 @@ function doScrollCheck() {
 	try {
 		// If IE is used, use the trick by Diego Perini
 		// http://javascript.nwbox.com/IEContentLoaded/
-		document.documentElement.doScroll("left");
+		document.documentElement.doScroll(LEFT);
 	} catch(e) {
 		window.setTimeout( doScrollCheck, 1 );
 		return;
@@ -222,7 +231,7 @@ function doScrollCheck() {
 Simples.fn = Simples.prototype = { 
 	init : function( selector, context ){
 
-		// Handle $(""), $(null), or $(undefined)
+		// Handle $(EMPTY_STRING), $(null), or $(undefined)
 		if ( !selector ){
 			return this;
 		} else if( selector.selector !== undefined ){
@@ -270,7 +279,7 @@ Simples.fn = Simples.prototype = {
 		return this;		
 	},
 	length : 0,
-	selector : '',
+	selector : EMPTY_STRING,
 	version : '0.1.3',  
 	each : function( callback ){
 		var i=0,l=this.length;
@@ -354,7 +363,7 @@ Simples.merge({
 		leadingWhitespace: div.firstChild.nodeType === 3,
 		// Make sure that if no value is specified for a checkbox
 		// that it defaults to "on".
-		// (WebKit defaults to "" instead)
+		// (WebKit defaults to EMPTY_STRING instead)
 		checkOn: div.getElementsByTagName("input")[0].value === "on",
 		// WebKit doesn't clone checked state correctly in fragments   
 		checkClone : fragment.cloneNode(true).cloneNode(true).lastChild.checked, 
@@ -379,7 +388,7 @@ Simples.merge({
 			!/compatible/.test( ua ) && /(mozilla)(?:.*? rv:([\w.]+))?/.exec( ua ) ||
 			[];
 
-		return { browser: match[1] || "", version: match[2] || "0" };
+		return { browser: match[1] || EMPTY_STRING, version: match[2] || "0" };
 	},
 	browser : {}
 }); 
@@ -445,7 +454,7 @@ function canDoData( elem ){
 
 Simples.merge({
 	data : function( elem, key, value ){
-		if ( canDoData( elem ) && ( key === undefined || typeof key === "string" ) ) {
+		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
 			if( key && value !== undefined ){
 				if( value !== null ){
@@ -492,7 +501,7 @@ Simples.merge({
 
 Simples.extend({
 	data : function( key, value ){   
-		if( typeof key === 'string' ){
+		if( typeof key === STRING ){
 			if( value !== undefined ){
 				this.each(function(){
 					Simples.data( this, key, value );
@@ -520,15 +529,17 @@ AJAX_IS_JSON = /^[\],:{}\s]*$/,
 AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
 AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
+LAST_AMP = /&$/,
+PARSEERROR = "parsererror",
 TYPEOF = /number|string/;
 
 var ActiveAjaxRequests = 0;
 
 function formatData(name, value) {
 
-    var str = "";
+    var str = EMPTY_STRING;
 
-    if (typeof name === 'string') {
+    if (typeof name === STRING) {
         var objClass = toString.call(value);
 		if (objClass === FunctionClass) {
 
@@ -552,6 +563,72 @@ function formatData(name, value) {
 		}
     }
     return str;
+}
+
+// Determine the success of the HTTP response
+function httpSuccess(xhr) {
+    try {
+        // If no server status is provided, and we're actually
+        // requesting a local file, then it was successful
+        return ! xhr.status && location.protocol == "file:" ||
+
+        // Any status in the 200 range is good
+        (xhr.status >= 200 && xhr.status < 300) ||
+
+        // Successful if the document has not been modified
+        xhr.status == 304 ||
+
+        // Safari returns an empty status if the file has not been modified
+        navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
+    } catch(e) {}
+
+    // If checking the status failed, then assume that the request failed too
+    return false;
+}
+
+// httpData parsing is from jQuery 1.4
+function httpData(xhr, type, dataFilter) {
+
+    var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
+    xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
+    data = xml ? xhr.responseXML: xhr.responseText;
+
+    if (xml && data.documentElement.nodeName === PARSEERROR) {
+        throw PARSEERROR;
+    }
+
+    if (typeof dataFilter === FUNC) {
+        data = dataFilter(data, type);
+    }
+
+    // The filter can actually parse the response
+    if (typeof data === STRING) {
+        // Get the JavaScript object, if JSON is used.
+        if (type === "json" || !type && ct.indexOf("json") >= 0) {
+            // Make sure the incoming data is actual JSON
+            // Logic borrowed from http://json.org/json2.js
+            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, EMPTY_STRING))) {
+
+                // Try to use the native JSON parser first
+                if (window.JSON && window.JSON.parse) {
+                    data = window.JSON.parse(data);
+
+                } else {
+                    data = ( new Function("return " + data) )();
+                }
+
+            } else {
+                throw "Invalid JSON: " + data;
+            }
+
+            // If the type is "script", eval it in global context
+        } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
+
+            eval.call(window, data);
+        }
+    }
+
+    return data;
 }
 
 Simples.merge({
@@ -608,9 +685,9 @@ Simples.merge({
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 	        if ( options.data ) {
-	            options.data = Simples.params(options.data).replace(/&$/, '');
+	            options.data = Simples.params(options.data).replace( LAST_AMP, EMPTY_STRING);
 
-	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === 'string') {
+	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === STRING) {
 	                options.data += ("&" + Simples.params(options.additionalData));
 	            }
 	        }
@@ -639,7 +716,7 @@ Simples.merge({
 	                try {
 	                    data = httpData(xhr, options.dataType);
 	                } catch(e) {
-	                    options.error(xhr, 'parseerror');
+	                    options.error(xhr, PARSEERROR);
 	                }
 
 	                options.success(data, 'success');
@@ -679,72 +756,6 @@ Simples.merge({
 	    // non-async requests
 	    if (!options.async) {
 	        onreadystatechange();
-	    }
-
-	    // Determine the success of the HTTP response
-	    function httpSuccess(xhr) {
-	        try {
-	            // If no server status is provided, and we're actually
-	            // requesting a local file, then it was successful
-	            return ! xhr.status && location.protocol == "file:" ||
-
-	            // Any status in the 200 range is good
-	            (xhr.status >= 200 && xhr.status < 300) ||
-
-	            // Successful if the document has not been modified
-	            xhr.status == 304 ||
-
-	            // Safari returns an empty status if the file has not been modified
-	            navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
-	        } catch(e) {}
-
-	        // If checking the status failed, then assume that the request failed too
-	        return false;
-	    }
-
-	    // httpData parsing is from jQuery 1.4
-	    function httpData(xhr, type, dataFilter) {
-
-	        var ct = xhr.getResponseHeader("content-type") || "",
-	        xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
-	        data = xml ? xhr.responseXML: xhr.responseText;
-
-	        if (xml && data.documentElement.nodeName === "parsererror") {
-	            throw "parsererror";
-	        }
-
-	        if (typeof dataFilter === 'function') {
-	            data = dataFilter(data, type);
-	        }
-
-	        // The filter can actually parse the response
-	        if (typeof data === "string") {
-	            // Get the JavaScript object, if JSON is used.
-	            if (type === "json" || !type && ct.indexOf("json") >= 0) {
-	                // Make sure the incoming data is actual JSON
-	                // Logic borrowed from http://json.org/json2.js
-	                if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
-
-	                    // Try to use the native JSON parser first
-	                    if (window.JSON && window.JSON.parse) {
-	                        data = window.JSON.parse(data);
-
-	                    } else {
-	                        data = ( new Function("return " + data) )();
-	                    }
-
-	                } else {
-	                    throw "Invalid JSON: " + data;
-	                }
-
-	                // If the type is "script", eval it in global context
-	            } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
-
-	                eval.call(window, data);
-	            }
-	        }
-
-	        return data;
 	    }
 
 	},
@@ -793,7 +804,7 @@ Simples.Selector = function(selector, context, results) {
 	results.selector = selector;
 	results.context = context || document;
 
-    if (typeof(selector) === 'string') {
+    if (typeof(selector) === STRING) {
         if (QUERY_SELECTOR && selector.indexOf('<') < 0) {
             results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
             return results;
@@ -822,7 +833,7 @@ Simples.Selector = function(selector, context, results) {
             results.push(document.createElement(tag[1]));
         } else {
             // clean up selector
-            // selector = selector.replace(TAG_STRIP, '');
+            // selector = selector.replace(TAG_STRIP, EMPTY_STRING);
             // get last id in selector
             var index = selector.lastIndexOf(FIRST_ID);
             selector = selector.substring(index > 0 ? index: 0);
@@ -880,7 +891,7 @@ function getElements(selector, context) {
             return nodes;
         }
     } else if (selector.indexOf('[name=') === 0) {
-        var name = selector.substring(6).replace(/\].*/, '');
+        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
         context = context && context.nodeType === 9 ? context: document;
         if (context.getElementsByName) {
             return slice.call(context.getElementsByName(name));
@@ -909,12 +920,13 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	SPECIAL_URL = /href|src|style/,
 	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
 	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i,
+	TAG_LIST = {'UL':'LI','DL':'DT','TR':'TD'},
 	QUOTE_MATCHER = /(["']?)/g;
 
 // private method - Borrowed from XUI project
 // Wraps the HTML in a TAG, Tag is optional. If the html starts with a Tag, it will wrap the context in that tag.
 function wrapHelper(xhtml, el) {
-	// insert into document fragment to ensure insert occurs without messing up order
+	// insert into documentFragment to ensure insert occurs without messing up order
 	if( xhtml.toString().indexOf("[object ") > -1 ){
 		if( xhtml && xhtml.length !== undefined ){
 			var docFrag = document.createDocumentFragment();
@@ -928,26 +940,26 @@ function wrapHelper(xhtml, el) {
 		return xhtml;
 	}
     var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
-    xhtml = "" + xhtml;
+    xhtml = EMPTY_STRING + xhtml;
     if ( VALID_ELEMENTS.test(xhtml) ) {
         result = VALID_ELEMENTS.exec(xhtml);
 		tag = result[1];
 
         // if the node has any attributes, convert to object
-        if (result[2] !== "") {
+        if (result[2] !== EMPTY_STRING) {
             attrList = result[2].split( SPLIT_ATTRIBUTE );
 
             for (var l=attrList.length; i < l; i++) {
                 attr = Simples.trim( attrList[i] );
-                if (attr !== "" && attr !== " ") {
+                if (attr !== EMPTY_STRING && attr !== " ") {
                     node = attr.split('=');
-                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, '');
+                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, EMPTY_STRING);
                 }
             }
         }
         xhtml = result[3];
     } else {
-		tag = (el.firstChild === null) ? {'UL':'LI','DL':'DT','TR':'TD'}[el.tagName] || el.tagName : el.firstChild.tagName;
+		tag = (el.firstChild === null) ? TAG_LIST[el.tagName] || el.tagName : el.firstChild.tagName;
 	}
 
     element = document.createElement(tag);
@@ -975,7 +987,7 @@ Simples.merge({
 
 					return html;
 				case "text" :
-					var str = "", elems = elem.childNodes;
+					var str = EMPTY_STRING, elems = elem.childNodes;
 					for ( var i = 0; elems[i]; i++ ) {
 						elem = elems[i];
 
@@ -1023,7 +1035,7 @@ Simples.merge({
 					        parent.replaceChild( el, elem );						
 						}
 						break;
-					case 'top' :
+					case TOP :
 						elem.insertBefore( wrapHelper(html, elem), elem.firstChild);
 						break;
 					case 'bottom' : 
@@ -1067,14 +1079,14 @@ Simples.merge({
 						html = html != null ? html : location;
 						var list, len, i = 0, testString = html.toString();
 						if ( testString.indexOf("[object ") === -1 ) {
-							elem.innerHTML = ""+html;
+							elem.innerHTML = EMPTY_STRING+html;
 							list = elem.getElementsByTagName('SCRIPT');
 							len = list.length;
 							for (; i < len; i++) {
 								eval(list[i].text);
 							}
 						} else if( testString.indexOf("[object ") > -1 ) {
-							elem.innerHTML = '';
+							elem.innerHTML = EMPTY_STRING;
 							elem.appendChild( wrapHelper( html, elem ) );
 						}					
 				}
@@ -1126,19 +1138,19 @@ Simples.merge({
 				elem.removeAttribute( name );
 			}
 		} else { 
-			if ( ( typeof value == ( 'function' || 'object' ) ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
+			if ( ( typeof value == ( FUNC || 'object' ) ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
 				return undefined;
 			}
 
 			if( name === "style" && !Simples.support.style ){
 				// get style correctly
-				elem.style.cssText = "" + value;
+				elem.style.cssText = EMPTY_STRING + value;
 			} else if ( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ) { 
 				// These attributes don't require special treatment 
-				elem[ name ] = ""+value;
+				elem[ name ] = EMPTY_STRING+value;
 			} else { 
 				// it must be this
-				elem.setAttribute(name, ""+value);
+				elem.setAttribute(name, EMPTY_STRING+value);
 			}
 		}
 	}
@@ -1150,7 +1162,7 @@ Simples.extend({
 		if ( arguments.length === 0 || ( arguments.length === 1 && SINGLE_ARG_READ.test( location ) ) ) {
 			return Simples.domRead( this[0], location );
 		}
-		location = location != null ? location : "";
+		location = location != null ? location : EMPTY_STRING;
 
 		var c=0,i=0,l=this.length, results;
 		while(i<l){
@@ -1227,7 +1239,8 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	RCAPITALISE = /\b(\w)(\w)\b/g,
 	RNUMPX = /^-?d+(?:px)?$/i,
 	RNUM = /^-?d/,
-	
+	WIDTH = "width",
+	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
 	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
 	// normalize float css property
@@ -1264,8 +1277,8 @@ Simples.merge({
 		}
 
 		function returnWidthHeight( elem, name, extra ) {
-			var which = name === "width" ? cssWidth : cssHeight, 
-				val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
+			var which = name === WIDTH ? cssWidth : cssHeight, 
+				val = name === WIDTH ? elem.offsetWidth : elem.offsetHeight;
 
 			if ( extra === "border" ) {
 				return val;
@@ -1307,18 +1320,18 @@ Simples.merge({
         
 		return function( elem, type, extra ){
             if( elem && RWIDTH_HEIGHT.test( type ) ){
-				if( type === "width" || type === "height" ){
+				if( type === WIDTH || type === HEIGHT ){ 
 					// Get window width or height
 					// does it walk and quack like a window?
 					if( "scrollTo" in elem && elem.document ){
-						var client = "client" + type.replace( RCAPITALISE, fcapitalise );
+						var client = "client" + ( type === WIDTH ) ? "Width" : "Height";
 						// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
 						return elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ client ] || elem.document.body[ client ];
 				
 					// Get document width or height
 					// is it a document
 					} else if( elem.nodeType === 9 ){
-						var name = type.replace( RCAPITALISE, fcapitalise ),
+						var name = ( type === WIDTH ) ? "Width" : "Height",
 							scroll = "scroll" + name, 
 							offset = "offset" + name;
 				
@@ -1332,14 +1345,14 @@ Simples.merge({
 						return getWidthHeight( elem, type );
 					}
 				} else if( type === "innerHeight" || type === "innerWidth" ){
-					type = type === "innerHeight" ? "height" : "width";
+					type = type === "innerHeight" ? HEIGHT : WIDTH;
 					return getWidthHeight( elem, type, "padding" );
 				} else if( type === "outerHeight" || type === "outerWidth" ){
-					type = type === "outerHeight" ? "height" : "width";
+					type = type === "outerHeight" ? HEIGHT : WIDTH;
 					return getWidthHeight( elem, type, extra ? "margin" : "border" );
 				}
 				return null;
-			} else if( elem && ( type === "top" || type === "left" ) ){
+			} else if( elem && ( type === TOP || type === LEFT ) ){
 				// shortcut to prevent the instantiation of another Simples object
 				return Simples.prototype.offset.call( [ elem ] )[ type ];
 			}
@@ -1353,10 +1366,10 @@ Simples.merge({
 	    var ret, style = elem.style, filter;
 
 	    // IE uses filters for opacity
-	    if (!Simples.support.opacity && name === "opacity" && elem.currentStyle) {
+	    if (!Simples.support.opacity && name === OPACITY && elem.currentStyle) {
 
-	        ret = ROPACITY.test(elem.currentStyle.filter || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
-	        return ret === "" ? "1": ret;
+	        ret = ROPACITY.test(elem.currentStyle.filter || EMPTY_STRING) ? (parseFloat(RegExp.$1) / 100) + EMPTY_STRING: EMPTY_STRING;
+	        return ret === EMPTY_STRING ? "1": ret;
 	    }
 
 	    // Make sure we're using the right name for getting the float value
@@ -1389,7 +1402,7 @@ Simples.merge({
 	        }
 
 	        // We should always get a number back from opacity
-	        if (name === "opacity" && ret === "") {
+	        if (name === OPACITY && ret === EMPTY_STRING) {
 	            ret = "1";
 	        }
 
@@ -1428,7 +1441,7 @@ Simples.merge({
 		}
 
 		// ignore negative width and height values #1599
-		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
 
@@ -1439,19 +1452,19 @@ Simples.merge({
 		var style = elem.style || elem, set = value !== undefined;
 
 		// IE uses filters for opacity
-		if ( !Simples.support.opacity && name === "opacity" ) {
+		if ( !Simples.support.opacity && name === OPACITY ) {
 			if ( set ) {
 				// IE has trouble with opacity if it does not have layout
 				// Force it by setting the zoom level
 				style.zoom = 1;
 
 				// Set the alpha filter to set the opacity
-				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + value * 100 + ")";
-				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || "";
+				var opacity = parseInt( value, 10 ) + EMPTY_STRING === "NaN" ? EMPTY_STRING : "alpha(opacity=" + value * 100 + ")";
+				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || EMPTY_STRING;
 				style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
 			}
 
-			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + "":"";
+			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + EMPTY_STRING:EMPTY_STRING;
 		}
 
 		// Make sure we're using the right name for getting the float value
@@ -1478,12 +1491,12 @@ Simples.extend({
 		}
 	},
 	css : function( name, value ){ 
-		if( value === undefined && typeof name === 'string' ){
+		if( value === undefined && typeof name === STRING ){
 			return Simples.currentCSS( this[0], name );  
 		}
 
 		// ignore negative width and height values #1599
-		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
 		
@@ -1783,7 +1796,7 @@ Simples.Events = {
 
 Simples.extend({
 	bind : function( type, callback ){
-		if( typeof type === "string" && ( callback === false || toString.call( callback ) === FunctionClass ) ){
+		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
 			var attach = Simples.Events.attach,i=0,l=this.length;
 			while(i<l){
@@ -1803,7 +1816,7 @@ Simples.extend({
 		return this;
 	}, 
 	trigger : function( type, data ){
-		if( typeof type === "string"){ 
+		if( typeof type === STRING){ 
 			// Loop over elements
 			var trigger = Simples.Events.trigger,i=0,l=this.length;
 			while(i<l){
@@ -1921,7 +1934,7 @@ Simples.offset.init = function(){
 
 	// safari subtracts parent border width here which is 5px
 	this.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
-	checkDiv.style.position = checkDiv.style.top = "";
+	checkDiv.style.position = checkDiv.style.top = EMPTY_STRING;
 
 	innerDiv.style.overflow = "hidden";
 	innerDiv.style.position = "relative";
@@ -1959,8 +1972,8 @@ Simples.merge({
 
 		var curElem    = Simples( elem ),
 			curOffset  = curElem.offset(),
-			curCSSTop  = Simples.currentCSS( elem, "top", true ),
-			curCSSLeft = Simples.currentCSS( elem, "left", true ),
+			curCSSTop  = Simples.currentCSS( elem, TOP, true ),
+			curCSSLeft = Simples.currentCSS( elem, LEFT, true ),
 			calculatePosition = (position === "absolute" && (curCSSTop === 'auto' || curCSSLeft === 'auto' ) ),
 			props = {}, curPosition = {}, curTop, curLeft;
 
@@ -2022,21 +2035,21 @@ Simples.merge({
 
 		if ( win ) {
 			win.scrollTo(
-				name === "left" ? val : Simples.getScroll( win, "left" ),
-				name === "top" ? val : Simples.getScroll( win, "top" )
+				name === LEFT ? val : Simples.getScroll( win, LEFT ),
+				name === TOP ? val : Simples.getScroll( win, TOP )
 			);
 
 		} else {
-			name = name === "top" ? "scrollTop" : "scrollLeft";
+			name = name === TOP ? "scrollTop" : "scrollLeft";
 			elem[ name ] = val;
 		}
 	},
 	getScroll : function( elem, name ){
-		name = name === "top" ? "scrollTop" : "scrollLeft";
+		name = name === TOP ? "scrollTop" : "scrollLeft";
 		win = getWindow( elem );
 
 		// Return the scroll offset
-		return win ? ( ("pageXOffset" in win) ? win[ name === "top" ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
+		return win ? ( ("pageXOffset" in win) ? win[ name === TOP ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
 	}
 });
 
@@ -2116,7 +2129,7 @@ Simples.Animation = {
 	create : function( elem, setStyle, opts ){
 		opts = opts || {};
 		if ( !( elem && elem.nodeType ) || Simples.isEmptyObject( setStyle ) ) {
-			if (typeof opts.callback === "function") {
+			if (typeof opts.callback === FUNC) {
 				opts.callback.call(elem);
 			}
 			return null;
@@ -2125,9 +2138,9 @@ Simples.Animation = {
 		var anim = {
 			0 : elem,
 			id : Simples.Animation.guid++,
-			callback : ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop,
+			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
 			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
-			tween : ( typeof opts.tween === "function" ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
+			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
 			start : {},
 			finish : {}
 		};
@@ -2135,11 +2148,11 @@ Simples.Animation = {
 		// check for supported css animated features and prep for animation
 		for( var key in setStyle ){
 			var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
-				opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
+				opacity = ( cKey === OPACITY && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 			if( opacity || Simples.Animation.allowTypes.test( cKey ) ){
-				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
-				anim.finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
 			}                                        
 		}
 
