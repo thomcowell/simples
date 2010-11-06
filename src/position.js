@@ -240,6 +240,7 @@ Simples.extend({
 			while( len ){
 				Simples.setOffset( this[ --len ], options );
 			}
+			return this;
 		}
 
 		return this[0] ? Simples.offset( this[0] ) : null;
@@ -257,6 +258,7 @@ Simples.extend({
 			while( len ){
 				Simples.setScroll( this[ --len ], name, val );
 			}
+			return this;
 		}
 		return this[0] ? Simples.getScroll( this[0], name ) : null;
 	},
