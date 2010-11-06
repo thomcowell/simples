@@ -32,7 +32,7 @@ Simples.Animation = {
 	create : function( elem, setStyle, opts ){
 		opts = opts || {};
 		if ( !( elem && elem.nodeType ) || Simples.isEmptyObject( setStyle ) ) {
-			if (typeof opts.callback === "function") {
+			if (typeof opts.callback === FUNC) {
 				opts.callback.call(elem);
 			}
 			return null;
@@ -41,9 +41,9 @@ Simples.Animation = {
 		var anim = {
 			0 : elem,
 			id : Simples.Animation.guid++,
-			callback : ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop,
+			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
 			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
-			tween : ( typeof opts.tween === "function" ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
+			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
 			start : {},
 			finish : {}
 		};
@@ -51,11 +51,11 @@ Simples.Animation = {
 		// check for supported css animated features and prep for animation
 		for( var key in setStyle ){
 			var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
-				opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
+				opacity = ( cKey === OPACITY && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 			if( opacity || Simples.Animation.allowTypes.test( cKey ) ){
-				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
-				anim.finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
 			}                                        
 		}
 

@@ -13,7 +13,7 @@ function canDoData( elem ){
 
 Simples.merge({
 	data : function( elem, key, value ){
-		if ( canDoData( elem ) && ( key === undefined || typeof key === "string" ) ) {
+		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
 			if( key && value !== undefined ){
 				if( value !== null ){
@@ -60,7 +60,7 @@ Simples.merge({
 
 Simples.extend({
 	data : function( key, value ){   
-		if( typeof key === 'string' ){
+		if( typeof key === STRING ){
 			if( value !== undefined ){
 				this.each(function(){
 					Simples.data( this, key, value );

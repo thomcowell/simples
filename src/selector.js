@@ -15,7 +15,7 @@ Simples.Selector = function(selector, context, results) {
 	results.selector = selector;
 	results.context = context || document;
 
-    if (typeof(selector) === 'string') {
+    if (typeof(selector) === STRING) {
         if (QUERY_SELECTOR && selector.indexOf('<') < 0) {
             results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
             return results;
@@ -44,7 +44,7 @@ Simples.Selector = function(selector, context, results) {
             results.push(document.createElement(tag[1]));
         } else {
             // clean up selector
-            // selector = selector.replace(TAG_STRIP, '');
+            // selector = selector.replace(TAG_STRIP, EMPTY_STRING);
             // get last id in selector
             var index = selector.lastIndexOf(FIRST_ID);
             selector = selector.substring(index > 0 ? index: 0);
@@ -102,7 +102,7 @@ function getElements(selector, context) {
             return nodes;
         }
     } else if (selector.indexOf('[name=') === 0) {
-        var name = selector.substring(6).replace(/\].*/, '');
+        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
         context = context && context.nodeType === 9 ? context: document;
         if (context.getElementsByName) {
             return slice.call(context.getElementsByName(name));

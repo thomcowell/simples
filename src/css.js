@@ -8,7 +8,8 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	RCAPITALISE = /\b(\w)(\w)\b/g,
 	RNUMPX = /^-?d+(?:px)?$/i,
 	RNUM = /^-?d/,
-	
+	WIDTH = "width",
+	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
 	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
 	// normalize float css property
@@ -45,8 +46,8 @@ Simples.merge({
 		}
 
 		function returnWidthHeight( elem, name, extra ) {
-			var which = name === "width" ? cssWidth : cssHeight, 
-				val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
+			var which = name === WIDTH ? cssWidth : cssHeight, 
+				val = name === WIDTH ? elem.offsetWidth : elem.offsetHeight;
 
 			if ( extra === "border" ) {
 				return val;
@@ -88,18 +89,18 @@ Simples.merge({
         
 		return function( elem, type, extra ){
             if( elem && RWIDTH_HEIGHT.test( type ) ){
-				if( type === "width" || type === "height" ){
+				if( type === WIDTH || type === HEIGHT ){ 
 					// Get window width or height
 					// does it walk and quack like a window?
 					if( "scrollTo" in elem && elem.document ){
-						var client = "client" + type.replace( RCAPITALISE, fcapitalise );
+						var client = "client" + ( type === WIDTH ) ? "Width" : "Height";
 						// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
 						return elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ client ] || elem.document.body[ client ];
 				
 					// Get document width or height
 					// is it a document
 					} else if( elem.nodeType === 9 ){
-						var name = type.replace( RCAPITALISE, fcapitalise ),
+						var name = ( type === WIDTH ) ? "Width" : "Height",
 							scroll = "scroll" + name, 
 							offset = "offset" + name;
 				
@@ -113,14 +114,14 @@ Simples.merge({
 						return getWidthHeight( elem, type );
 					}
 				} else if( type === "innerHeight" || type === "innerWidth" ){
-					type = type === "innerHeight" ? "height" : "width";
+					type = type === "innerHeight" ? HEIGHT : WIDTH;
 					return getWidthHeight( elem, type, "padding" );
 				} else if( type === "outerHeight" || type === "outerWidth" ){
-					type = type === "outerHeight" ? "height" : "width";
+					type = type === "outerHeight" ? HEIGHT : WIDTH;
 					return getWidthHeight( elem, type, extra ? "margin" : "border" );
 				}
 				return null;
-			} else if( elem && ( type === "top" || type === "left" ) ){
+			} else if( elem && ( type === TOP || type === LEFT ) ){
 				// shortcut to prevent the instantiation of another Simples object
 				return Simples.prototype.offset.call( [ elem ] )[ type ];
 			}
@@ -134,10 +135,10 @@ Simples.merge({
 	    var ret, style = elem.style, filter;
 
 	    // IE uses filters for opacity
-	    if (!Simples.support.opacity && name === "opacity" && elem.currentStyle) {
+	    if (!Simples.support.opacity && name === OPACITY && elem.currentStyle) {
 
-	        ret = ROPACITY.test(elem.currentStyle.filter || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
-	        return ret === "" ? "1": ret;
+	        ret = ROPACITY.test(elem.currentStyle.filter || EMPTY_STRING) ? (parseFloat(RegExp.$1) / 100) + EMPTY_STRING: EMPTY_STRING;
+	        return ret === EMPTY_STRING ? "1": ret;
 	    }
 
 	    // Make sure we're using the right name for getting the float value
@@ -170,7 +171,7 @@ Simples.merge({
 	        }
 
 	        // We should always get a number back from opacity
-	        if (name === "opacity" && ret === "") {
+	        if (name === OPACITY && ret === EMPTY_STRING) {
 	            ret = "1";
 	        }
 
@@ -209,7 +210,7 @@ Simples.merge({
 		}
 
 		// ignore negative width and height values #1599
-		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
 
@@ -220,19 +221,19 @@ Simples.merge({
 		var style = elem.style || elem, set = value !== undefined;
 
 		// IE uses filters for opacity
-		if ( !Simples.support.opacity && name === "opacity" ) {
+		if ( !Simples.support.opacity && name === OPACITY ) {
 			if ( set ) {
 				// IE has trouble with opacity if it does not have layout
 				// Force it by setting the zoom level
 				style.zoom = 1;
 
 				// Set the alpha filter to set the opacity
-				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + value * 100 + ")";
-				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || "";
+				var opacity = parseInt( value, 10 ) + EMPTY_STRING === "NaN" ? EMPTY_STRING : "alpha(opacity=" + value * 100 + ")";
+				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || EMPTY_STRING;
 				style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
 			}
 
-			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + "":"";
+			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + EMPTY_STRING:EMPTY_STRING;
 		}
 
 		// Make sure we're using the right name for getting the float value
@@ -259,12 +260,12 @@ Simples.extend({
 		}
 	},
 	css : function( name, value ){ 
-		if( value === undefined && typeof name === 'string' ){
+		if( value === undefined && typeof name === STRING ){
 			return Simples.currentCSS( this[0], name );  
 		}
 
 		// ignore negative width and height values #1599
-		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
 		

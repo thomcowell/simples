@@ -105,7 +105,7 @@ Simples.offset.init = function(){
 
 	// safari subtracts parent border width here which is 5px
 	this.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
-	checkDiv.style.position = checkDiv.style.top = "";
+	checkDiv.style.position = checkDiv.style.top = EMPTY_STRING;
 
 	innerDiv.style.overflow = "hidden";
 	innerDiv.style.position = "relative";
@@ -143,8 +143,8 @@ Simples.merge({
 
 		var curElem    = Simples( elem ),
 			curOffset  = curElem.offset(),
-			curCSSTop  = Simples.currentCSS( elem, "top", true ),
-			curCSSLeft = Simples.currentCSS( elem, "left", true ),
+			curCSSTop  = Simples.currentCSS( elem, TOP, true ),
+			curCSSLeft = Simples.currentCSS( elem, LEFT, true ),
 			calculatePosition = (position === "absolute" && (curCSSTop === 'auto' || curCSSLeft === 'auto' ) ),
 			props = {}, curPosition = {}, curTop, curLeft;
 
@@ -206,21 +206,21 @@ Simples.merge({
 
 		if ( win ) {
 			win.scrollTo(
-				name === "left" ? val : Simples.getScroll( win, "left" ),
-				name === "top" ? val : Simples.getScroll( win, "top" )
+				name === LEFT ? val : Simples.getScroll( win, LEFT ),
+				name === TOP ? val : Simples.getScroll( win, TOP )
 			);
 
 		} else {
-			name = name === "top" ? "scrollTop" : "scrollLeft";
+			name = name === TOP ? "scrollTop" : "scrollLeft";
 			elem[ name ] = val;
 		}
 	},
 	getScroll : function( elem, name ){
-		name = name === "top" ? "scrollTop" : "scrollLeft";
+		name = name === TOP ? "scrollTop" : "scrollLeft";
 		win = getWindow( elem );
 
 		// Return the scroll offset
-		return win ? ( ("pageXOffset" in win) ? win[ name === "top" ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
+		return win ? ( ("pageXOffset" in win) ? win[ name === TOP ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
 	}
 });
 

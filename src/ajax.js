@@ -14,15 +14,17 @@ AJAX_IS_JSON = /^[\],:{}\s]*$/,
 AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
 AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
+LAST_AMP = /&$/,
+PARSEERROR = "parsererror",
 TYPEOF = /number|string/;
 
 var ActiveAjaxRequests = 0;
 
 function formatData(name, value) {
 
-    var str = "";
+    var str = EMPTY_STRING;
 
-    if (typeof name === 'string') {
+    if (typeof name === STRING) {
         var objClass = toString.call(value);
 		if (objClass === FunctionClass) {
 
@@ -46,6 +48,72 @@ function formatData(name, value) {
 		}
     }
     return str;
+}
+
+// Determine the success of the HTTP response
+function httpSuccess(xhr) {
+    try {
+        // If no server status is provided, and we're actually
+        // requesting a local file, then it was successful
+        return ! xhr.status && location.protocol == "file:" ||
+
+        // Any status in the 200 range is good
+        (xhr.status >= 200 && xhr.status < 300) ||
+
+        // Successful if the document has not been modified
+        xhr.status == 304 ||
+
+        // Safari returns an empty status if the file has not been modified
+        navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
+    } catch(e) {}
+
+    // If checking the status failed, then assume that the request failed too
+    return false;
+}
+
+// httpData parsing is from jQuery 1.4
+function httpData(xhr, type, dataFilter) {
+
+    var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
+    xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
+    data = xml ? xhr.responseXML: xhr.responseText;
+
+    if (xml && data.documentElement.nodeName === PARSEERROR) {
+        throw PARSEERROR;
+    }
+
+    if (typeof dataFilter === FUNC) {
+        data = dataFilter(data, type);
+    }
+
+    // The filter can actually parse the response
+    if (typeof data === STRING) {
+        // Get the JavaScript object, if JSON is used.
+        if (type === "json" || !type && ct.indexOf("json") >= 0) {
+            // Make sure the incoming data is actual JSON
+            // Logic borrowed from http://json.org/json2.js
+            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, EMPTY_STRING))) {
+
+                // Try to use the native JSON parser first
+                if (window.JSON && window.JSON.parse) {
+                    data = window.JSON.parse(data);
+
+                } else {
+                    data = ( new Function("return " + data) )();
+                }
+
+            } else {
+                throw "Invalid JSON: " + data;
+            }
+
+            // If the type is "script", eval it in global context
+        } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
+
+            eval.call(window, data);
+        }
+    }
+
+    return data;
 }
 
 Simples.merge({
@@ -102,9 +170,9 @@ Simples.merge({
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 	        if ( options.data ) {
-	            options.data = Simples.params(options.data).replace(/&$/, '');
+	            options.data = Simples.params(options.data).replace( LAST_AMP, EMPTY_STRING);
 
-	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === 'string') {
+	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === STRING) {
 	                options.data += ("&" + Simples.params(options.additionalData));
 	            }
 	        }
@@ -133,7 +201,7 @@ Simples.merge({
 	                try {
 	                    data = httpData(xhr, options.dataType);
 	                } catch(e) {
-	                    options.error(xhr, 'parseerror');
+	                    options.error(xhr, PARSEERROR);
 	                }
 
 	                options.success(data, 'success');
@@ -173,72 +241,6 @@ Simples.merge({
 	    // non-async requests
 	    if (!options.async) {
 	        onreadystatechange();
-	    }
-
-	    // Determine the success of the HTTP response
-	    function httpSuccess(xhr) {
-	        try {
-	            // If no server status is provided, and we're actually
-	            // requesting a local file, then it was successful
-	            return ! xhr.status && location.protocol == "file:" ||
-
-	            // Any status in the 200 range is good
-	            (xhr.status >= 200 && xhr.status < 300) ||
-
-	            // Successful if the document has not been modified
-	            xhr.status == 304 ||
-
-	            // Safari returns an empty status if the file has not been modified
-	            navigator.userAgent.indexOf("Safari") >= 0 && typeof xhr.status == "undefined";
-	        } catch(e) {}
-
-	        // If checking the status failed, then assume that the request failed too
-	        return false;
-	    }
-
-	    // httpData parsing is from jQuery 1.4
-	    function httpData(xhr, type, dataFilter) {
-
-	        var ct = xhr.getResponseHeader("content-type") || "",
-	        xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
-	        data = xml ? xhr.responseXML: xhr.responseText;
-
-	        if (xml && data.documentElement.nodeName === "parsererror") {
-	            throw "parsererror";
-	        }
-
-	        if (typeof dataFilter === 'function') {
-	            data = dataFilter(data, type);
-	        }
-
-	        // The filter can actually parse the response
-	        if (typeof data === "string") {
-	            // Get the JavaScript object, if JSON is used.
-	            if (type === "json" || !type && ct.indexOf("json") >= 0) {
-	                // Make sure the incoming data is actual JSON
-	                // Logic borrowed from http://json.org/json2.js
-	                if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
-
-	                    // Try to use the native JSON parser first
-	                    if (window.JSON && window.JSON.parse) {
-	                        data = window.JSON.parse(data);
-
-	                    } else {
-	                        data = ( new Function("return " + data) )();
-	                    }
-
-	                } else {
-	                    throw "Invalid JSON: " + data;
-	                }
-
-	                // If the type is "script", eval it in global context
-	            } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
-
-	                eval.call(window, data);
-	            }
-	        }
-
-	        return data;
 	    }
 
 	},
