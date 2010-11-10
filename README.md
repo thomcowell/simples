@@ -1,4 +1,4 @@
-[simples](http://simplejs.eightsquarestudio.com/) - Simple Javascript Handler
+[simples](http://simples.eightsquarestudio.com/) - Simple Javascript Handler
 ================================
 
 What you need to build your own Simples
@@ -49,5 +49,4 @@ OR
 `ant PREFIX=~/www/ docs`
 
 If you have any questions, please feel free to ask them on the Simples
-mailing list, which can be found here:  
-[http://simplejs.eightsquarestudio.com/wiki](http://simplejs.eightsquarestudio.com/wiki)
+mailing list.
