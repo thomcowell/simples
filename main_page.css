@@ -1,34 +1,55 @@
 html {
-	font: 1.2em/1.6em "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	font: 1.1em/1.5em "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
 	color: #333;
 	margin: 0;
 	padding: 0;
 }
 body {
-	padding: 20px;
+	padding: 0 40px;
 	margin: 0;
+	position: relative;
 }
 header {
-	padding: 20px;
-	margin: -20px;
+	padding: 10px 40px;
+	margin: 0 -40px 20px;
 	display: block;
 	width: 100%;
+	background: #ffcc00;
 	border-bottom: #999 1px solid;
-	-webkit-box-shadow: 0px 5px 5px #ccc;
-	-moz-box-shadow: 0px 5px 5px #ccc;
-	box-shadow: 0px 5px 5px #ccc;
-}
-h1 {
-	margin:0;
-	font-size: 1.6em;
-	line-height: 2.0em;
+	-webkit-box-shadow: 0px 5px 5px #666;
+	-moz-box-shadow: 0px 5px 5px #666;
+	box-shadow: 0px 5px 5px #666;
+	z-index: 20;
+	height: 114px;
 }
 h1 span {
-	font-size: 0.6em;
-	line-height: 1em;
-	vertical-align: top;
-	top: 1.2em;
+	margin: 10px 0 0;
+	padding: 0;
+	font-size: 3em;
+	line-height: 1.6em;
+}
+h1 {
+	font-size: 1em;
+	line-height: 1.2em;
 	position: relative;
+}
+section {
+	float: left;
+	margin-right: 320px;
+}
+section#navigation {
+	position: absolute;
+	right: 0;
+	margin-top: 0;
+	width: 300px;
+	margin-right: 0;
+}
+section p {
+	display: block;
+}
+section ul {
+	list-style: none;
+	padding: 5px 0 0 10px;
 }
 a {
 	color: #666;
