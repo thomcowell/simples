@@ -5,25 +5,31 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	RFLOAT = /float/i,
 	RDASH_ALPHA = /-([a-z])/ig,
 	RUPPER = /([A-Z])/g,
+	RCAPITALISE = /\b(\w)(\w)\b/g,
 	RNUMPX = /^-?d+(?:px)?$/i,
-	RNUM = /^-?d/,                  
-	
-	cssShow = { position: "absolute", visibility: "hidden", display:"block" },
-	cssWidth = [ "Left", "Right" ],
-	cssHeight = [ "Top", "Bottom" ],
-	
+	RNUM = /^-?d/,
+	WIDTH = "width",
+	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
 	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
 	// normalize float css property
 	fcamelCase = function( all, letter ) {
 		return letter.toUpperCase();
-	},	
+	},
+	fcapitalise = function( all, first, rest ){
+		return first.toUpperCase() + rest.toLowerCase();
+	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
 // Create innerHeight, innerWidth, outerHeight and outerWidth methods
 
 Simples.merge({
-	getWidthHeight : (function( Simples ){
+	getStyle : (function( Simples ){
+
+        var RWIDTH_HEIGHT = /width|height/i,
+			cssShow = { position: "absolute", visibility: "hidden", display:"block" },
+			cssWidth = [ "Left", "Right" ],
+			cssHeight = [ "Top", "Bottom" ];
 
 		function getWidthHeight( elem, name, extra ){
 			var val;
@@ -40,8 +46,8 @@ Simples.merge({
 		}
 
 		function returnWidthHeight( elem, name, extra ) {
-			var which = name === "width" ? cssWidth : cssHeight, 
-				val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
+			var which = name === WIDTH ? cssWidth : cssHeight, 
+				val = name === WIDTH ? elem.offsetWidth : elem.offsetHeight;
 
 			if ( extra === "border" ) {
 				return val;
@@ -80,57 +86,48 @@ Simples.merge({
 				elem.style[ name ] = old[ name ];
 			}	
 		}
-
-		var _dimensions_ = [ "Height", "Width" ]; 
-
-		function setUpWidthAndHeight( name ){
-			var type = name.toLowerCase();
-
-			// innerHeight and innerWidth
-			Simples.prototype["inner" + name] = function() {
-				return this[0] ? getWidthHeight( this[0], type, "padding" ) : null;
-			};
-
-			// outerHeight and outerWidth
-			Simples.prototype["outer" + name] = function( margin ) {
-				return this[0] ? getWidthHeight( this[0], type, margin ? "margin" : "border" ) : null;
-			};
-
-			Simples.prototype[ type ] = function( size ) {
-				// Get window width or height
-				var elem = this[0];
-				if ( !elem ) {
-					return size == null ? null : this;
-				}
-
-				return ("scrollTo" in elem && elem.document) ? // does it walk and quack like a window?
-					// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
-					elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ "client" + name ] ||
-					elem.document.body[ "client" + name ] :
-
+        
+		return function( elem, type, extra ){
+            if( elem && RWIDTH_HEIGHT.test( type ) ){
+				if( type === WIDTH || type === HEIGHT ){ 
+					// Get window width or height
+					// does it walk and quack like a window?
+					if( "scrollTo" in elem && elem.document ){
+						var client = "client" + ( type === WIDTH ) ? "Width" : "Height";
+						// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
+						return elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ client ] || elem.document.body[ client ];
+				
 					// Get document width or height
-					(elem.nodeType === 9) ? // is it a document
+					// is it a document
+					} else if( elem.nodeType === 9 ){
+						var name = ( type === WIDTH ) ? "Width" : "Height",
+							scroll = "scroll" + name, 
+							offset = "offset" + name;
+				
 						// Either scroll[Width/Height] or offset[Width/Height], whichever is greater
-						Math.max(
-							elem.documentElement["client" + name],
-							elem.body["scroll" + name], elem.documentElement["scroll" + name],
-							elem.body["offset" + name], elem.documentElement["offset" + name]
-						) :
+						return Math.max(
+							elem.documentElement[ "client" + name ],
+							elem.body[ scroll ], elem.documentElement[ scroll ],
+							elem.body[ offset ], elem.documentElement[ offset ]
+						);
+					} else {
+						return getWidthHeight( elem, type );
+					}
+				} else if( type === "innerHeight" || type === "innerWidth" ){
+					type = type === "innerHeight" ? HEIGHT : WIDTH;
+					return getWidthHeight( elem, type, "padding" );
+				} else if( type === "outerHeight" || type === "outerWidth" ){
+					type = type === "outerHeight" ? HEIGHT : WIDTH;
+					return getWidthHeight( elem, type, extra ? "margin" : "border" );
+				}
+				return null;
+			} else if( elem && ( type === TOP || type === LEFT ) ){
+				// shortcut to prevent the instantiation of another Simples object
+				return Simples.prototype.offset.call( [ elem ] )[ type ];
+			}
 
-						// Get or set width or height on the element
-						size === undefined ?
-							// Get width or height on the element
-							getWidthHeight( elem, type ) : 
-							// Set the width or height on the element (default to pixels if value is unitless)
-							this.css( type, typeof size === "string" ? size : size + "px" );
-			};		
-		}
-
-		for(var i=0,l=_dimensions_.length;i<l;i++){
-		    setUpWidthAndHeight( _dimensions_[i] );
-		}
-
-		return getWidthHeight;
+			return Simples.currentCSS( elem, type, extra );
+		};
 
 	})( Simples ),
 	currentCSS : function(elem, name, extra) {
@@ -138,10 +135,10 @@ Simples.merge({
 	    var ret, style = elem.style, filter;
 
 	    // IE uses filters for opacity
-	    if (!Simples.support.opacity && name === "opacity" && elem.currentStyle) {
+	    if (!Simples.support.opacity && name === OPACITY && elem.currentStyle) {
 
-	        ret = ROPACITY.test(elem.currentStyle.filter || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
-	        return ret === "" ? "1": ret;
+	        ret = ROPACITY.test(elem.currentStyle.filter || EMPTY_STRING) ? (parseFloat(RegExp.$1) / 100) + EMPTY_STRING: EMPTY_STRING;
+	        return ret === EMPTY_STRING ? "1": ret;
 	    }
 
 	    // Make sure we're using the right name for getting the float value
@@ -174,7 +171,7 @@ Simples.merge({
 	        }
 
 	        // We should always get a number back from opacity
-	        if (name === "opacity" && ret === "") {
+	        if (name === OPACITY && ret === EMPTY_STRING) {
 	            ret = "1";
 	        }
 
@@ -213,7 +210,7 @@ Simples.merge({
 		}
 
 		// ignore negative width and height values #1599
-		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
 
@@ -224,19 +221,19 @@ Simples.merge({
 		var style = elem.style || elem, set = value !== undefined;
 
 		// IE uses filters for opacity
-		if ( !Simples.support.opacity && name === "opacity" ) {
+		if ( !Simples.support.opacity && name === OPACITY ) {
 			if ( set ) {
 				// IE has trouble with opacity if it does not have layout
 				// Force it by setting the zoom level
 				style.zoom = 1;
 
 				// Set the alpha filter to set the opacity
-				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + value * 100 + ")";
-				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || "";
+				var opacity = parseInt( value, 10 ) + EMPTY_STRING === "NaN" ? EMPTY_STRING : "alpha(opacity=" + value * 100 + ")";
+				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || EMPTY_STRING;
 				style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
 			}
 
-			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + "":"";
+			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + EMPTY_STRING:EMPTY_STRING;
 		}
 
 		// Make sure we're using the right name for getting the float value
@@ -250,29 +247,25 @@ Simples.merge({
 			style[ name ] = value;
 		}
 
-		return style[ name ]; 
-	},
-	getStyle : function( elem, name, extra ){
-
-		if( name === "width" || name === "height" ){
-			return Simples.getWidthHeight( elem, name, extra );
-		} else if( name === "top" || name === "left" ){   
-			// shortcut to prevent the instantiation of another Simples object
-			return Simples.prototype.offset.call( [ elem ] )[ name ];
-		}
-
-		return Simples.currentCSS( elem, name, extra );	
+		return style[ name ];
 	}
 });
 
 Simples.extend({
+	style : function( type, extra ){
+		if( !extra || typeof extra === "boolean" ){
+			return this[0] ? Simples.getStyle( this[0], type, extra ) : null;
+		} else {
+			return this.css( type, extra );
+		}
+	},
 	css : function( name, value ){ 
-		if( value === undefined && typeof name === 'string' ){
+		if( value === undefined && typeof name === STRING ){
 			return Simples.currentCSS( this[0], name );  
 		}
 
 		// ignore negative width and height values #1599
-		if ( (name === "width" || name === "height") && parseFloat(value) < 0 ) {
+		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
 			value = undefined;
 		}
 		
@@ -285,22 +278,6 @@ Simples.extend({
 		} else if( nameClass === ObjectClass ) {
 			for( var key in name ){
 				this.css( key, name[ key ] );
-			}
-		}
-		return this;
-	},
-	show : function(){
-		for( var i=0,l=this.length;i<l;i++){
-			if ( this[i].style ) {
-				this[i].style.display = "block";
-			}
-		}
-		return this;
-	},
-	hide : function(){
-		for( var i=0,l=this.length;i<l;i++){
-			if ( this[i].style ) {
-				this[i].style.display = "none";
 			}
 		}
 		return this;

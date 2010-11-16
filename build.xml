@@ -5,10 +5,14 @@
 	
     <property description="Folder for simples and min target" name="dist" value="./dist" />
     <property description="Folder for simples src" name="src" value="./src" />
+	
+	<tstamp>
+	      <format property="current.year" pattern="yyyy"/>
+	</tstamp> 
 
     <property name="SIMPLE" value="${dist}/simples.js" />
     <property name="SIMPLE_MIN" value="${dist}/simples.min.js" />
-	
+	   
 	<available property="qunit" file="test/qunit" />
 	
 	<target name="qunit-clone" unless="qunit">
@@ -29,11 +33,19 @@
         <echo message="Building ${SIMPLE}" />
         <mkdir dir="${dist}" /> 
 		
+		<delete dir="${dist}"/>
+		<mkdir dir="${dist}"/>
+
+		<exec executable="git" outputproperty="last.commit">
+			<arg line="log -1 --pretty='%cd'"/>
+		</exec>
+		
         <concat destfile="${SIMPLE}" fixlastline="yes"> 
 			<filelist dir="${src}" files="${filelist}"/>
         </concat>
     	<replaceregexp match="@VERSION" replace="${version}" flags="g" byline="true" file="${SIMPLE}" />
-		<replaceregexp match="Date: " replace="Date: ${date}" file="${SIMPLE}" />
+		<replaceregexp match="@CURRENT_YEAR" replace="${current.year}" flags="g" byline="true" file="${SIMPLE}" />
+		<replaceregexp match="Date: " replace="Date: ${last.commit}" file="${SIMPLE}" />
         <echo message="${SIMPLE} built." />
     </target>
 
@@ -50,7 +62,7 @@
 				<include name="simples.js" />
 			</fileset>
 			<arg line="-jar" />
-			<arg path="build/google-compiler-20091218.jar" />
+			<arg path="build/google-compiler-20100330.jar" />
 			<arg value="--warning_level" />
 			<arg value="QUIET" />
 			<arg value="--js_output_file" />
@@ -58,16 +70,10 @@
 			<arg value="--js" />
 			<mapper type="glob" from="simples.js" to="tmpmin" />
 		</apply>
-		<concat destfile="${SIMPLE_MIN}">
-			<filelist files="${SIMPLE}, dist/tmpmin"/>
-			<filterchain>
-				<headfilter lines="15"/>
-			</filterchain>
-		</concat>
 		<concat destfile="${SIMPLE_MIN}" append="yes">
 			<filelist files="dist/tmpmin"/>
 		</concat>
-		<delete file="dist/tmpmin"/>
+		<delete file="dist/tmpmin"/>  
         <echo message="${SIMPLE_MIN} built." />
     </target>
 

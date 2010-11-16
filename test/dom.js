@@ -170,14 +170,14 @@ test("html('inner')", 8, function(){
 		} else {
 			div.html( location );
 		}
-		equal( div[0].innerHTML, endHTML, "location:"+location +" and html:"+html );
+		equal( endHTML, div[0].innerHTML, "location:"+location +" and html:"+html );
 	}
 	
 	testInner( "<p>No Location</p>", undefined, "<p>No Location</p>");
 	testInner( "inner", "<p>Location is 'inner'</p>", "<p>Location is 'inner'</p>");
 
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";
+	p.innerHTML = "DOM Element";
 		
 	testInner( p, undefined, "<p>DOM Element</p>");
 	testInner( "inner", p, "<p>DOM Element</p>");
@@ -195,16 +195,16 @@ test("html('inner')", 8, function(){
 });
 
 test("html('text')", 4, function(){
-    var p = Simples('<p/>');	
 	function testText( text, endText ){
+		var p = Simples('<p/>');
 		if( text === null ){
-			p[0].innerText = endText;
-			equal( p.html("text"), endText, "location:text no html provided" );			
+			p[0].appendChild( document.createTextNode( endText ) );
+			equal( p.html("text"), endText, "location:text no html provided" );
 		} else {
-			endText = endText || text;	
-			p[0].innerText = "";
+			endText = endText || text;
+			p[0].innerHTML = "";
 			p.html( "text", text );
-			equal( p[0].innerText, endText, "location:text and html:"+text );			
+			equal( p[0].innerHTML, endText, "location:text and html:"+text );
 		}
 	}
 
@@ -228,7 +228,7 @@ test("html('outer')", 4, function(){
 	}
 
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";
+	p.innerHTML = "DOM Element";
 		
 	testOuter( "<span>Super Duper</span>" );
 	
@@ -250,7 +250,7 @@ test("html('top')", 3, function(){
 	testTop( "<p>I am Top</p>" );
 	
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";	
+	p.innerHTML = "DOM Element";
 	testTop( p, "<p>DOM Element</p>" );
 	
 	testTop( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
@@ -269,7 +269,7 @@ test("html('bottom')", 3, function(){
 	testBottom( "<p>I am Bottom</p>" ); 
 	
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";	
+	p.innerHTML = "DOM Element";
 	testBottom( p, "<p>DOM Element</p>" );
 	
 	testBottom( Simples( Simples('<div/>').html("<span>Super Duper 1</span><span>Super Duper 2</span>")[0].childNodes ), "<span>Super Duper 1</span><span>Super Duper 2</span>" );
@@ -307,7 +307,7 @@ test("html('before')", 3, function(){
 	}
 
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";
+	p.innerHTML = "DOM Element";
 		
 	testBefore( "<span>Super Duper</span>" );
 	
@@ -328,7 +328,7 @@ test("html('after')", 3, function(){
 	}
 
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";
+	p.innerHTML = "DOM Element";
 		
 	testAfter( "<span>Super Duper</span>" );
 	
@@ -363,7 +363,7 @@ test("html('wrap')", 3, function(){
 	}
 
 	var p = document.createElement('p');
-	p.innerText = "DOM Element";
+	p.innerHTML = "DOM Element";
 		
 	testWrap( "<span>Super Duper</span>" );
 	

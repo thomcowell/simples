@@ -125,7 +125,7 @@ module("Data: cleanData");
 test("cleanData on invalid element", 1, function() {
 	var noError = true;
 	try{
-		cleanData( document.createElement('object') );
+		Simples.cleanData( document.createElement('object') );
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
@@ -133,7 +133,7 @@ test("cleanData on invalid element", 1, function() {
 test("cleanData on valid element without data", 1, function() {
 	var noError = true;
 	try{
-		cleanData( document.createElement('div') );
+		Simples.cleanData( document.createElement('div') );
 	}catch(e){ noError = false; }
 	ok( noError, "should not throw an error");
 });
@@ -142,7 +142,7 @@ test("cleanData on element with data as requested", 1, function() {
 	var r_div = document.createElement('div');
 	r_div[ accessID ] = { test:data };
 	
-	cleanData( r_div );	
+	Simples.cleanData( r_div );	
 	equal( r_div[ accessID ], undefined, "a div should have data removed");
 });
 

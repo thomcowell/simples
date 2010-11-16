@@ -1,12 +1,11 @@
 // Constants
-var TAG = /<(\w+)\s?\/?>/,
+var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	// TAG_STRIP = /\b[\.|\#\|\[].+/g, 
 	// TAG_STRIP = /\b(\.|\#|\[)|(\=?<!(name))(.)*/, /(?:\w+)\b((\.|\#|\[)|(\=?>!(name)))(.)*/, /(?:\w+)\b[\.|\#|\[]{1}.*/g,
 	FIRST_ID = /\s#/,
 	// ATTR_NAME_IS = /\[name\=([^\]]+)\]/,
 	// Is it a simple selector
-	// isSimple = /^.[^:#\[\.,]*$/,
-	// TAG_STRIP = /\b[\.\#\|\[\=].+/g,
+	COMPLEX_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)([^>]*)>(.*)<\/\1>/i,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
 	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined";
@@ -16,7 +15,7 @@ Simples.Selector = function(selector, context, results) {
 	results.selector = selector;
 	results.context = context || document;
 
-    if (typeof(selector) === 'string') {
+    if (typeof(selector) === STRING) {
         if (QUERY_SELECTOR && selector.indexOf('<') < 0) {
             results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
             return results;
@@ -31,18 +30,24 @@ Simples.Selector = function(selector, context, results) {
             }
             return results;
         }
-        // clean up selector
-        // selector = selector.replace(TAG_STRIP, '');
-        // get last id in selector
-        var index = selector.lastIndexOf(FIRST_ID);
-        selector = selector.substring(index > 0 ? index: 0);
         // check selector if structured to create element
-        var tag = TAG.exec(selector);
-        if (tag !== null && tag.length > 1) {
+		 if( COMPLEX_TAG.test( selector ) ){
+            results.selector = "<"+COMPLEX_TAG.exec( selector )[1]+">";
+            results.context = document;
+            var div = document.createElement('div');
+            div.innerHTML = selector;
+            results.push.apply( results, slice.call( div.childNodes, 0 ) );
+        } else if( SINGLE_TAG.test( selector ) ) {
+            var tag = SINGLE_TAG.exec( selector );
             results.context = document;
             results.selector = tag[0];
             results.push(document.createElement(tag[1]));
         } else {
+            // clean up selector
+            // selector = selector.replace(TAG_STRIP, EMPTY_STRING);
+            // get last id in selector
+            var index = selector.lastIndexOf(FIRST_ID);
+            selector = selector.substring(index > 0 ? index: 0);
             // allow another document to be used for context where getting by id
             results.context = context = (selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0) ? (context && context.nodeType === 9 ? context: document) : (context || document);
             var split = selector.split(SPACE_WITH_BOUNDARY);
@@ -97,7 +102,7 @@ function getElements(selector, context) {
             return nodes;
         }
     } else if (selector.indexOf('[name=') === 0) {
-        var name = selector.substring(6).replace(/\].*/, '');
+        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
         context = context && context.nodeType === 9 ? context: document;
         if (context.getElementsByName) {
             return slice.call(context.getElementsByName(name));

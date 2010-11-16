@@ -5,7 +5,7 @@ var toString = Object.prototype.toString,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf,
 	trim = String.prototype.trim,
-// references to class outputs	
+/* references to class outputs	 */
 	ArrayClass = '[object Array]',
 	ObjectClass = '[object Object]',
 	NodeListClass = '[object NodeList]', 
@@ -15,7 +15,17 @@ var toString = Object.prototype.toString,
 	BooleanClass = "[object Boolean]",
 	HTMLCollectionClass = "[object HTMLCollection]",
 	WindowClass = "[object Window]",
-	FIRST_LAST_SPACES = /^\s*|\s*$/g,
+	FIRST_SPACES = /^\s*/,
+	LAST_SPACES = /\s*$/,
+	STRING = 'string',
+	DOMLOADED = "DOMContentLoaded",
+	READYSTATE = "onreadystatechange",
+	FUNC = "function",
+	OPACITY = "opacity",
+	TOP = "top",
+	LEFT = "left",
+	COMPLETE = "complete",
+	EMPTY_STRING = "",
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -30,12 +40,12 @@ function Simples( selector, context ) {
 /**
  * @name merge
  * @description used to merge objects into one
- * @param {Object} obj native javascript object to be merged
+ * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj native javascript object or array to be merged onto first
  **/
 Simples.merge = function(first /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
-    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first: {};
+    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first : {};
     // set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1: 0;
     // Loop over arguments
@@ -57,8 +67,7 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     return target;
 };
 
-Simples.merge({ 
-	buildInstanceWrapper : true,
+Simples.merge({
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
 		if( toString.call( addMethods ) === ObjectClass ){
@@ -124,14 +133,14 @@ Simples.merge({
 
 		// Catch cases where $(document).ready() is called after the
 		// browser event has already occurred.
-		if ( document.readyState === "complete" ) {
+		if ( document.readyState === COMPLETE ) {
 			return Simples.readyHandler();
 		}
 
 		// Mozilla, Opera and webkit nightlies currently support this event
 		if ( document.addEventListener ) {
 			// Use the handy event callback
-			document.addEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+			document.addEventListener( DOMLOADED, DOMContentLoaded, false );
 
 			// A fallback to window.onload, that will always work
 			window.addEventListener( "load", Simples.readyHandler, false );
@@ -140,7 +149,7 @@ Simples.merge({
 		} else if ( document.attachEvent ) {
 			// ensure firing before onload,
 			// maybe late but safe also for iframes
-			document.attachEvent("onreadystatechange", DOMContentLoaded);
+			document.attachEvent( READYSTATE, DOMContentLoaded);
 
 			// A fallback to window.onload, that will always work
 			window.attachEvent( "onload", Simples.readyHandler );
@@ -165,8 +174,8 @@ Simples.merge({
 	},
 	// Use native String.trim function wherever possible, Otherwise use our own trimming functionality
 	trim : function( text ) {
-		text = text == null ? "" : text;
-		return trim ? trim.call( text ) : text.toString().replace( FIRST_LAST_SPACES, "" );
+		text = text == null ? EMPTY_STRING : text;
+		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
 	},
 	noop : function(){}
 });
@@ -174,15 +183,15 @@ Simples.merge({
 // Cleanup functions for the document ready method
 if ( document.addEventListener ) {
 	DOMContentLoaded = function() {
-		document.removeEventListener( "DOMContentLoaded", DOMContentLoaded, false );
+		document.removeEventListener( DOMLOADED, DOMContentLoaded, false );
 		Simples.readyHandler();
 	};
 
 } else if ( document.attachEvent ) {
 	DOMContentLoaded = function() {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-		if ( document.readyState === "complete" ) {
-			document.detachEvent( "onreadystatechange", DOMContentLoaded );
+		if ( document.readyState === COMPLETE ) {
+			document.detachEvent( READYSTATE, DOMContentLoaded );
 			Simples.readyHandler();
 		}
 	};
@@ -197,7 +206,7 @@ function doScrollCheck() {
 	try {
 		// If IE is used, use the trick by Diego Perini
 		// http://javascript.nwbox.com/IEContentLoaded/
-		document.documentElement.doScroll("left");
+		document.documentElement.doScroll(LEFT);
 	} catch(e) {
 		window.setTimeout( doScrollCheck, 1 );
 		return;
@@ -211,7 +220,7 @@ function doScrollCheck() {
 Simples.fn = Simples.prototype = { 
 	init : function( selector, context ){
 
-		// Handle $(""), $(null), or $(undefined)
+		// Handle $(EMPTY_STRING), $(null), or $(undefined)
 		if ( !selector ){
 			return this;
 		} else if( selector.selector !== undefined ){
@@ -259,7 +268,7 @@ Simples.fn = Simples.prototype = {
 		return this;		
 	},
 	length : 0,
-	selector : '',
+	selector : EMPTY_STRING,
 	version : '@VERSION',  
 	each : function( callback ){
 		var i=0,l=this.length;

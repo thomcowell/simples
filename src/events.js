@@ -175,7 +175,6 @@ Simples.Events = {
 				e = document.createEvent("HTMLEvents");
 				e.initEvent(type, true, true); 
 				if( data ){ e.data = data; }
-				e.target = elem;              
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
@@ -281,7 +280,7 @@ Simples.Events = {
 
 Simples.extend({
 	bind : function( type, callback ){
-		if( typeof type === "string" && ( callback === false || toString.call( callback ) === FunctionClass ) ){
+		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
 			var attach = Simples.Events.attach,i=0,l=this.length;
 			while(i<l){
@@ -301,7 +300,7 @@ Simples.extend({
 		return this;
 	}, 
 	trigger : function( type, data ){
-		if( typeof type === "string"){ 
+		if( typeof type === STRING){ 
 			// Loop over elements
 			var trigger = Simples.Events.trigger,i=0,l=this.length;
 			while(i<l){

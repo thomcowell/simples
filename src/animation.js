@@ -20,6 +20,8 @@ Simples.Animation = {
 	timerID : null,
 	interval : Math.round( 1000 / this.frameRate ),
 	/**
+	 * @name Simples.Animation.create
+	 * @description used to to create an animation object which can be used by the animation queue runner
 	 * elem {Element}
 	 * setStyle {Object} 
 	 * opts {Object}  
@@ -30,7 +32,7 @@ Simples.Animation = {
 	create : function( elem, setStyle, opts ){
 		opts = opts || {};
 		if ( !( elem && elem.nodeType ) || Simples.isEmptyObject( setStyle ) ) {
-			if (typeof opts.callback === "function") {
+			if (typeof opts.callback === FUNC) {
 				opts.callback.call(elem);
 			}
 			return null;
@@ -39,9 +41,9 @@ Simples.Animation = {
 		var anim = {
 			0 : elem,
 			id : Simples.Animation.guid++,
-			callback : ( typeof opts.callback === 'function' ) ? opts.callback : Simples.noop,
+			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
 			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
-			tween : ( typeof opts.tween === "function" ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
+			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
 			start : {},
 			finish : {}
 		};
@@ -49,11 +51,11 @@ Simples.Animation = {
 		// check for supported css animated features and prep for animation
 		for( var key in setStyle ){
 			var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
-				opacity = ( cKey === 'opacity' && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
+				opacity = ( cKey === OPACITY && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 			if( opacity || Simples.Animation.allowTypes.test( cKey ) ){
-				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + '' || '0').replace(REGEX_PIXEL,'') * 1;
-				anim.finish[ cKey ] = ( setStyle[ key ] + '' || '0').replace(REGEX_PIXEL,'') * 1;
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
 			}                                        
 		}
 
@@ -64,67 +66,76 @@ Simples.Animation = {
 		if( opts.manualStart !== true ){
 			Simples.Animation.start( anim );
 		}
-		return anim;   	
+		return anim;
 	},
 	/**
-	 * anim {Object} animation to perform action on
+	 * @name Simples.Animation.start
+	 * @description used to add the animation to the animation runner queue
+	 * animation {Object} animation to perform action on
 	 */
-	start : function( anim ){                            
+	start : function( animation ){
 
-		if( anim && anim.id ){ 
-			if( !hasOwn.call( this.animations, anim.id ) ){
+		if( animation && animation.id ){
+			if( !hasOwn.call( this.animations, animation.id ) ){
 				this.length++;
-				this.animations[ anim.id ] = anim;
-				if( anim.duration === 0 ){
-					this.stop( anim ); 
-				} else if( !anim.startTime ){
-					anim.startTime = new Date().getTime();
+				this.animations[ animation.id ] = animation;
+				if( animation.duration === 0 ){
+					this.stop( animation );
+				} else if( !animation.startTime ){
+					animation.startTime = new Date().getTime();
 				}
 			}
 			
 			if( !this.timerID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				this.timerID = window.setInterval(function(){ Simples.Animation.step(); }, this.interval );
+				this.timerID = window.setInterval(function(){ Simples.Animation._step(); }, this.interval );
 			}
 		}
 	},
 	/**
-	 * anim {Object} animation to perform action on
+	 * @name Simples.Animation.reverse
+	 * @description used to take an animation in its current position and reverse and run
+	 * animation {Object} animation to perform action on
 	 */
-	reverse : function( anim ){
-	 	var start = anim.start, finish = anim.finish;
+	reverse : function( animation ){
+		var start = animation.start, finish = animation.finish;
 
-		anim.start = finish;
-		anim.finish = start;
+		animation.start = finish;
+		animation.finish = start;
 		
-		if( anim.startTime ){
+		if( animation.startTime ){
 			var now = new Date().getTime(),
-				diff = now - anim.startTime;
+				diff = now - animation.startTime;
 
-			anim.startTime = now - ( anim.duration - diff );
+			animation.startTime = now - ( animation.duration - diff );
+			this.length--;
+		} else {
+			this.start( animation );
 		}
-		
-		this.length--;
-		this.start( anim );   
 	}, 
 	/**
-	 * anim {Object} animation to perform action on
+	 * @description used to reset an animation to either the start or finish position
+	 * animation {Object} animation to perform action on
 	 * resetToEnd {Boolean} whether to reset to finish (true) or start (false||undefined) state
 	 */
-	reset : function( anim, resetToEnd ){
+	reset : function( animation, resetToEnd ){
 
-		var cssObj = resetToEnd ? anim.finish : anim.start,
-			elem = anim[0];
+		var cssObj = resetToEnd ? animation.finish : animation.start,
+			elem = animation[0];
 			
 		for( var name in cssObj ){
 			Simples.setStyle( elem, name, cssObj[ name ] );
 		}
 		
-		if( anim.startTime ){
-			this.stop( anim );
+		if( animation.startTime ){
+			this.stop( animation );
 		}
 	},
-	step : function(){    
+	/**
+	 * @private
+	 * @description a private method used by the queue runner to iterate over queued animations and update each postion
+	 */
+	_step : function(){
 		if( this.length ){ 
 			var now = new Date().getTime();    
 			for( var id in this.animations ){
@@ -148,13 +159,18 @@ Simples.Animation = {
 			this.timerID = null;
 		}
 	},
+	/**
+	 * @description used to stop a supplied animation and cleanup after itsef
+	 * animation {Object} the animation object to use and work on.
+	 * jumpToEnd {Boolean} whether to leave in current position or set css to finish position
+	 */
 	stop : function( animation, jumpToEnd ){
 		if( animation && hasOwn.call( this.animations, animation.id ) ){
 
 			animation.startTime = null;
 
 			if ( jumpToEnd ){
-				this.reset( animation, true )
+				this.reset( animation, true );
 			}
 
 			var data = Simples.data( animation[0] );
@@ -174,7 +190,7 @@ Simples.merge({
 		if( elem && Simples.Animation[ action ] ){
 			var anims = Simples.data( elem, "animation" );
 
-			if( anims && action != ("create" || "step") ){
+			if( anims && action != ("create" || "_step") ){
 				for( var id in anims ){
 					var anim = anims[ id ];
 					Simples.Animation[ action ]( anim, arguments[2] );

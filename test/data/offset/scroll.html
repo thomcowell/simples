@@ -27,7 +27,7 @@
 				Simples('#scroll-1')[0].scrollLeft = 5;
 				Simples('#scroll-1')[0].scrollTop = 5;
 				Simples('.scroll').bind('click',function() {
-					Simples('#marker').css( Simples(this).offset() );
+					Simples('#marker').css( Simples.offset(this) );
 					return false;
 				});                             
 			});      

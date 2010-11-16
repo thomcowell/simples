@@ -73,6 +73,26 @@ test('create selector', 16, function(){
 	same( div4[0].tagName, 'DIV', "should have created the element as a div");
 });
 
+test('create complex selector', 10, function(){
+	var text = "<div>SuperDuper</div>",
+		div = Simples.Selector( text );
+
+	same( div.context, document, "should have a context of document");
+	same( div.selector, "<div>", text + " -- should have a selector of <div/>");
+	same( Simples( div[0] ).html("outer"), text, "should have the same as supplied html" );
+
+	text = '<form action="/some/url" method="POST"><input name="name" type="text"/><input type="password" name="password"/><input type="submit" name="submit"/></form>';
+	div = Simples.Selector( text );
+
+	same( document, div.context, "should have a context of document");
+	same( "<form>", div.selector, text + " -- should have a selector of <div/>");
+	equal( "FORM", div[0].tagName, "should have the same as supplied html" );
+	equal( 3, div[0].childNodes.length, "should have the same as supplied html" );
+	equal( "name", div[0].childNodes[0].name, "should have the same as supplied html" );
+	equal( "password", div[0].childNodes[1].name, "should have the same as supplied html" );
+	equal( "submit", div[0].childNodes[2].name, "should have the same as supplied html" );
+});
+
 test('simple selector', 14, function(){
 	var rows = Simples.Selector('.row');
 	same( rows.context, document, "should have a context of document");	

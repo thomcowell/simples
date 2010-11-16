@@ -45,7 +45,7 @@ Simples.merge({
 		leadingWhitespace: div.firstChild.nodeType === 3,
 		// Make sure that if no value is specified for a checkbox
 		// that it defaults to "on".
-		// (WebKit defaults to "" instead)
+		// (WebKit defaults to EMPTY_STRING instead)
 		checkOn: div.getElementsByTagName("input")[0].value === "on",
 		// WebKit doesn't clone checked state correctly in fragments   
 		checkClone : fragment.cloneNode(true).cloneNode(true).lastChild.checked, 
@@ -70,7 +70,7 @@ Simples.merge({
 			!/compatible/.test( ua ) && /(mozilla)(?:.*? rv:([\w.]+))?/.exec( ua ) ||
 			[];
 
-		return { browser: match[1] || "", version: match[2] || "0" };
+		return { browser: match[1] || EMPTY_STRING, version: match[2] || "0" };
 	},
 	browser : {}
 }); 

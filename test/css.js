@@ -1,14 +1,8 @@
 module("CSS");
 
 Simples.extend({
-	is : function(state){ 
-		if( this[0] ){
-			switch(state){
-			case ':visible':
-				return this[0].offsetWidth > 0 || this[0].offsetHeight > 0;
-			}             
-		}
-		return false;
+	isVisible : function(){ 
+		return this[0].offsetWidth > 0 || this[0].offsetHeight > 0;
 	}
 });
 
@@ -17,11 +11,11 @@ test("css(String|Hash)", function() {
 
 	equals( Simples('#main').css("display"), 'none', 'Check for css property "display"');
 
-	ok( Simples('#nothiddendiv').is(':visible'), 'Modifying CSS display: Assert element is visible');
+	ok( Simples('#nothiddendiv').isVisible(), 'Modifying CSS display: Assert element is visible');
 	Simples('#nothiddendiv').css({display: 'none'});
-	ok( !Simples('#nothiddendiv').is(':visible'), 'Modified CSS display: Assert element is hidden');
+	ok( !Simples('#nothiddendiv').isVisible(), 'Modified CSS display: Assert element is hidden');
 	Simples('#nothiddendiv').css({display: 'block'});
-	ok( Simples('#nothiddendiv').is(':visible'), 'Modified CSS display: Assert element is visible');
+	ok( Simples('#nothiddendiv').isVisible(), 'Modified CSS display: Assert element is visible');
 
 	// handle negative numbers by ignoring #1599, #4216
 	Simples('#nothiddendiv').css({ 'width': 1, 'height': 1 });
@@ -80,11 +74,11 @@ test("css(String|Hash)", function() {
 
 test("css(String, Object)", function() {
 	expect(21);
-	ok( Simples('#nothiddendiv').is(':visible'), 'Modifying CSS display: Assert element is visible');
+	ok( Simples('#nothiddendiv').isVisible(), 'Modifying CSS display: Assert element is visible');
 	Simples('#nothiddendiv').css("display", 'none');
-	ok( !Simples('#nothiddendiv').is(':visible'), 'Modified CSS display: Assert element is hidden');
+	ok( !Simples('#nothiddendiv').isVisible(), 'Modified CSS display: Assert element is hidden');
 	Simples('#nothiddendiv').css("display", 'block');
-	ok( Simples('#nothiddendiv').is(':visible'), 'Modified CSS display: Assert element is visible');
+	ok( Simples('#nothiddendiv').isVisible(), 'Modified CSS display: Assert element is visible');
 
 	Simples("#nothiddendiv").css("top", "-1em");
 	ok( Simples("#nothiddendiv").css("top"), -16, "Check negative number in EMs." );
@@ -117,14 +111,6 @@ test("css(String, Object)", function() {
 	// opera sometimes doesn't update 'display' correctly, see #2037
 	Simples("#t2037")[0].innerHTML = Simples("#t2037")[0].innerHTML
 	equals( Simples("#t2037 .hidden").css("display"), "none", "Make sure browser thinks it is hidden" );
-});
-
-test("Simples instance show and hide", function(){
-	var elem = Simples('#foo').css('display','none');
-	elem.show();
-	equals( elem[0].style.display, 'block', 'show should set the display of element to block' );
-	elem.hide();
-	equals( elem[0].style.display, 'none', 'show should set the display of element to block' );
 });
 
 if(Simples.browser.msie) {
@@ -168,55 +154,55 @@ test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", func
 
 module("CSS: Width and Height");
 
-test("width()", function() {
+test("style('width')", function() {
 	expect(7);
 
 	var $div = Simples("#nothiddendiv");
-	$div.width( 30 );
-	equals($div.width(), 30, "Test set to 30 correctly");
-	$div.hide();
-	equals($div.width(), 30, "Test hidden div");
-	$div.show();
-	$div.width( -1 ); // handle negative numbers by ignoring #1599
-	equals($div.width(), 30, "Test negative width ignored");
+	$div.css( "width", 30 );
+	equals($div.style('width'), 30, "Test set to 30 correctly");
+	$div.css('display', 'none');
+	equals($div.style('width'), 30, "Test hidden div");
+	$div.css('display', 'block');
+	$div.css( "width", -1 ); // handle negative numbers by ignoring #1599
+	equals($div.style('width'), 30, "Test negative width ignored");
 	$div.css("padding", "20px");
-	equals($div.width(), 30, "Test padding specified with pixels");
+	equals($div.style('width'), 30, "Test padding specified with pixels");
 	$div.css("border", "2px solid #fff");
-	equals($div.width(), 30, "Test border specified with pixels");
+	equals($div.style('width'), 30, "Test border specified with pixels");
 
 	$div.css({ display: "", border: "", padding: "" });
 
 	Simples("#nothiddendivchild").css({ width: 20, padding: "3px", border: "2px solid #fff" });
-	equals(Simples("#nothiddendivchild").width(), 20, "Test child width with border and padding");
+	equals(Simples("#nothiddendivchild").style('width'), 20, "Test child width with border and padding");
 	Simples("#nothiddendiv, #nothiddendivchild").css({ border: "", padding: "", width: "" });
 
 	var blah = Simples("blah");
-	equals( blah.width( 10 ), blah, "Make sure that setting a width on an empty set returns the set." );
+	equals( blah.css( "width", 10 ), blah, "Make sure that setting a width on an empty set returns the set." );
 });
 
-test("height()", function() {
+test("style('height')", function() {
 	expect(6);
 
 	var $div = Simples("#nothiddendiv");
-	$div.height( 30 );
-	equals($div.height(), 30, "Test set to 30 correctly");
-	$div.hide();
-	equals($div.height(), 30, "Test hidden div");
-	$div.show();
-	$div.height( -1 ); // handle negative numbers by ignoring #1599
-	equals($div.height(), 30, "Test negative height ignored");
+	$div.css( "height", 30 );
+	equals($div.style('height'), 30, "Test set to 30 correctly");
+	$div.css('display', 'none');
+	equals($div.style('height'), 30, "Test hidden div");
+	$div.css('display', 'block');
+	$div.css( "height", -1 ); // handle negative numbers by ignoring #1599
+	equals($div.style('height'), 30, "Test negative height ignored");
 	$div.css("padding", "20px");
-	equals($div.height(), 30, "Test padding specified with pixels");
+	equals($div.style('height'), 30, "Test padding specified with pixels");
 	$div.css("border", "2px solid #fff");
-	equals($div.height(), 30, "Test border specified with pixels");
+	equals($div.style('height'), 30, "Test border specified with pixels");
 
 	$div.css({ display: "", border: "", padding: "", height: "1px" });
 
 	var blah = Simples("blah");
-	equals( blah.height( 10 ), blah, "Make sure that setting a height on an empty set returns the set." );
+	equals( blah.css( "height", 10 ), blah, "Make sure that setting a height on an empty set returns the set." );
 });
 
-test("innerWidth()", function() {
+test("style('innerWidth')", function() {
 	expect(3);
 
 	var $div = Simples("#nothiddendiv");
@@ -226,18 +212,18 @@ test("innerWidth()", function() {
 		border: "2px solid #fff",
 		width: 30
 	});
-	
-	equals($div.innerWidth(), 30, "Test with margin and border");
+
+	equals($div.style("innerWidth"), 30, "Test with margin and border");
 	$div.css("padding", "20px");
-	equals($div.innerWidth(), 70, "Test with margin, border and padding");
-	$div.hide();
-	equals($div.innerWidth(), 70, "Test hidden div");
+	equals($div.style("innerWidth"), 70, "Test with margin, border and padding");
+	$div.css('display', 'none');
+	equals($div.style("innerWidth"), 70, "Test hidden div");
 	
 	// reset styles
 	$div.css({ display: null, border: null, padding: null, width: null, height: null });
 });
 
-test("innerHeight()", function() {
+test("style('innerHeight')", function() {
 	expect(3);
 	
 	var $div = Simples("#nothiddendiv");
@@ -248,54 +234,54 @@ test("innerHeight()", function() {
 		height: 30
 	});
 	
-	equals($div.innerHeight(), 30, "Test with margin and border");
+	equals($div.style('innerHeight'), 30, "Test with margin and border");
 	$div.css("padding", "20px");
-	equals($div.innerHeight(), 70, "Test with margin, border and padding");
-	$div.hide();
-	equals($div.innerHeight(), 70, "Test hidden div");
+	equals($div.style('innerHeight'), 70, "Test with margin, border and padding");
+	$div.css('display','none');
+	equals($div.style('innerHeight'), 70, "Test hidden div");
 	
 	// reset styles
 	$div.css({ display: "", border: "", padding: "", width: "", height: "" });
 });
 
-test("outerWidth()", function() {
+test("style('outerWidth')", function() {
 	expect(6);
 	
 	var $div = Simples("#nothiddendiv");
 	$div.css("width", 30);
 	
-	equals($div.outerWidth(), 30, "Test with only width set");
+	equals($div.style('outerWidth'), 30, "Test with only width set");
 	$div.css("padding", "20px");
-	equals($div.outerWidth(), 70, "Test with padding");
+	equals($div.style('outerWidth'), 70, "Test with padding");
 	$div.css("border", "2px solid #fff");
-	equals($div.outerWidth(), 74, "Test with padding and border");
+	equals($div.style('outerWidth'), 74, "Test with padding and border");
 	$div.css("margin", "10px");
-	equals($div.outerWidth(), 74, "Test with padding, border and margin without margin option");
+	equals($div.style('outerWidth'), 74, "Test with padding, border and margin without margin option");
 	$div.css("position", "absolute");
-	equals($div.outerWidth(true), 94, "Test with padding, border and margin with margin option");
-	$div.hide();
-	equals($div.outerWidth(true), 94, "Test hidden div with padding, border and margin with margin option");
+	equals($div.style('outerWidth',true), 94, "Test with padding, border and margin with margin option");
+	$div.css('display','none');
+	equals($div.style('outerWidth',true), 94, "Test hidden div with padding, border and margin with margin option");
 	
 	// reset styles
 	$div.css({ position: "", display: "", border: "", padding: "", width: "", height: "" });
 });
 
-test("outerHeight()", function() {
+test("style('outerHeight')", function() {
 	expect(6);
 	
 	var $div = Simples("#nothiddendiv");
 	$div.css("height", 30);
 	
-	equals($div.outerHeight(), 30, "Test with only width set");
+	equals($div.style('outerHeight'), 30, "Test with only width set");
 	$div.css("padding", "20px");
-	equals($div.outerHeight(), 70, "Test with padding");
+	equals($div.style('outerHeight'), 70, "Test with padding");
 	$div.css("border", "2px solid #fff");
-	equals($div.outerHeight(), 74, "Test with padding and border");
+	equals($div.style('outerHeight'), 74, "Test with padding and border");
 	$div.css("margin", "10px");
-	equals($div.outerHeight(), 74, "Test with padding, border and margin without margin option");
-	equals($div.outerHeight(true), 94, "Test with padding, border and margin with margin option");
-	$div.hide();
-	equals($div.outerHeight(true), 94, "Test hidden div with padding, border and margin with margin option");
+	equals($div.style('outerHeight'), 74, "Test with padding, border and margin without margin option");
+	equals($div.style('outerHeight',true), 94, "Test with padding, border and margin with margin option");
+	$div.css('display','none');
+	equals($div.style('outerHeight',true), 94, "Test hidden div with padding, border and margin with margin option");
 	
 	// reset styles
 	$div.css({ display: "", border: "", padding: "", width: "", height: "" });

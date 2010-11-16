@@ -27,8 +27,8 @@
 		<script type="text/javascript" charset="utf-8"> 
 			Simples.ready(function(){ 
 				Simples('.absolute').bind('click',function() {
-					Simples('#marker').css( Simples(this).offset() );
-					var pos = Simples(this).position();
+					Simples('#marker').css( Simples.offset( this ) );
+					var pos = Simples.position( this );
 					Simples(this).css({ top: pos.top, left: pos.left });
 					return false;
 				});

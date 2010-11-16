@@ -1,104 +1,15 @@
 // OMG its another non-W3C standard browser 
 var REGEX_HTML_BODY = /^body|html$/i;
 
-Simples.offset = {
-	init : function(){
-		var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
-			html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
-
-		Simples.merge( container.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" } );
-
-		container.innerHTML = html;
-		body.insertBefore( container, body.firstChild );
-		innerDiv = container.firstChild;
-		checkDiv = innerDiv.firstChild;
-		td = innerDiv.nextSibling.firstChild.firstChild;
-
-		this.doesNotAddBorder = (checkDiv.offsetTop !== 5);
-		this.doesAddBorderForTableAndCells = (td.offsetTop === 5);
-
-		checkDiv.style.position = "fixed";
-		checkDiv.style.top = "20px";
-
-		// safari subtracts parent border width here which is 5px
-		this.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
-		checkDiv.style.position = checkDiv.style.top = "";
-
-		innerDiv.style.overflow = "hidden";
-		innerDiv.style.position = "relative";
-
-		this.subtractsBorderForOverflowNotVisible = (checkDiv.offsetTop === -5);
-
-		this.doesNotIncludeMarginInBodyOffset = (body.offsetTop !== bodyMarginTop);
-
-		body.removeChild( container );
-		body = container = innerDiv = checkDiv = table = td = null;
-		Simples.offset.initialize = Simples.noop;
-	},
-	
-	bodyOffset: function( body ) {
-		var top = body.offsetTop, left = body.offsetLeft;
-
-		Simples.offset.init();
-
-		if ( Simples.offset.doesNotIncludeMarginInBodyOffset ) {
-			top  += parseFloat( Simples.currentCSS(body, "marginTop",  true) ) || 0;
-			left += parseFloat( Simples.currentCSS(body, "marginLeft", true) ) || 0;
-		}
-
-		return { top: top, left: left };
-	},
-	
-	setOffset: function( elem, options, i ) {
-		var position = Simples.currentCSS( elem, "position" );
-
-		// set position first, in-case top/left are set even on static elem
-		if ( position === "static" ) {
-			elem.style.position = "relative";
-		}
-
-		var curElem    = Simples( elem ),
-			curOffset  = curElem.offset(),
-			curCSSTop  = Simples.currentCSS( elem, "top", true ),
-			curCSSLeft = Simples.currentCSS( elem, "left", true ),
-			calculatePosition = (position === "absolute" && (curCSSTop === 'auto' || curCSSLeft === 'auto' ) ),
-			props = {}, curPosition = {}, curTop, curLeft;
-
-		// need to be able to calculate position if either top or left is auto and position is absolute
-		if ( calculatePosition ) {
-			curPosition = curElem.position();
-		}
-
-		curTop  = calculatePosition ? curPosition.top  : parseInt( curCSSTop,  10 ) || 0;
-		curLeft = calculatePosition ? curPosition.left : parseInt( curCSSLeft, 10 ) || 0;
-
-		if (options.top != null) {
-			props.top = (options.top - curOffset.top) + curTop;
-		}
-		if (options.left != null) {
-			props.left = (options.left - curOffset.left) + curLeft;
-		}
-		
-		curElem.css( props );
-	}	
-};
-
 if( "getBoundingClientRect" in document.documentElement ){
-	Simples.prototype.offset = function( options ){
-		var elem = this[0];
-
-		if ( options ) { 
-			return this.each(function( i ) {
-				Simples.offset.setOffset( this, options, i );
-			});
-		}
+	Simples.offset = function( elem ){
 
 		if ( !elem || !elem.ownerDocument ) {
 			return null;
 		}
 
 		if ( elem === elem.ownerDocument.body ) {
-			return Simples.offset.bodyOffset( elem );
+			return Simples.bodyOffset( elem );
 		}
 
 		var box = elem.getBoundingClientRect(), doc = elem.ownerDocument, body = doc.body,
@@ -112,21 +23,14 @@ if( "getBoundingClientRect" in document.documentElement ){
 		return { top: top, left: left };
 	};	                 
 } else {
-	Simples.prototype.offset = function( options ) {
-		var elem = this[0];
-
-		if ( options ) { 
-			return this.each(function( i ) {
-				Simples.offset.setOffset( this, options, i );
-			});
-		}
+	Simples.offset = function( elem ) {
 
 		if ( !elem || !elem.ownerDocument ) {
 			return null;
 		}
 
 		if ( elem === elem.ownerDocument.body ) {
-			return Simples.offset.bodyOffset( elem );
+			return Simples.bodyOffset( elem );
 		}
 
 		Simples.offset.init();
@@ -178,23 +82,107 @@ if( "getBoundingClientRect" in document.documentElement ){
 		}
 
 		return { top: top, left: left };
-	};	
+	};
 }
 
-Simples.extend({
-	position: function() {
-		if ( !this[0] ) {
-			return null;
+Simples.offset.init = function(){
+	var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
+		html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
+
+	Simples.merge( container.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" } );
+
+	container.innerHTML = html;
+	body.insertBefore( container, body.firstChild );
+	innerDiv = container.firstChild;
+	checkDiv = innerDiv.firstChild;
+	td = innerDiv.nextSibling.firstChild.firstChild;
+
+	this.doesNotAddBorder = (checkDiv.offsetTop !== 5);
+	this.doesAddBorderForTableAndCells = (td.offsetTop === 5);
+
+	checkDiv.style.position = "fixed";
+	checkDiv.style.top = "20px";
+
+	// safari subtracts parent border width here which is 5px
+	this.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
+	checkDiv.style.position = checkDiv.style.top = EMPTY_STRING;
+
+	innerDiv.style.overflow = "hidden";
+	innerDiv.style.position = "relative";
+
+	this.subtractsBorderForOverflowNotVisible = (checkDiv.offsetTop === -5);
+
+	this.doesNotIncludeMarginInBodyOffset = (body.offsetTop !== bodyMarginTop);
+
+	body.removeChild( container );
+	body = container = innerDiv = checkDiv = table = td = null;
+	this.init = Simples.noop;
+};
+
+Simples.merge({
+	bodyOffset : function( body ) {
+		var top = body.offsetTop, left = body.offsetLeft;
+
+		Simples.offset.init();
+
+		if ( Simples.offset.doesNotIncludeMarginInBodyOffset ) {
+			top  += parseFloat( Simples.currentCSS(body, "marginTop",  true) ) || 0;
+			left += parseFloat( Simples.currentCSS(body, "marginLeft", true) ) || 0;
 		}
 
-		var elem = this[0],
+		return { top: top, left: left };
+	},
+
+	setOffset : function( elem, options ) {
+		var position = Simples.currentCSS( elem, "position" );
+
+		// set position first, in-case top/left are set even on static elem
+		if ( position === "static" ) {
+			elem.style.position = "relative";
+		}
+
+		var curElem    = Simples( elem ),
+			curOffset  = curElem.offset(),
+			curCSSTop  = Simples.currentCSS( elem, TOP, true ),
+			curCSSLeft = Simples.currentCSS( elem, LEFT, true ),
+			calculatePosition = (position === "absolute" && (curCSSTop === 'auto' || curCSSLeft === 'auto' ) ),
+			props = {}, curPosition = {}, curTop, curLeft;
+
+		// need to be able to calculate position if either top or left is auto and position is absolute
+		if ( calculatePosition ) {
+			curPosition = curElem.position();
+		}
+
+		curTop  = calculatePosition ? curPosition.top  : parseInt( curCSSTop,  10 ) || 0;
+		curLeft = calculatePosition ? curPosition.left : parseInt( curCSSLeft, 10 ) || 0;
+
+		if (options.top != null) {
+			props.top = (options.top - curOffset.top) + curTop;
+		}
+		if (options.left != null) {
+			props.left = (options.left - curOffset.left) + curLeft;
+		}
+
+		curElem.css( props );
+	},
+
+	offsetParent : function( elem ) {
+		var offsetParent = elem.offsetParent || document.body;
+		while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && Simples.currentCSS(offsetParent, "position") === "static") ) {
+			offsetParent = offsetParent.offsetParent;
+		}
+
+		return offsetParent;
+	},
+
+	position: function( elem ) {
 
 		// Get *real* offsetParent
-		offsetParent = this.offsetParent(),
+		var offsetParent = Simples.offsetParent( elem ),
 
 		// Get correct offsets
-		offset       = this.offset(),
-		parentOffset = REGEX_HTML_BODY.test(offsetParent[0].nodeName) ? { top: 0, left: 0 } : offsetParent.offset();
+		offset       = Simples.offset( elem ),
+		parentOffset = REGEX_HTML_BODY.test(offsetParent.nodeName) ? { top: 0, left: 0 } : Simples.offset( offsetParent );
 
 		// Subtract element margins
 		// note: when an element has margin: auto the offsetLeft and marginLeft
@@ -203,8 +191,8 @@ Simples.extend({
 		offset.left -= parseFloat( Simples.currentCSS(elem, "marginLeft", true) ) || 0;
 
 		// Add offsetParent borders
-		parentOffset.top  += parseFloat( Simples.currentCSS(offsetParent[0], "borderTopWidth",  true) ) || 0;
-		parentOffset.left += parseFloat( Simples.currentCSS(offsetParent[0], "borderLeftWidth", true) ) || 0;
+		parentOffset.top  += parseFloat( Simples.currentCSS(offsetParent, "borderTopWidth",  true) ) || 0;
+		parentOffset.left += parseFloat( Simples.currentCSS(offsetParent, "borderLeftWidth", true) ) || 0;
 
 		// Subtract the two offsets
 		return {
@@ -213,19 +201,27 @@ Simples.extend({
 		};
 	},
 
-	offsetParent: function() {
-		var newObj = Simples();
-		this.each(function() {
-			var offsetParent = this.offsetParent || document.body;
-			while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && Simples.currentCSS(offsetParent, "position") === "static") ) {
-				offsetParent = offsetParent.offsetParent;
-			}  
-			if( offsetParent !== null || offsetParent !== undefined ){
-				newObj.push( offsetParent );
-			}
-		});
-		return newObj;
-	}       
+	setScroll : function( elem, name, val ){
+		win = getWindow( elem );
+
+		if ( win ) {
+			win.scrollTo(
+				name === LEFT ? val : Simples.getScroll( win, LEFT ),
+				name === TOP ? val : Simples.getScroll( win, TOP )
+			);
+
+		} else {
+			name = name === TOP ? "scrollTop" : "scrollLeft";
+			elem[ name ] = val;
+		}
+	},
+	getScroll : function( elem, name ){
+		name = name === TOP ? "scrollTop" : "scrollLeft";
+		win = getWindow( elem );
+
+		// Return the scroll offset
+		return win ? ( ("pageXOffset" in win) ? win[ name === TOP ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
+	}
 });
 
 function getWindow( elem ) {
@@ -235,44 +231,38 @@ function getWindow( elem ) {
 			elem.defaultView || elem.parentWindow :
 			false;
 }
- 
-// Create scrollLeft and scrollTop methods
-(function( Simples ){
-	var _scrolls_ = ["Left", "Top"];
-	
-	function addScrollMethodfunction( name, i ){
-		var method = "scroll" + name;
 
-		Simples.prototype[ method ] = function(val) {
-			var elem = this[0], win;
-			if ( !elem ) {
-				return null;
+Simples.extend({
+	offset : function( options ){
+
+		if ( options ) {
+			var len = this.length;
+			while( len ){
+				Simples.setOffset( this[ --len ], options );
 			}
+			return this;
+		}
 
-			if ( val !== undefined ) {
-				// Set the scroll offset
-				return this.each(function() {
-					win = getWindow( this );
-
-					if ( win ) {
-						win.scrollTo(
-							!i ? val : Simples(win).scrollLeft(),
-							 i ? val : Simples(win).scrollTop()
-						);
-
-					} else {
-						this[ method ] = val;
-					}
-				});
-			} else {
-				win = getWindow( elem );
-
-				// Return the scroll offset
-				return win ? ( ("pageXOffset" in win) ? win[ i ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ method ] || win.document.body[ method ] ) : elem[ method ];
+		return this[0] ? Simples.offset( this[0] ) : null;
+	},
+	offsetParent : function(){
+		var len = this.length;
+		while( len ){
+			this[ --len ] = Simples.offsetParent( this[ len ] );
+		}
+		return this;
+	},
+	scroll : function( name, val ){
+		if( val !== undefined ){
+			var len = this.length;
+			while( len ){
+				Simples.setScroll( this[ --len ], name, val );
 			}
-		};
+			return this;
+		}
+		return this[0] ? Simples.getScroll( this[0], name ) : null;
+	},
+	position : function(){
+		return this[0] ? Simples.position( this[0] ) : null;
 	}
-	for(var i=0,l=_scrolls_.length;i<l;i++){
-		addScrollMethodfunction( _scrolls_[i], i );
-	}
-})( Simples );
+});
