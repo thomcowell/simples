@@ -214,7 +214,7 @@ Simples.merge({
 			value = undefined;
 		}
 
-		if ( typeof value === "number" && !REXCLUDE.test(name) ) {
+		if ( typeof value === NUMBER && !REXCLUDE.test(name) ) {
 			value += "px";
 		}
 

@@ -1,26 +1,25 @@
 
 // ======= AJAX ========== //
-/** @const */
 // borrowed from jQuery
 var ACCEPTS = {
     xml: "application/xml, text/xml",
     html: "text/html",
-    script: "text/javascript, application/javascript",
     json: "application/json, text/javascript",
     text: "text/plain",
     _default: "*/*"
 },
+// REGEXP USED IN THIS FILE
 AJAX_IS_JSON = /^[\],:{}\s]*$/,
 AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
 AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 LAST_AMP = /&$/,
 PARSEERROR = "parsererror",
-TYPEOF = /number|string/;
-
-var ActiveAjaxRequests = 0;
-
-function formatData(name, value) {
+TYPEOF = /number|string/,
+// count of active ajax requests
+ActiveAjaxRequests = 0,
+// private method used by Simples.params to build data for request
+formatData = function(name, value) {
 
     var str = EMPTY_STRING;
 
@@ -48,10 +47,9 @@ function formatData(name, value) {
 		}
     }
     return str;
-}
-
-// Determine the success of the HTTP response
-function httpSuccess(xhr) {
+},
+// private method to determine the success of the HTTP response
+httpSuccess = function(xhr) {
     try {
         // If no server status is provided, and we're actually
         // requesting a local file, then it was successful
@@ -69,10 +67,9 @@ function httpSuccess(xhr) {
 
     // If checking the status failed, then assume that the request failed too
     return false;
-}
-
-// httpData parsing is from jQuery 1.4
-function httpData(xhr, type, dataFilter) {
+},
+// private method for httpData parsing is from jQuery 1.4
+httpData = function(xhr, type, dataFilter) {
 
     var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
     xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
@@ -114,21 +111,46 @@ function httpData(xhr, type, dataFilter) {
     }
 
     return data;
-}
-
+};
+// public methods
 Simples.merge({
+	/**
+	 * Simples.ajaxDefaults: default behaviour for all ajax requests
+	 */
 	ajaxDefaults : {
 	    // Functions to call when the request fails, succeeds,
 	    // or completes (either fail or succeed)
-	    complete: function() {},
-	    error: function() {},
-	    success: function() {},
-	    additionalData: [],
+		/**
+		 * Simples.ajaxDefaults.complete: function to execute when complete arguments are ( xhrObject, 'complete' )
+		 */
+	    complete: Simples.noop,
+		/**
+		 * Simples.ajaxDefaults.error: function to execute when complete arguments are ( xhrObject, 'error' || 'pareseerror' )
+		 */	
+	    error: Simples.noop,
+		/**
+		 * Simples.ajaxDefaults.success: function to execute when complete arguments are ( data, 'success', xhrObject )
+		 */	
+	    success: Simples.noop,
+		/**
+		 * Simples.ajaxDefaults.dataType: The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
+		 */
 	    dataType: 'json',
+		/**
+		 * Simples.ajaxDefaults.async: boolean value of whether you want the request to be asynchronous or blocking
+		 */
 	    async: true,
-		cache: true,
+		/**
+		 * Simples.ajaxDefaults.type: the HTTP verb type of request GET, POST, PUT, DELETE
+		 */		
 	    type: "GET",
+		/**
+		 * Simples.ajaxDefaults.timeout: the time to allow the request to be open before a timeout is triggered
+		 */
 	    timeout: 5000,
+		/**
+		 * Simples.ajaxDefaults.xhr: helper to return the correct XHR object for your platform
+		 */
 		xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
 			function() {
 				return new window.XMLHttpRequest();
@@ -138,11 +160,16 @@ Simples.merge({
 					return new window.ActiveXObject("Microsoft.XMLHTTP");
 				} catch(e) {}
 			},
-	    // The data type that'll be returned from the server
-	    // the default is simply to determine what data was returned from the
-	    // and act accordingly.
+		/**
+		 * data: data to pass to the server
+		 */
 	    data: null
 	},
+	/**
+	 * Simples.ajax: used to send an ajax requests
+	 * @param url {String}
+	 * @param options {Object} the options to use specified for each individual request see Simples.ajaxDefaults
+	 */	
     ajax: function(url, options) {
 
 	    // Load the options object with defaults, if no
@@ -157,29 +184,27 @@ Simples.merge({
 	    // How long to wait before considering the request to be a timeout
 	    // Create the request object
 	    var xhr = options.xhr();
+	
+	    if ( options.data ) {
+            options.data = Simples.params( options.data );
+        }
+
+	    if (type === 'POST') {
+	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	    } else if( type === 'GET'){
+			url = ( url + ( url.indexOf('?') > 0 ? '&' : '?' ) + options.data );
+		}
 
 	    // Open the asynchronous POST request
-	    xhr.open(type, url, options.async);
+	    xhr.open( type, url, options.async );
 
 	    // Keep track of when the request has been succesfully completed
 	    var requestDone = false;
 
 	    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-	    if (type === 'POST') {
-	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-	        if ( options.data ) {
-	            options.data = Simples.params(options.data).replace( LAST_AMP, EMPTY_STRING);
-
-	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === STRING) {
-	                options.data += ("&" + Simples.params(options.additionalData));
-	            }
-	        }
-
-	    }
 		var content = ACCEPTS[ options.dataType ];
-	    xhr.setRequestHeader("Accept", content ? content +', '+ACCEPTS._default : ACCEPTS._default );
+	    xhr.setRequestHeader("Accept", content || ACCEPTS._default );
 		// up ajax Counter
 	    ActiveAjaxRequests++;
 	    // Watch for when the state of the document gets updated
@@ -204,16 +229,16 @@ Simples.merge({
 	                    options.error(xhr, PARSEERROR);
 	                }
 
-	                options.success(data, 'success');
+	                options.success(data, 'success', xhr);
 
 	                // Otherwise, an error occurred, so execute the error callback
 	            } else {
 	                options.error(xhr, 'error');
 	            }
-	            ActiveAjaxRequests--;
 	            // Call the completion callback
-	            options.complete(xhr);
+	            options.complete(xhr, 'complete' );
 
+	            ActiveAjaxRequests--;
 	            // Clean up after ourselves, to avoid memory leaks
 	            xhr = null;
 	        }

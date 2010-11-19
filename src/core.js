@@ -18,6 +18,7 @@ var toString = Object.prototype.toString,
 	FIRST_SPACES = /^\s*/,
 	LAST_SPACES = /\s*$/,
 	STRING = 'string',
+	NUMBER = "number",
 	DOMLOADED = "DOMContentLoaded",
 	READYSTATE = "onreadystatechange",
 	FUNC = "function",
@@ -38,8 +39,7 @@ function Simples( selector, context ) {
 }      
 
 /**
- * @name merge
- * @description used to merge objects into one
+ * Simples.merge: used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj native javascript object or array to be merged onto first
  **/
@@ -269,7 +269,7 @@ Simples.fn = Simples.prototype = {
 	},
 	length : 0,
 	selector : EMPTY_STRING,
-	version : '@VERSION',  
+	version : '@VERSION',
 	each : function( callback ){
 		var i=0,l=this.length;
 		while(i<l){

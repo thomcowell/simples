@@ -8,7 +8,61 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	COMPLEX_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)([^>]*)>(.*)<\/\1>/i,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
-	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined";
+	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined",
+	getElements = function(selector, context) {
+
+	    context = context || document;
+	    var tag = selector.substring(1),
+	    elems,
+	    nodes;
+
+	    if (selector.indexOf('#') === 0) {
+	        // Native function
+	        var id = (context && context.nodeType === 9 ? context: document).getElementById(tag);
+	        // test to make sure id is the own specified, because of name being read as id in some browsers
+	        return id && id.id === tag ? [id] : [];
+
+	    } else if (selector.indexOf('.') === 0) {
+	        if (context.getElementsByClassName) {
+	            // Native function
+	            return slice.call(context.getElementsByClassName(tag), 0);
+	        } else {
+	            // For IE which doesn't support getElementsByClassName
+	            elems = context.getElementsByTagName('*');
+	            nodes = [];
+	            // Loop over elements to test for correct class
+	            for (var i = 0, l = elems.length; i < l; i++) {
+	                // Detect whether this element has the class specified
+	                if ((" " + (elems[i].className || elems[i].getAttribute("class")) + " ").indexOf(tag) > -1) {
+	                    nodes.push(elems[i]);
+	                }
+	            }
+	            return nodes;
+	        }
+	    } else if (selector.indexOf('[name=') === 0) {
+	        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
+	        context = context && context.nodeType === 9 ? context: document;
+	        if (context.getElementsByName) {
+	            return slice.call(context.getElementsByName(name));
+	        } else {
+	            // For IE which doesn't support getElementsByClassName
+	            elems = context.getElementsByName('*');
+	            nodes = [];
+	            // Loop over elements to test for correct class
+	            for (var m = 0, n = elems.length; m < n; m++) {
+	                // Detect whether this element has the class specified
+	                if ((" " + (elems[m].name || elems[m].getAttribute("name")) + " ").indexOf(name) > -1) {
+	                    nodes.push(elems[m]);
+	                }
+	            }
+	            return nodes;
+	        }
+	    } else {
+	        // assume that if not id or class must be tag
+	        var find = context.getElementsByTagName(selector);
+	        return find ? slice.call(find, 0) : [];
+	    }
+	};
 
 Simples.Selector = function(selector, context, results) {
     results = results || [];
@@ -70,58 +124,3 @@ Simples.Selector = function(selector, context, results) {
     }
     return results;
 };
-
-function getElements(selector, context) {
-
-    context = context || document;
-    var tag = selector.substring(1),
-    elems,
-    nodes;
-
-    if (selector.indexOf('#') === 0) {
-        // Native function
-        var id = (context && context.nodeType === 9 ? context: document).getElementById(tag);
-        // test to make sure id is the own specified, because of name being read as id in some browsers
-        return id && id.id === tag ? [id] : [];
-
-    } else if (selector.indexOf('.') === 0) {
-        if (context.getElementsByClassName) {
-            // Native function
-            return slice.call(context.getElementsByClassName(tag), 0);
-        } else {
-            // For IE which doesn't support getElementsByClassName
-            elems = context.getElementsByTagName('*');
-            nodes = [];
-            // Loop over elements to test for correct class
-            for (var i = 0, l = elems.length; i < l; i++) {
-                // Detect whether this element has the class specified
-                if ((" " + (elems[i].className || elems[i].getAttribute("class")) + " ").indexOf(tag) > -1) {
-                    nodes.push(elems[i]);
-                }
-            }
-            return nodes;
-        }
-    } else if (selector.indexOf('[name=') === 0) {
-        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
-        context = context && context.nodeType === 9 ? context: document;
-        if (context.getElementsByName) {
-            return slice.call(context.getElementsByName(name));
-        } else {
-            // For IE which doesn't support getElementsByClassName
-            elems = context.getElementsByName('*');
-            nodes = [];
-            // Loop over elements to test for correct class
-            for (var m = 0, n = elems.length; m < n; m++) {
-                // Detect whether this element has the class specified
-                if ((" " + (elems[m].name || elems[m].getAttribute("name")) + " ").indexOf(name) > -1) {
-                    nodes.push(elems[m]);
-                }
-            }
-            return nodes;
-        }
-    } else {
-        // assume that if not id or class must be tag
-        var find = context.getElementsByTagName(selector);
-        return find ? slice.call(find, 0) : [];
-    }
-}
