@@ -4,10 +4,15 @@
 var ACCEPTS = {
     xml: "application/xml, text/xml",
     html: "text/html",
+	script: "text/javascript, application/javascript",
     json: "application/json, text/javascript",
     text: "text/plain",
     _default: "*/*"
 },
+JSON = "json",
+FILE = "file:",
+GET = "GET",
+XML = "xml",
 // REGEXP USED IN THIS FILE
 AJAX_IS_JSON = /^[\],:{}\s]*$/,
 AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
@@ -15,7 +20,6 @@ AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 LAST_AMP = /&$/,
 PARSEERROR = "parsererror",
-TYPEOF = /number|string/,
 // count of active ajax requests
 ActiveAjaxRequests = 0,
 // private method used by Simples.params to build data for request
@@ -53,7 +57,7 @@ httpSuccess = function(xhr) {
     try {
         // If no server status is provided, and we're actually
         // requesting a local file, then it was successful
-        return ! xhr.status && location.protocol == "file:" ||
+        return ! xhr.status && location.protocol == FILE ||
 
         // Any status in the 200 range is good
         (xhr.status >= 200 && xhr.status < 300) ||
@@ -72,7 +76,7 @@ httpSuccess = function(xhr) {
 httpData = function(xhr, type, dataFilter) {
 
     var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
-    xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
+    xml = type === XML || !type && ct.indexOf(XML) >= 0,
     data = xml ? xhr.responseXML: xhr.responseText;
 
     if (xml && data.documentElement.nodeName === PARSEERROR) {
@@ -86,7 +90,7 @@ httpData = function(xhr, type, dataFilter) {
     // The filter can actually parse the response
     if (typeof data === STRING) {
         // Get the JavaScript object, if JSON is used.
-        if (type === "json" || !type && ct.indexOf("json") >= 0) {
+        if (type === JSON || !type && ct.indexOf(JSON) >= 0) {
             // Make sure the incoming data is actual JSON
             // Logic borrowed from http://json.org/json2.js
             if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, EMPTY_STRING))) {
@@ -103,8 +107,8 @@ httpData = function(xhr, type, dataFilter) {
                 throw "Invalid JSON: " + data;
             }
 
-            // If the type is "script", eval it in global context
-        } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
+            // If the type is SCRIPT, eval it in global context
+        } else if (type === SCRIPT || !type && ct.indexOf("javascript") >= 0) {
 
             eval.call(window, data);
         }
@@ -135,7 +139,7 @@ Simples.merge({
 		/**
 		 * Simples.ajaxDefaults.dataType: The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
 		 */
-	    dataType: 'json',
+	    dataType: JSON,
 		/**
 		 * Simples.ajaxDefaults.async: boolean value of whether you want the request to be asynchronous or blocking
 		 */
@@ -143,7 +147,7 @@ Simples.merge({
 		/**
 		 * Simples.ajaxDefaults.type: the HTTP verb type of request GET, POST, PUT, DELETE
 		 */		
-	    type: "GET",
+	    type: GET,
 		/**
 		 * Simples.ajaxDefaults.timeout: the time to allow the request to be open before a timeout is triggered
 		 */
@@ -151,7 +155,7 @@ Simples.merge({
 		/**
 		 * Simples.ajaxDefaults.xhr: helper to return the correct XHR object for your platform
 		 */
-		xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
+		xhr: window.XMLHttpRequest && (window.location.protocol !== FILE || !window.ActiveXObject) ?
 			function() {
 				return new window.XMLHttpRequest();
 			} :
@@ -163,12 +167,16 @@ Simples.merge({
 		/**
 		 * data: data to pass to the server
 		 */
-	    data: null
+	    data: null,
+		/**
+		 * Simples.ajaxDefaults.context: context in which the callback is to be executed
+		 */
+		context : window
 	},
 	/**
 	 * Simples.ajax: used to send an ajax requests
 	 * @param url {String}
-	 * @param options {Object} the options to use specified for each individual request see Simples.ajaxDefaults
+	 * @param options {Object} the options to use specified for each individual request see Simples.ajaxDefaults for description of options
 	 */	
     ajax: function(url, options) {
 
@@ -191,7 +199,7 @@ Simples.merge({
 
 	    if (type === 'POST') {
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	    } else if( type === 'GET'){
+	    } else if( type === GET){
 			url = ( url + ( url.indexOf('?') > 0 ? '&' : '?' ) + options.data );
 		}
 
@@ -203,8 +211,7 @@ Simples.merge({
 
 	    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-		var content = ACCEPTS[ options.dataType ];
-	    xhr.setRequestHeader("Accept", content || ACCEPTS._default );
+	    xhr.setRequestHeader("Accept", ACCEPTS[ options.dataType ] || ACCEPTS._default );
 		// up ajax Counter
 	    ActiveAjaxRequests++;
 	    // Watch for when the state of the document gets updated
@@ -226,17 +233,17 @@ Simples.merge({
 	                try {
 	                    data = httpData(xhr, options.dataType);
 	                } catch(e) {
-	                    options.error(xhr, PARSEERROR);
+	                    options.error.call( options.context, xhr, PARSEERROR);
 	                }
 
-	                options.success(data, 'success', xhr);
+	                options.success.call( options.context, data, 'success', xhr);
 
 	                // Otherwise, an error occurred, so execute the error callback
 	            } else {
-	                options.error(xhr, 'error');
+	                options.error.call( options.context, xhr, 'error');
 	            }
 	            // Call the completion callback
-	            options.complete(xhr, 'complete' );
+	            options.complete.call( options.context, xhr, 'complete' );
 
 	            ActiveAjaxRequests--;
 	            // Clean up after ourselves, to avoid memory leaks
@@ -259,7 +266,7 @@ Simples.merge({
 	    // Establish the connection to the server
 		// Send the data
 		try {
-			xhr.send( (type !== "GET" && s.data) || null );
+			xhr.send( (type !== GET && s.data) || null );
 		} catch( sendError ) {
 			onreadystatechange();
 		}
@@ -269,9 +276,51 @@ Simples.merge({
 	    }
 
 	},
+	/**
+	 * Simples.scriptLoader: used to get scripts from a server
+	 * @param src {String} the source to point to for the request
+	 * @param callback {Function} called when the script is finished loading
+	 */
+	scriptLoader : function( src, callback ){
+
+		var script = document.createElement(SCRIPT),
+			head = document.getElementsByTagName("head")[0] || document.documentElement;
+		
+	    if (script.readyState) {
+	        script.onreadystatechange = function() {
+	            if (script.readyState === "loaded" || script.readyState === "complete") {
+	                script.onreadystatechange = null;
+	                ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+					this.parentNode.removeChild( this );
+	            }
+	        };
+	    } else {
+	        script.onload = function() {
+	            ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+				this.parentNode.removeChild( this );
+	        };
+		}
+
+	    script.type = "text/javascript";
+	    script.async = true;
+	    script.src = src;
+
+	    head.appendChild(script);
+	
+	    // cleanup memory
+	    script = null;
+	},
+	/**
+	 * Simples.ajaxSettings: used to update the global default settings, see Simples.ajaxDefaults description
+	 */
     ajaxSettings: function(opts) {
 	    Simples.ajaxDefaults = Simples.merge(Simples.ajaxDefaults, opts);
 	},
+	/**
+	 * Simples.param: used to format data into a transmittable format takes either one argument of an object of array of objects or 2 arguments of strings
+	 * @param {Object|Array|String} name : value OR [{name:'',value:''}] OR "name" 
+	 * @param {String} value 
+	 */
     params: function(obj) {
 
 	    if( arguments.length === 1 ){ 

@@ -1,11 +1,18 @@
+/**
+ * @private
+ */
 function returnFalse() {
 	return false;
 }
-
+/**
+ * @private
+ */
 function returnTrue() {
 	return true;
 }
-
+/**
+ * Simples.Event: the event constructor to provide unified event object support
+ */
 Simples.Event = function( event ){
 	// Allow instantiation without the 'new' keyword
 	if ( !this.isDefaultPrevented ) {
@@ -61,13 +68,8 @@ Simples.Event.prototype = {
 		// otherwise set the cancelBubble property of the original event to true (IE)
 		e.cancelBubble = true;
 	},
-	stopImmediatePropagation: function() {
-		this.isImmediatePropagationStopped = returnTrue;
-		this.stopPropagation();
-	},
 	isDefaultPrevented: returnFalse,
-	isPropagationStopped: returnFalse,
-	isImmediatePropagationStopped: returnFalse
+	isPropagationStopped: returnFalse
 };
 	
 Simples.Events = {

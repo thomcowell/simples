@@ -181,19 +181,16 @@ Simples.merge({
 		if( elem && elem.nodeType && elem.nodeType != ( 3 || 8 ) ){
 			className = " "+className+" "; 
 			var hasClassName = (" " + elem.className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1;
-			switch( action ){
-				case "add" : 
-					if( !hasClassName ){
-						elem.className = Simples.trim( Simples.trim( elem.className.replace( STRIP_TAB_NEW_LINE, " ") ) + className );
-					}
-					break;
-				case "remove" :
-					if( hasClassName ){
-						elem.className = Simples.trim( (' ' + elem.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( className, ' ' ) );
-					}
-					break;
-				default :
-					return hasClassName;
+			if( action === "add" ){
+				if( !hasClassName ){
+					elem.className = Simples.trim( Simples.trim( elem.className.replace( STRIP_TAB_NEW_LINE, " ") ) + className );
+				}
+		 	} else if( action === "remove" ){
+				if( hasClassName ){
+					elem.className = Simples.trim( (' ' + elem.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( className, ' ' ) );
+				}
+			} else {
+				return hasClassName;
 			}
 		}
 	},

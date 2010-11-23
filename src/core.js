@@ -22,6 +22,7 @@ var toString = Object.prototype.toString,
 	DOMLOADED = "DOMContentLoaded",
 	READYSTATE = "onreadystatechange",
 	FUNC = "function",
+	SCRIPT = "script",
 	OPACITY = "opacity",
 	TOP = "top",
 	LEFT = "left",
@@ -33,7 +34,11 @@ var toString = Object.prototype.toString,
 	readyBound = false,
 	// The functions to execute on DOM ready
 	readyList = [];
-
+/**
+ * Simples: used to instantiate the Simples object
+ * @param {String|Element} selector element is used by object and string is used to select Element(s), see Simples.Selector for more information
+ * @param {Element} context element used to provide context
+ **/
 function Simples( selector, context ) {
 	return new Simples.fn.init( selector, context );
 }      
@@ -41,7 +46,7 @@ function Simples( selector, context ) {
 /**
  * Simples.merge: used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
- * @param {Object|Array} obj native javascript object or array to be merged onto first
+ * @param {Object|Array} obj1, obj2.... native javascript object or array to be merged onto first
  **/
 Simples.merge = function(first /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
@@ -68,38 +73,57 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
 };
 
 Simples.merge({
+	/**
+	 * Simples.extend: used to add functionality to the Simples instance object
+	 * @param {Object|String} addMethods list of names of functions and the function in a opbject, when 2 arguments provided the first should be the name of the function and the function to be added.
+	 */
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		if( toString.call( addMethods ) === ObjectClass ){
+		var klass = toString.call( addMethods );
+		if( klass === ObjectClass ){
 			for (var key in addMethods) {
 		        if ( hasOwn.call( addMethods, key ) ) {
 		            Simples.fn[key] = addMethods[key];
 		        }
 		    }
+		} else if( klass === StringClass && typeof arguments[1] === FUNC ){
+			Simples.fn[ arguments[0] ]= arguments[1];
 		}
-	},  
+	},
+	/**
+	 * Simples.isEmptyObject: used to check an object to see whether it is empty
+	 * @param {Object} obj object to check whether is empty
+	 */
 	isEmptyObject : function( obj ) {
 		for ( var name in obj ) { return false; }
 		return true;
 	},
-	// Has the ready events already been bound?
-	isReady : false,       
-	ready: function( fn ) {
+	/**
+	 * Simples.isReady: a value to indicate whether the browser has been triggered as ready
+	 */
+	isReady : false,
+	/**
+	 * Simples.ready: used to add functions to browser ready queue and are triggered when DOMContentLoaded has been fired or latest window.onload
+	 * @param {Function} callback the function to be fired when ready and or fired if already ready
+	 */
+	ready: function( callback ) {
 		// Attach the listeners
 		Simples.bindReady();
 		
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			fn.call( document, Simples.Event( 'ready' ) );
+			callback.call( document, Simples.Event( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
 			// Add the function to the wait list
-			readyList.push( fn );
+			readyList.push( callback );
 		}
 	},
-	// Handle when the DOM is ready
+	/**
+	 * @private Handle when the DOM is ready
+	 */
 	readyHandler : function() {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
@@ -124,6 +148,9 @@ Simples.merge({
 			}
 		}
 	},
+	/**
+	 * @private To setup the event listeners for the ready event
+	 */
 	bindReady : function(){
 		if ( readyBound ) {
 			return;
@@ -166,17 +193,28 @@ Simples.merge({
 				doScrollCheck();
 			}
 		}
-	},	
+	},
+	/**
+	 * Simples.setContext: used to set the context on a function when the returned function is executed
+	 * @param {Object} context object to execute with
+	 * @param {Function} func the function you want to call with the given context
+	 */
 	setContext : function( context, func ){
 		return function(){
 			return func.apply( context, arguments );
 		};
 	},
-	// Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	/**
+	 * Simples.trim: Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	 * @param {String} text string to trim
+	 */
 	trim : function( text ) {
 		text = text == null ? EMPTY_STRING : text;
 		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
 	},
+	/**
+	 * Simples.noop: an empty function to use as noop function
+	 */
 	noop : function(){}
 });
 
@@ -217,7 +255,13 @@ function doScrollCheck() {
 }
 
 
-Simples.fn = Simples.prototype = { 
+Simples.fn = Simples.prototype = {
+	/**
+	 * Simples( '*' ).init: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
+	 * @param {String|Element} selector
+	 * @param {Object} context
+	 * @returns {Simples} the simples onject with the results of the selector
+	 */
 	init : function( selector, context ){
 
 		// Handle $(EMPTY_STRING), $(null), or $(undefined)

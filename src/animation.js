@@ -211,7 +211,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).aniamte: Used to create animations off the elements in the instance of the Simples object
+	 * Simples( '*' ).animate: Used to create animations off the elements in the instance of the Simples object
 	 * @param action {String} the name of the action to be performed, excluding create && _step
 	 * @param css {Object} CSS to use in animation, final position 
 	 * @param opts {Object}

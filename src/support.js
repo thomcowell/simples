@@ -1,7 +1,7 @@
 // Inside closure to prevent any collisions or leaks
 (function( Simples ){
 
-var root = document.documentElement, div = document.createElement("div"), script = document.createElement("script"), id = "script" + new Date().getTime();
+var root = document.documentElement, div = document.createElement("div"), script = document.createElement(SCRIPT), id = SCRIPT + new Date().getTime();
 
 div.style.display = "none";
 div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
@@ -25,7 +25,7 @@ var eventSupported = function( eventName ) {
 	var isSupported = (eventName in el); 
 	if ( !isSupported ) { 
 		el.setAttribute(eventName, "return;"); 
-		isSupported = typeof el[eventName] === "function"; 
+		isSupported = typeof el[eventName] === FUNC; 
 	} 
 	el = null; 
 
@@ -34,6 +34,7 @@ var eventSupported = function( eventName ) {
 
 Simples.merge({
 	support : { 
+		useQuerySelector : typeof document.querySelectorAll === FUNC,
 		// Make sure that element opacity exists
 		// (IE uses filter instead)
 		// Use a regex to work around a WebKit issue. See jQuery #5145

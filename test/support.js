@@ -10,6 +10,7 @@ test("test that values are assigned", 10, function() {
 	ok( typeof Simples.support.scriptEval === 'boolean', "scriptEval is a boolean value" );        
 	ok( typeof Simples.support.noCloneEvent === 'boolean', "noCloneEvent is a boolean value" );        
 	ok( typeof Simples.support.isBoxModel === 'boolean', "isBoxModel is a boolean value" );        		
+	ok( typeof Simples.support.useQuerySelector === 'boolean', "useQuerySelector is a boolean value" );        		
 });           
 
 test("test that broswer values are returned", 3, function() {

@@ -58,3 +58,7 @@ test("Simples.params - when passing in 1 argument as an array",5,function(){
 	equal( Simples.params([1,true,false,"there",function(){ return 'red'; }]), "", "an array not of objects value should be represented" );
 });
 
+test("Simples.scriptLoader", function(){
+	ok( false, "Need to write tests" );
+})
+
