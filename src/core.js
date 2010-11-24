@@ -311,9 +311,22 @@ Simples.fn = Simples.prototype = {
 		}
 		return this;		
 	},
+	/**
+	 * Simples( '*' ).length: The count of items on the Simples object 
+	 */
 	length : 0,
+	/**
+	 * Simples( '*' ).selector: The selector used to create the Simples object
+	 */
 	selector : EMPTY_STRING,
+	/**
+	 * Simples( '*' ).version: The version of the Simples library
+	 */
 	version : '@VERSION',
+	/**
+	 * Simples( '*' ).each: To loop over each item in the Simples object
+	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 */
 	each : function( callback ){
 		var i=0,l=this.length;
 		while(i<l){
@@ -322,7 +335,11 @@ Simples.fn = Simples.prototype = {
 		}
 		return this;
 	},
-	filter : function( testFn ){
+	/**
+	 * Simples( '*' ).reduce: To reduce the selected elements on the Simples object 
+	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 */
+	reduce : function( testFn ){
 		var i = 0,c = 0,l = this.length;
 		while( i<l ){
 			if( testFn.call( this[c], i, l ) !== true ){ this.splice( c--, 1 ); }
@@ -330,6 +347,10 @@ Simples.fn = Simples.prototype = {
 		}
 		return this;
 	},
+	/**
+	 * Simples( '*' ).find: used to find elements off of the elements currently on the Simples object 
+	 * @param {String} selector string to find elements
+	 */
 	find: function( selector ){ 
 		var results = Simples(), i=0,l=this.length;
 		while(i<l){
@@ -337,6 +358,10 @@ Simples.fn = Simples.prototype = {
 		}
 		return results;
 	},
+	/**
+	 * Simples( '*' ).add: used to add more elements to the current Simples object
+	 * @param {Elements} An array or Simples object of elements to concatenate to the current simples Object
+	 */
 	add : function( elems ){
 		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
 		return this;

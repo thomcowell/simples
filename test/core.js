@@ -290,11 +290,11 @@ test('Simples.find',function(){
 	Simples.Selector = oldSelector;
 });
 
-test('Simples.filter', 14, function(){ 
+test('Simples.reduce', 14, function(){ 
 
 	var s_obj = Simples('div'), counter=0, length = s_obj.length, set = Simples('.row');
 
-	s_obj.filter(function(i,l){ 
+	s_obj.reduce(function(i,l){ 
 		if( i !== counter ){
 			ok( false, "i doesn't equal counter ");
 		} 
@@ -315,7 +315,7 @@ test('Simples.filter', 14, function(){
 	equal( s_obj.length, 8, "should return an instance of Simples");
 	
 	s_obj = Simples('div');
-	s_obj.filter(function(i,l){  
+	s_obj.reduce(function(i,l){  
 		if(i===0){ 
 			return undefined; 
 		} else if( i===(length-1) ){

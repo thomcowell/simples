@@ -153,7 +153,7 @@ Simples.merge({
 	},
 	/**
 	 * Simples.setOffset: to set the offset of the top and left of an element passed on its current offset
-	 * @param {Element} elem
+	 * @param {Element} elem element to set the offset on
 	 * @param {Object} options
 	 * @param {Number} options.top the top offset desired
 	 * @param {Number} options.left	the left offset desired
@@ -192,7 +192,7 @@ Simples.merge({
 	},
 	/**
 	 * Simples.offsetParent: to get the offsetParent of an element
-	 * @param {Element} elem
+	 * @param {Element} elem the element to get the offsetParent of
 	 * @returns {Element}
 	 */
 	offsetParent : function( elem ) {
@@ -235,7 +235,7 @@ Simples.merge({
 	},
 	/**
 	 * Simples.setScroll: 
-	 * @param {Element} elem
+	 * @param {Element} elem element to set the scroll on
 	 * @param {String} name 'top' or 'left' 
 	 * @param {Number} value  	
 	 */
@@ -255,7 +255,7 @@ Simples.merge({
 	},
 	/**
 	 * Simples.getScroll: To retrieve the scrollTop / scrollLeft for a given element
-	 * @param {Element} elem
+	 * @param {Element} elem element to get the scroll of
 	 * @param {String} name 'top' or 'left'
 	 * @returns {Number} the value of the scrollTop / scrollLeft 	
 	 */	

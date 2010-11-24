@@ -34,7 +34,10 @@ var eventSupported = function( eventName ) {
 
 Simples.merge({
 	support : { 
+		// to determine whether querySelector is avaliable
 		useQuerySelector : typeof document.querySelectorAll === FUNC,
+		// to check whether native support is available for the dataset
+		hasDataset : toString.call( document.body.dataset ) === ObjectClass,
 		// Make sure that element opacity exists
 		// (IE uses filter instead)
 		// Use a regex to work around a WebKit issue. See jQuery #5145

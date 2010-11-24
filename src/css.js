@@ -21,9 +21,13 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
-// Create innerHeight, innerWidth, outerHeight and outerWidth methods
-
 Simples.merge({
+	/**
+	 * Simples.getStyle: Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
+	 * @param {Element} elem the element to read the somputed style off
+	 * @param {String} type of the attribute to read
+	 * @param {Boolean} extra used to determine on outerHeight, outerWidth whether to include the margin or just the border
+	 */
 	getStyle : (function( Simples ){
 
         var RWIDTH_HEIGHT = /width|height/i,
@@ -93,7 +97,7 @@ Simples.merge({
 					// Get window width or height
 					// does it walk and quack like a window?
 					if( "scrollTo" in elem && elem.document ){
-						var client = "client" + ( type === WIDTH ) ? "Width" : "Height";
+						var client = "client" + ( ( type === WIDTH ) ? "Width" : "Height" );
 						// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
 						return elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ client ] || elem.document.body[ client ];
 				
@@ -123,14 +127,19 @@ Simples.merge({
 				return null;
 			} else if( elem && ( type === TOP || type === LEFT ) ){
 				// shortcut to prevent the instantiation of another Simples object
-				return Simples.prototype.offset.call( [ elem ] )[ type ];
+				return Simples.offset( elem )[ type ];
 			}
 
-			return Simples.currentCSS( elem, type, extra );
+			return Simples.currentCSS( elem, type );
 		};
 
 	})( Simples ),
-	currentCSS : function(elem, name, extra) {
+	/**
+	 * Simples.currentCSS: 
+	 * @param {Element} elem the element to read the current style attributes off 
+	 * @param {String} name of the style atttribute to read
+	 */	
+	currentCSS : function(elem, name) {
 
 	    var ret, style = elem.style, filter;
 
@@ -203,6 +212,12 @@ Simples.merge({
 
 	    return ret;
 	},
+	/**
+	 * Simples.setStyle: use to set the supplied elements style attribute 
+	 * @param {Element} elem the element to set the style attribute on
+	 * @param {String} name the name of the attribute to set
+	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
+	 */	
 	setStyle : function( elem, name, value ){                       
 		// don't set styles on text and comment nodes
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
@@ -252,6 +267,11 @@ Simples.merge({
 });
 
 Simples.extend({
+	/**
+	 * Simples( '*' ).style: Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+	 * @param {String} type the computed style attribute to read
+	 * @param {Boolean} extra whether to include extra
+	 */	
 	style : function( type, extra ){
 		if( !extra || typeof extra === "boolean" ){
 			return this[0] ? Simples.getStyle( this[0], type, extra ) : null;
@@ -259,6 +279,11 @@ Simples.extend({
 			return this.css( type, extra );
 		}
 	},
+	/**
+	 * Simples( '*' ).css: Used to read the current style attribute or set the current style attribute
+	 * @param {String} name of the attribute to set
+	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
+	 */	
 	css : function( name, value ){ 
 		if( value === undefined && typeof name === STRING ){
 			return Simples.currentCSS( this[0], name );  
