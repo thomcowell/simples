@@ -24,7 +24,7 @@ function clearEvents( elem, type, events, handlers ){
 	}
 	if( events && events[type] ){ delete events[ type ]; }
 	if( handlers && handlers[type] ){ delete handlers[ type ]; }
-};
+}
 /**
  * Simples.Event: the event constructor to provide unified event object support
  * @param {String|Event} the name or event to coerce into a Simples.Event to bridge the differences between implementations

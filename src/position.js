@@ -234,10 +234,10 @@ Simples.merge({
 		};
 	},
 	/**
-	 * Simples.setScroll: 
+	 * Simples.setScroll:
 	 * @param {Element} elem element to set the scroll on
-	 * @param {String} name 'top' or 'left' 
-	 * @param {Number} value  	
+	 * @param {String} name 'top' or 'left'
+	 * @param {Number} value
 	 */
 	setScroll : function( elem, name, val ){
 		win = getWindow( elem );
@@ -257,7 +257,7 @@ Simples.merge({
 	 * Simples.getScroll: To retrieve the scrollTop / scrollLeft for a given element
 	 * @param {Element} elem element to get the scroll of
 	 * @param {String} name 'top' or 'left'
-	 * @returns {Number} the value of the scrollTop / scrollLeft 	
+	 * @returns {Number} the value of the scrollTop / scrollLeft
 	 */	
 	getScroll : function( elem, name ){
 		var isTop = name === TOP;
@@ -317,7 +317,7 @@ Simples.extend({
 	 * Simples( '*' ).position: To retrieve or set the scrollTop / scrollLeft elements on the simples object
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} val the value to set the offset to
-	 * @returns {Number} the value of the scrollTop / scrollLeft 	
+	 * @returns {Number} the value of the scrollTop / scrollLeft
 	 */	
 	position : function(){
 		return this[0] ? Simples.position( this[0] ) : null;

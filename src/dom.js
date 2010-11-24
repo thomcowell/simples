@@ -197,13 +197,13 @@ Simples.merge({
 	 */
 	className : function( elem, className, action ){
 		if( elem && elem.nodeType && elem.nodeType != ( 3 || 8 ) ){
-			className = " "+className+" "; 
+			className = " "+className+" ";
 			var hasClassName = (" " + elem.className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1;
 			if( action === "add" ){
 				if( !hasClassName ){
 					elem.className = Simples.trim( Simples.trim( elem.className.replace( STRIP_TAB_NEW_LINE, " ") ) + className );
 				}
-		 	} else if( action === "remove" ){
+			} else if( action === "remove" ){
 				if( hasClassName ){
 					elem.className = Simples.trim( (' ' + elem.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( className, ' ' ) );
 				}
