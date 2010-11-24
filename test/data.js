@@ -132,9 +132,10 @@ test("Simples.data on invalid element", 1, function() {
 test("Simples.data on element with data as requested", 1, function() {
 	var r_div = document.createElement('div');
 	r_div[ accessID ] = {test:data};
-	
+	r_div.setAttribute('data-test',"sandwich");
 	Simples.data( r_div, 'test', null);	
 	same( r_div[ accessID ].test, undefined, "a div should have data removed");
+	same( r_div.getAttribute('data-test'), null, "a div should have data removed");	
 });
 
 module("Data: cleanData");

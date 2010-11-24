@@ -48,6 +48,11 @@ Simples.merge({
 				if( value !== null ){
 					data[ key ] = value; 
 				} else {
+					if( HAS_DATASET ){
+						delete elem.dataset[ key ];
+					} else {
+						elem.removeAttribute('data-'+key);
+					}
 					delete data[ key ];
 				}      
 			} else if( value === undefined ){
