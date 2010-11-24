@@ -5,7 +5,7 @@
  * Copyright (c) 2009 - 2010, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sat Nov 6 23:16:10 2010 +0000
+ * Date: Tue Nov 23 19:42:34 2010 -0800
  */
 (function( window, undefined ) {
 
@@ -29,9 +29,11 @@ var toString = Object.prototype.toString,
 	FIRST_SPACES = /^\s*/,
 	LAST_SPACES = /\s*$/,
 	STRING = 'string',
+	NUMBER = "number",
 	DOMLOADED = "DOMContentLoaded",
 	READYSTATE = "onreadystatechange",
 	FUNC = "function",
+	SCRIPT = "script",
 	OPACITY = "opacity",
 	TOP = "top",
 	LEFT = "left",
@@ -43,16 +45,19 @@ var toString = Object.prototype.toString,
 	readyBound = false,
 	// The functions to execute on DOM ready
 	readyList = [];
-
+/**
+ * Simples: used to instantiate the Simples object
+ * @param {String|Element} selector element is used by object and string is used to select Element(s), see Simples.Selector for more information
+ * @param {Element} context element used to provide context
+ **/
 function Simples( selector, context ) {
 	return new Simples.fn.init( selector, context );
 }      
 
 /**
- * @name merge
- * @description used to merge objects into one
+ * Simples.merge: used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
- * @param {Object|Array} obj native javascript object or array to be merged onto first
+ * @param {Object|Array} obj1, obj2.... native javascript object or array to be merged onto first
  **/
 Simples.merge = function(first /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
@@ -79,38 +84,57 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
 };
 
 Simples.merge({
+	/**
+	 * Simples.extend: used to add functionality to the Simples instance object
+	 * @param {Object|String} addMethods list of names of functions and the function in a opbject, when 2 arguments provided the first should be the name of the function and the function to be added.
+	 */
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		if( toString.call( addMethods ) === ObjectClass ){
+		var klass = toString.call( addMethods );
+		if( klass === ObjectClass ){
 			for (var key in addMethods) {
 		        if ( hasOwn.call( addMethods, key ) ) {
 		            Simples.fn[key] = addMethods[key];
 		        }
 		    }
+		} else if( klass === StringClass && typeof arguments[1] === FUNC ){
+			Simples.fn[ arguments[0] ]= arguments[1];
 		}
-	},  
+	},
+	/**
+	 * Simples.isEmptyObject: used to check an object to see whether it is empty
+	 * @param {Object} obj object to check whether is empty
+	 */
 	isEmptyObject : function( obj ) {
 		for ( var name in obj ) { return false; }
 		return true;
 	},
-	// Has the ready events already been bound?
-	isReady : false,       
-	ready: function( fn ) {
+	/**
+	 * Simples.isReady: a value to indicate whether the browser has been triggered as ready
+	 */
+	isReady : false,
+	/**
+	 * Simples.ready: used to add functions to browser ready queue and are triggered when DOMContentLoaded has been fired or latest window.onload
+	 * @param {Function} callback the function to be fired when ready and or fired if already ready
+	 */
+	ready: function( callback ) {
 		// Attach the listeners
 		Simples.bindReady();
 		
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			fn.call( document, Simples.Event( 'ready' ) );
+			callback.call( document, Simples.Event( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
 			// Add the function to the wait list
-			readyList.push( fn );
+			readyList.push( callback );
 		}
 	},
-	// Handle when the DOM is ready
+	/**
+	 * @private Handle when the DOM is ready
+	 */
 	readyHandler : function() {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
@@ -135,6 +159,9 @@ Simples.merge({
 			}
 		}
 	},
+	/**
+	 * @private To setup the event listeners for the ready event
+	 */
 	bindReady : function(){
 		if ( readyBound ) {
 			return;
@@ -177,17 +204,28 @@ Simples.merge({
 				doScrollCheck();
 			}
 		}
-	},	
+	},
+	/**
+	 * Simples.setContext: used to set the context on a function when the returned function is executed
+	 * @param {Object} context object to execute with
+	 * @param {Function} func the function you want to call with the given context
+	 */
 	setContext : function( context, func ){
 		return function(){
 			return func.apply( context, arguments );
 		};
 	},
-	// Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	/**
+	 * Simples.trim: Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	 * @param {String} text string to trim
+	 */
 	trim : function( text ) {
 		text = text == null ? EMPTY_STRING : text;
 		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
 	},
+	/**
+	 * Simples.noop: an empty function to use as noop function
+	 */
 	noop : function(){}
 });
 
@@ -228,7 +266,13 @@ function doScrollCheck() {
 }
 
 
-Simples.fn = Simples.prototype = { 
+Simples.fn = Simples.prototype = {
+	/**
+	 * Simples( '*' ).init: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
+	 * @param {String|Element} selector
+	 * @param {Object} context
+	 * @returns {Simples} the simples onject with the results of the selector
+	 */
 	init : function( selector, context ){
 
 		// Handle $(EMPTY_STRING), $(null), or $(undefined)
@@ -278,9 +322,22 @@ Simples.fn = Simples.prototype = {
 		}
 		return this;		
 	},
+	/**
+	 * Simples( '*' ).length: The count of items on the Simples object 
+	 */
 	length : 0,
+	/**
+	 * Simples( '*' ).selector: The selector used to create the Simples object
+	 */
 	selector : EMPTY_STRING,
-	version : '0.1.3',  
+	/**
+	 * Simples( '*' ).version: The version of the Simples library
+	 */
+	version : '0.1.3',
+	/**
+	 * Simples( '*' ).each: To loop over each item in the Simples object
+	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 */
 	each : function( callback ){
 		var i=0,l=this.length;
 		while(i<l){
@@ -289,7 +346,11 @@ Simples.fn = Simples.prototype = {
 		}
 		return this;
 	},
-	filter : function( testFn ){
+	/**
+	 * Simples( '*' ).reduce: To reduce the selected elements on the Simples object 
+	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 */
+	reduce : function( testFn ){
 		var i = 0,c = 0,l = this.length;
 		while( i<l ){
 			if( testFn.call( this[c], i, l ) !== true ){ this.splice( c--, 1 ); }
@@ -297,6 +358,10 @@ Simples.fn = Simples.prototype = {
 		}
 		return this;
 	},
+	/**
+	 * Simples( '*' ).find: used to find elements off of the elements currently on the Simples object 
+	 * @param {String} selector string to find elements
+	 */
 	find: function( selector ){ 
 		var results = Simples(), i=0,l=this.length;
 		while(i<l){
@@ -304,6 +369,10 @@ Simples.fn = Simples.prototype = {
 		}
 		return results;
 	},
+	/**
+	 * Simples( '*' ).add: used to add more elements to the current Simples object
+	 * @param {Elements} An array or Simples object of elements to concatenate to the current simples Object
+	 */
 	add : function( elems ){
 		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
 		return this;
@@ -319,7 +388,7 @@ Simples.fn.init.prototype = Simples.fn;
 // Inside closure to prevent any collisions or leaks
 (function( Simples ){
 
-var root = document.documentElement, div = document.createElement("div"), script = document.createElement("script"), id = "script" + new Date().getTime();
+var root = document.documentElement, div = document.createElement("div"), script = document.createElement(SCRIPT), id = SCRIPT + new Date().getTime();
 
 div.style.display = "none";
 div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
@@ -343,7 +412,7 @@ var eventSupported = function( eventName ) {
 	var isSupported = (eventName in el); 
 	if ( !isSupported ) { 
 		el.setAttribute(eventName, "return;"); 
-		isSupported = typeof el[eventName] === "function"; 
+		isSupported = typeof el[eventName] === FUNC; 
 	} 
 	el = null; 
 
@@ -352,6 +421,10 @@ var eventSupported = function( eventName ) {
 
 Simples.merge({
 	support : { 
+		// to determine whether querySelector is avaliable
+		useQuerySelector : typeof document.querySelectorAll === FUNC,
+		// to check whether native support is available for the dataset
+		hasDataset : toString.call( document.body.dataset ) === ObjectClass,
 		// Make sure that element opacity exists
 		// (IE uses filter instead)
 		// Use a regex to work around a WebKit issue. See jQuery #5145
@@ -446,16 +519,45 @@ var accessID = 'simples'+ new Date().getTime(),
 		"embed": true,
 		"object": true,
 		"applet": true
+	},
+	// HAS_DATASET = Simples.support.hasDataset,
+	/**
+	 * @private
+	 */
+	canDoData = function( elem ){
+		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 	};
-	
-function canDoData( elem ){
-	return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
-}
 
 Simples.merge({
+	/**
+	 * Simples.data: for the provided element you can save data to the elements dataset where a simple string or read data off of the element
+	 * @param {Element} elem the element to read and manipulate dataset
+	 * @param {String} key the name of the dataset to work with
+	 * @param {All} value the value to write to the dataset, where value is undefined will read, where value is null will remove the key and data
+	 * @returns {Object|Null|All} returns dataset object for read where no key, returns value where read and null for eveything else
+	 */
 	data : function( elem, key, value ){
 		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
+			// if (!data.hasReadDataset) {
+			//     if (HAS_DATASET) {
+			//         var dset = elem.dataset;
+			//         for (var name in elem.dataset) {
+			//             data[name] = dset[name];
+			//             dset[name] = "Simples.data( Element, " + name + ")"
+			//         }
+			//     } else {
+			//         var attrs = elem.attributes,
+			//         i = attrs.length;
+			//         while (i) {
+			//             var attr = attrs[--i];
+			//             if (attr.name.indexOf('data-') === 0) {
+			//                 data[attr.name.substring(5)] = attr.value;
+			//             }
+			//         }
+			//     }
+			//     data.hasReadDataset = true;
+			// }
 			if( key && value !== undefined ){
 				if( value !== null ){
 					data[ key ] = value; 
@@ -472,6 +574,11 @@ Simples.merge({
 		}
 		return null;
 	},
+	/**
+	 * Simples.cleanData: for the provided element you can save data to the elements dataset where a simple string or read data off of the element
+	 * @param {Element} elem the element to clean all data off of the children
+	 * @param {Boolean} andSelf whether to include the provided element in with its children in the cleaning process
+	 */
 	cleanData : function( elem, andSelf ){
 		// Remove element nodes and prevent memory leaks
 		var canClean = canDoData( elem );
@@ -500,12 +607,19 @@ Simples.merge({
 });
 
 Simples.extend({
+	/**
+	 * Simples( '*' ).data: for the elements on the Simples object you can save data to the elements dataset where a simple string or read data off of the element, Simples.data for more information
+	 * @param {String} key the name of the dataset to work with
+	 * @param {All} value the value to write to the dataset
+	 * @returns {Simples|All} returns Simples object for write and delete and the value for read
+	 */	
 	data : function( key, value ){   
 		if( typeof key === STRING ){
 			if( value !== undefined ){
-				this.each(function(){
-					Simples.data( this, key, value );
-				});
+				var l=this.length;
+				while( l ){
+					Simples.data( this[--l], key, value );
+				}
 			} else {
 				return this[0] ? Simples.data( this[0], key ) : null;
 			}
@@ -515,27 +629,30 @@ Simples.extend({
 });
 
 // ======= AJAX ========== //
-/** @const */
 // borrowed from jQuery
 var ACCEPTS = {
     xml: "application/xml, text/xml",
     html: "text/html",
-    script: "text/javascript, application/javascript",
+	script: "text/javascript, application/javascript",
     json: "application/json, text/javascript",
     text: "text/plain",
     _default: "*/*"
 },
+JSON = "json",
+FILE = "file:",
+GET = "GET",
+XML = "xml",
+// REGEXP USED IN THIS FILE
 AJAX_IS_JSON = /^[\],:{}\s]*$/,
 AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
 AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
 AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 LAST_AMP = /&$/,
 PARSEERROR = "parsererror",
-TYPEOF = /number|string/;
-
-var ActiveAjaxRequests = 0;
-
-function formatData(name, value) {
+// count of active ajax requests
+ActiveAjaxRequests = 0,
+// private method used by Simples.params to build data for request
+formatData = function(name, value) {
 
     var str = EMPTY_STRING;
 
@@ -563,14 +680,13 @@ function formatData(name, value) {
 		}
     }
     return str;
-}
-
-// Determine the success of the HTTP response
-function httpSuccess(xhr) {
+},
+// private method to determine the success of the HTTP response
+httpSuccess = function(xhr) {
     try {
         // If no server status is provided, and we're actually
         // requesting a local file, then it was successful
-        return ! xhr.status && location.protocol == "file:" ||
+        return ! xhr.status && location.protocol == FILE ||
 
         // Any status in the 200 range is good
         (xhr.status >= 200 && xhr.status < 300) ||
@@ -584,13 +700,12 @@ function httpSuccess(xhr) {
 
     // If checking the status failed, then assume that the request failed too
     return false;
-}
-
-// httpData parsing is from jQuery 1.4
-function httpData(xhr, type, dataFilter) {
+},
+// private method for httpData parsing is from jQuery 1.4
+httpData = function(xhr, type, dataFilter) {
 
     var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
-    xml = type === "xml" || !type && ct.indexOf("xml") >= 0,
+    xml = type === XML || !type && ct.indexOf(XML) >= 0,
     data = xml ? xhr.responseXML: xhr.responseText;
 
     if (xml && data.documentElement.nodeName === PARSEERROR) {
@@ -604,7 +719,7 @@ function httpData(xhr, type, dataFilter) {
     // The filter can actually parse the response
     if (typeof data === STRING) {
         // Get the JavaScript object, if JSON is used.
-        if (type === "json" || !type && ct.indexOf("json") >= 0) {
+        if (type === JSON || !type && ct.indexOf(JSON) >= 0) {
             // Make sure the incoming data is actual JSON
             // Logic borrowed from http://json.org/json2.js
             if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, EMPTY_STRING))) {
@@ -621,30 +736,55 @@ function httpData(xhr, type, dataFilter) {
                 throw "Invalid JSON: " + data;
             }
 
-            // If the type is "script", eval it in global context
-        } else if (type === "script" || !type && ct.indexOf("javascript") >= 0) {
+            // If the type is SCRIPT, eval it in global context
+        } else if (type === SCRIPT || !type && ct.indexOf("javascript") >= 0) {
 
             eval.call(window, data);
         }
     }
 
     return data;
-}
-
+};
+// public methods
 Simples.merge({
+	/**
+	 * Simples.ajaxDefaults: default behaviour for all ajax requests
+	 */
 	ajaxDefaults : {
 	    // Functions to call when the request fails, succeeds,
 	    // or completes (either fail or succeed)
-	    complete: function() {},
-	    error: function() {},
-	    success: function() {},
-	    additionalData: [],
-	    dataType: 'json',
+		/**
+		 * Simples.ajaxDefaults.complete: function to execute when complete arguments are ( xhrObject, 'complete' )
+		 */
+	    complete: Simples.noop,
+		/**
+		 * Simples.ajaxDefaults.error: function to execute when complete arguments are ( xhrObject, 'error' || 'pareseerror' )
+		 */	
+	    error: Simples.noop,
+		/**
+		 * Simples.ajaxDefaults.success: function to execute when complete arguments are ( data, 'success', xhrObject )
+		 */	
+	    success: Simples.noop,
+		/**
+		 * Simples.ajaxDefaults.dataType: The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
+		 */
+	    dataType: JSON,
+		/**
+		 * Simples.ajaxDefaults.async: boolean value of whether you want the request to be asynchronous or blocking
+		 */
 	    async: true,
-		cache: true,
-	    type: "GET",
+		/**
+		 * Simples.ajaxDefaults.type: the HTTP verb type of request GET, POST, PUT, DELETE
+		 */		
+	    type: GET,
+		/**
+		 * Simples.ajaxDefaults.timeout: the time to allow the request to be open before a timeout is triggered
+		 */
 	    timeout: 5000,
-		xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
+		/**
+		 * Simples.ajaxDefaults.xhr: helper to return the correct XHR object for your platform
+		 */
+		xhr: window.XMLHttpRequest && (window.location.protocol !== FILE || !window.ActiveXObject) ?
 			function() {
 				return new window.XMLHttpRequest();
 			} :
@@ -653,11 +793,20 @@ Simples.merge({
 					return new window.ActiveXObject("Microsoft.XMLHTTP");
 				} catch(e) {}
 			},
-	    // The data type that'll be returned from the server
-	    // the default is simply to determine what data was returned from the
-	    // and act accordingly.
-	    data: null
+		/**
+		 * data: data to pass to the server
+		 */
+	    data: null,
+		/**
+		 * Simples.ajaxDefaults.context: context in which the callback is to be executed
+		 */
+		context : window
 	},
+	/**
+	 * Simples.ajax: used to send an ajax requests
+	 * @param url {String}
+	 * @param options {Object} the options to use specified for each individual request see Simples.ajaxDefaults for description of options
+	 */	
     ajax: function(url, options) {
 
 	    // Load the options object with defaults, if no
@@ -672,29 +821,26 @@ Simples.merge({
 	    // How long to wait before considering the request to be a timeout
 	    // Create the request object
 	    var xhr = options.xhr();
+	
+	    if ( options.data ) {
+            options.data = Simples.params( options.data );
+        }
+
+	    if (type === 'POST') {
+	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	    } else if( type === GET){
+			url = ( url + ( url.indexOf('?') > 0 ? '&' : '?' ) + options.data );
+		}
 
 	    // Open the asynchronous POST request
-	    xhr.open(type, url, options.async);
+	    xhr.open( type, url, options.async );
 
 	    // Keep track of when the request has been succesfully completed
 	    var requestDone = false;
 
 	    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-	    if (type === 'POST') {
-	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-	        if ( options.data ) {
-	            options.data = Simples.params(options.data).replace( LAST_AMP, EMPTY_STRING);
-
-	            if ( toString.call( options.additionalData ) === ObjectClass || options.additionalData.length || typeof options.additionalData === STRING) {
-	                options.data += ("&" + Simples.params(options.additionalData));
-	            }
-	        }
-
-	    }
-		var content = ACCEPTS[ options.dataType ];
-	    xhr.setRequestHeader("Accept", content ? content +', '+ACCEPTS._default : ACCEPTS._default );
+	    xhr.setRequestHeader("Accept", ACCEPTS[ options.dataType ] || ACCEPTS._default );
 		// up ajax Counter
 	    ActiveAjaxRequests++;
 	    // Watch for when the state of the document gets updated
@@ -716,19 +862,19 @@ Simples.merge({
 	                try {
 	                    data = httpData(xhr, options.dataType);
 	                } catch(e) {
-	                    options.error(xhr, PARSEERROR);
+	                    options.error.call( options.context, xhr, PARSEERROR);
 	                }
 
-	                options.success(data, 'success');
+	                options.success.call( options.context, data, 'success', xhr);
 
 	                // Otherwise, an error occurred, so execute the error callback
 	            } else {
-	                options.error(xhr, 'error');
+	                options.error.call( options.context, xhr, 'error');
 	            }
-	            ActiveAjaxRequests--;
 	            // Call the completion callback
-	            options.complete(xhr);
+	            options.complete.call( options.context, xhr, 'complete' );
 
+	            ActiveAjaxRequests--;
 	            // Clean up after ourselves, to avoid memory leaks
 	            xhr = null;
 	        }
@@ -749,7 +895,7 @@ Simples.merge({
 	    // Establish the connection to the server
 		// Send the data
 		try {
-			xhr.send( (type !== "GET" && s.data) || null );
+			xhr.send( (type !== GET && s.data) || null );
 		} catch( sendError ) {
 			onreadystatechange();
 		}
@@ -759,9 +905,51 @@ Simples.merge({
 	    }
 
 	},
+	/**
+	 * Simples.scriptLoader: used to get scripts from a server
+	 * @param src {String} the source to point to for the request
+	 * @param callback {Function} called when the script is finished loading
+	 */
+	scriptLoader : function( src, callback ){
+
+		var script = document.createElement(SCRIPT),
+			head = document.getElementsByTagName("head")[0] || document.documentElement;
+		
+	    if (script.readyState) {
+	        script.onreadystatechange = function() {
+	            if (script.readyState === "loaded" || script.readyState === "complete") {
+	                script.onreadystatechange = null;
+	                ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+					this.parentNode.removeChild( this );
+	            }
+	        };
+	    } else {
+	        script.onload = function() {
+	            ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+				this.parentNode.removeChild( this );
+	        };
+		}
+
+	    script.type = "text/javascript";
+	    script.async = true;
+	    script.src = src;
+
+	    head.appendChild(script);
+	
+	    // cleanup memory
+	    script = null;
+	},
+	/**
+	 * Simples.ajaxSettings: used to update the global default settings, see Simples.ajaxDefaults description
+	 */
     ajaxSettings: function(opts) {
 	    Simples.ajaxDefaults = Simples.merge(Simples.ajaxDefaults, opts);
 	},
+	/**
+	 * Simples.param: used to format data into a transmittable format takes either one argument of an object of array of objects or 2 arguments of strings
+	 * @param {Object|Array|String} name : value OR [{name:'',value:''}] OR "name" 
+	 * @param {String} value 
+	 */
     params: function(obj) {
 
 	    if( arguments.length === 1 ){ 
@@ -797,41 +985,117 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	COMPLEX_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)([^>]*)>(.*)<\/\1>/i,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
-	QUERY_SELECTOR = typeof document.querySelectorAll !== "undefined";
+	QUERY_SELECTOR = Simples.support.useQuerySelector,
+	/**
+	 * @private
+	 */
+	getElements = function(selector, context) {
 
+	    context = context || document;
+	    var tag = selector.substring(1),
+	    elems,
+	    nodes;
+
+	    if (selector.indexOf('#') === 0) {
+	        // Native function
+	        var id = (context && context.nodeType === 9 ? context: document).getElementById(tag);
+	        // test to make sure id is the own specified, because of name being read as id in some browsers
+	        return id && id.id === tag ? [id] : [];
+
+	    } else if (selector.indexOf('.') === 0) {
+	        if (context.getElementsByClassName) {
+	            // Native function
+	            return slice.call(context.getElementsByClassName(tag), 0);
+	        } else {
+	            // For IE which doesn't support getElementsByClassName
+	            elems = context.getElementsByTagName('*');
+	            nodes = [];
+	            // Loop over elements to test for correct class
+	            for (var i = 0, l = elems.length; i < l; i++) {
+	                // Detect whether this element has the class specified
+	                if ( Simples.className( elems[i], tag ) ) {
+	                    nodes.push(elems[i]);
+	                }
+	            }
+	            return nodes;
+	        }
+	    } else if (selector.indexOf('[name=') === 0) {
+	        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
+	        context = context && context.nodeType === 9 ? context: document;
+	        if (context.getElementsByName) {
+	            return slice.call(context.getElementsByName(name));
+	        } else {
+	            // For IE which doesn't support getElementsByClassName
+	            elems = context.getElementsByName('*');
+	            nodes = [];
+	            // Loop over elements to test for correct class
+	            for (var m = 0, n = elems.length; m < n; m++) {
+	                // Detect whether this element has the class specified
+	                if ((" " + (elems[m].name || elems[m].getAttribute("name")) + " ").indexOf(name) > -1) {
+	                    nodes.push(elems[m]);
+	                }
+	            }
+	            return nodes;
+	        }
+	    } else {
+	        // assume that if not id or class must be tag
+	        var find = context.getElementsByTagName(selector);
+	        return find ? slice.call(find, 0) : [];
+	    }
+	},
+	/**
+	 * @private provide html & object to bind to
+	 */
+	createDOM = function( selector, results ){
+
+		results.context = document;
+
+		if( COMPLEX_TAG.test( selector ) ){
+            results.selector = "<"+COMPLEX_TAG.exec( selector )[1]+">";
+
+			var div = document.createElement('div');
+            div.innerHTML = selector;
+            results.push.apply( results, slice.call( div.childNodes, 0 ) );
+
+        } else if( SINGLE_TAG.test( selector ) ) {
+            var tag = SINGLE_TAG.exec( selector );
+
+			results.selector = tag[0];
+            results.push( document.createElement(tag[1]) );
+		}
+
+		return results;
+	};
+
+/**
+ * Simples.Selector: used to create or select Elements selector based on .class #id and [name=name]
+ * @param {String|Element} selector element is used by object and string is used to select Element(s), based on className, id and name and where the querySelector is available using querySelectorAll
+ * @param {Element} context element used to provide context
+ * @param {Object|Array} results optional object to return selected Elements
+ */
 Simples.Selector = function(selector, context, results) {
     results = results || [];
 	results.selector = selector;
 	results.context = context || document;
 
     if (typeof(selector) === STRING) {
-        if (QUERY_SELECTOR && selector.indexOf('<') < 0) {
+        // check selector if structured to create element
+		if( selector.indexOf('<') > -1 && selector.indexOf('>') > 0 ){
+			return createDOM( selector, results );
+        } else if ( QUERY_SELECTOR ) {
             results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
             return results;
-        }
-        // if it is a multi select split and short cut the process
-        if (COMMA_WITH_BOUNDARY.test(selector)) {
-            var get = selector.split(COMMA_WITH_BOUNDARY);
-
-            for (var x = 0, y = get.length; x < y; x++) {
-
-                results.push.apply(results, slice.call(Simples.Selector(get[x], context), 0));
-            }
-            return results;
-        }
-        // check selector if structured to create element
-		 if( COMPLEX_TAG.test( selector ) ){
-            results.selector = "<"+COMPLEX_TAG.exec( selector )[1]+">";
-            results.context = document;
-            var div = document.createElement('div');
-            div.innerHTML = selector;
-            results.push.apply( results, slice.call( div.childNodes, 0 ) );
-        } else if( SINGLE_TAG.test( selector ) ) {
-            var tag = SINGLE_TAG.exec( selector );
-            results.context = document;
-            results.selector = tag[0];
-            results.push(document.createElement(tag[1]));
         } else {
+	        // if it is a multi select split and short cut the process
+	        if (COMMA_WITH_BOUNDARY.test(selector)) {
+	            var get = selector.split(COMMA_WITH_BOUNDARY);
+
+	            for (var x = 0, y = get.length; x < y; x++) {
+
+	                results.push.apply(results, slice.call(Simples.Selector(get[x], context), 0));
+	            }
+	            return results;
+	        }
             // clean up selector
             // selector = selector.replace(TAG_STRIP, EMPTY_STRING);
             // get last id in selector
@@ -859,61 +1123,6 @@ Simples.Selector = function(selector, context, results) {
     }
     return results;
 };
-
-function getElements(selector, context) {
-
-    context = context || document;
-    var tag = selector.substring(1),
-    elems,
-    nodes;
-
-    if (selector.indexOf('#') === 0) {
-        // Native function
-        var id = (context && context.nodeType === 9 ? context: document).getElementById(tag);
-        // test to make sure id is the own specified, because of name being read as id in some browsers
-        return id && id.id === tag ? [id] : [];
-
-    } else if (selector.indexOf('.') === 0) {
-        if (context.getElementsByClassName) {
-            // Native function
-            return slice.call(context.getElementsByClassName(tag), 0);
-        } else {
-            // For IE which doesn't support getElementsByClassName
-            elems = context.getElementsByTagName('*');
-            nodes = [];
-            // Loop over elements to test for correct class
-            for (var i = 0, l = elems.length; i < l; i++) {
-                // Detect whether this element has the class specified
-                if ((" " + (elems[i].className || elems[i].getAttribute("class")) + " ").indexOf(tag) > -1) {
-                    nodes.push(elems[i]);
-                }
-            }
-            return nodes;
-        }
-    } else if (selector.indexOf('[name=') === 0) {
-        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
-        context = context && context.nodeType === 9 ? context: document;
-        if (context.getElementsByName) {
-            return slice.call(context.getElementsByName(name));
-        } else {
-            // For IE which doesn't support getElementsByClassName
-            elems = context.getElementsByName('*');
-            nodes = [];
-            // Loop over elements to test for correct class
-            for (var m = 0, n = elems.length; m < n; m++) {
-                // Detect whether this element has the class specified
-                if ((" " + (elems[m].name || elems[m].getAttribute("name")) + " ").indexOf(name) > -1) {
-                    nodes.push(elems[m]);
-                }
-            }
-            return nodes;
-        }
-    } else {
-        // assume that if not id or class must be tag
-        var find = context.getElementsByTagName(selector);
-        return find ? slice.call(find, 0) : [];
-    }
-}
 var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	SINGLE_ARG_READ = /^outer$|^inner$|^text$/,
 	IMMUTABLE_ATTR = /(button|input)/i,
@@ -921,58 +1130,64 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
 	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i,
 	TAG_LIST = {'UL':'LI','DL':'DT','TR':'TD'},
-	QUOTE_MATCHER = /(["']?)/g;
-
-// private method - Borrowed from XUI project
-// Wraps the HTML in a TAG, Tag is optional. If the html starts with a Tag, it will wrap the context in that tag.
-function wrapHelper(xhtml, el) {
-	// insert into documentFragment to ensure insert occurs without messing up order
-	if( xhtml.toString().indexOf("[object ") > -1 ){
-		if( xhtml && xhtml.length !== undefined ){
-			var docFrag = document.createDocumentFragment();
-			xhtml = slice.call( xhtml, 0 );
-			for(var p=0,r=xhtml.length;p<r;p++){
-				docFrag.appendChild( xhtml[p] );
+	QUOTE_MATCHER = /(["']?)/g,
+	/**
+	 * @private - Borrowed from XUI project
+	 * Wraps the HTML in a TAG, Tag is optional. If the html starts with a Tag, it will wrap the context in that tag.
+	 */
+	wrapHelper = function(xhtml, el) {
+		// insert into documentFragment to ensure insert occurs without messing up order
+		if( xhtml.toString().indexOf("[object ") > -1 ){
+			if( xhtml && xhtml.length !== undefined ){
+				var docFrag = document.createDocumentFragment();
+				xhtml = slice.call( xhtml, 0 );
+				for(var p=0,r=xhtml.length;p<r;p++){
+					docFrag.appendChild( xhtml[p] );
+				}
+				xhtml = docFrag;
 			}
-			xhtml = docFrag;
-		}
 		
-		return xhtml;
-	}
-    var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
-    xhtml = EMPTY_STRING + xhtml;
-    if ( VALID_ELEMENTS.test(xhtml) ) {
-        result = VALID_ELEMENTS.exec(xhtml);
-		tag = result[1];
+			return xhtml;
+		}
+	    var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
+	    xhtml = EMPTY_STRING + xhtml;
+	    if ( VALID_ELEMENTS.test(xhtml) ) {
+	        result = VALID_ELEMENTS.exec(xhtml);
+			tag = result[1];
 
-        // if the node has any attributes, convert to object
-        if (result[2] !== EMPTY_STRING) {
-            attrList = result[2].split( SPLIT_ATTRIBUTE );
+	        // if the node has any attributes, convert to object
+	        if (result[2] !== EMPTY_STRING) {
+	            attrList = result[2].split( SPLIT_ATTRIBUTE );
 
-            for (var l=attrList.length; i < l; i++) {
-                attr = Simples.trim( attrList[i] );
-                if (attr !== EMPTY_STRING && attr !== " ") {
-                    node = attr.split('=');
-                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, EMPTY_STRING);
-                }
-            }
-        }
-        xhtml = result[3];
-    } else {
-		tag = (el.firstChild === null) ? TAG_LIST[el.tagName] || el.tagName : el.firstChild.tagName;
-	}
+	            for (var l=attrList.length; i < l; i++) {
+	                attr = Simples.trim( attrList[i] );
+	                if (attr !== EMPTY_STRING && attr !== " ") {
+	                    node = attr.split('=');
+	                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, EMPTY_STRING);
+	                }
+	            }
+	        }
+	        xhtml = result[3];
+	    } else {
+			tag = (el.firstChild === null) ? TAG_LIST[el.tagName] || el.tagName : el.firstChild.tagName;
+		}
 
-    element = document.createElement(tag);
+	    element = document.createElement(tag);
 
-    for( x in attributes ){
-		Simples.attr( element, x, attributes[x] );
-	}
+	    for( x in attributes ){
+			Simples.attr( element, x, attributes[x] );
+		}
 
-    element.innerHTML = xhtml;
-    return element;
-}
+	    element.innerHTML = xhtml;
+	    return element;
+	};
 
 Simples.merge({
+	/**
+	 * Simples.domRead: to read the html from a elem
+	 * @param {Element} elem the element to read the dom html from
+	 * @param {String} location to specify how to return the dom options are [ outer, text, inner/undefined ] use outer for outerHTML, text to read all the textNodes and inner or no argument for innerHTML
+	 */
 	domRead : function( elem, location ){
 		if( elem && elem.nodeType ){
 			switch( location ){
@@ -1005,6 +1220,12 @@ Simples.merge({
 			}
 		}
 	},
+	/**
+	 * Simples.domManip: to write the dom new html string or dom elements
+	 * @param {Element} elem the element to read the dom html from
+	 * @param {String} location to specify how to return the dom options are desctructive: [remove, empty, outer, text, inner/undefined ], non-destructive: [top, bottom, unwrap, before, after, wrap ]
+	 * @param {String|Elements} html the string or Elements to put into the dom
+	 */	
 	domManip : function( elem, location, html ){
 		var el, parent = elem.parentNode;
 		if( !elem || !elem.nodeType ){ return; }
@@ -1093,26 +1314,35 @@ Simples.merge({
 		}
 		return el;
 	},
+	/**
+	 * Simples.className: to either check for a className, add or remove a className
+	 * @param {Element} elem the element to manipulate the className on
+	 * @param {String} className the class to work with
+	 * @param {String} action to perform the step [ add, remove, has/undefined ]
+	 */
 	className : function( elem, className, action ){
 		if( elem && elem.nodeType && elem.nodeType != ( 3 || 8 ) ){
-			className = " "+className+" "; 
+			className = " "+className+" ";
 			var hasClassName = (" " + elem.className + " ").replace( STRIP_TAB_NEW_LINE, " ").indexOf( className ) > -1;
-			switch( action ){
-				case "add" : 
-					if( !hasClassName ){
-						elem.className = Simples.trim( Simples.trim( elem.className.replace( STRIP_TAB_NEW_LINE, " ") ) + className );
-					}
-					break;
-				case "remove" :
-					if( hasClassName ){
-						elem.className = Simples.trim( (' ' + elem.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( className, ' ' ) );
-					}
-					break;
-				default :
-					return hasClassName;
+			if( action === "add" ){
+				if( !hasClassName ){
+					elem.className = Simples.trim( Simples.trim( elem.className.replace( STRIP_TAB_NEW_LINE, " ") ) + className );
+				}
+			} else if( action === "remove" ){
+				if( hasClassName ){
+					elem.className = Simples.trim( (' ' + elem.className.replace( STRIP_TAB_NEW_LINE, " ") +' ').replace( className, ' ' ) );
+				}
+			} else {
+				return hasClassName;
 			}
 		}
 	},
+	/**
+	 * Simples.attr: read / write the attribute on an element
+	 * @param {Element} elem the element to manipulate the attribute
+	 * @param {String} name the name of the attribute
+	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
+	 */
 	attr : function( elem, name, value ){
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return undefined;
@@ -1157,6 +1387,12 @@ Simples.merge({
 });
 
 Simples.extend({
+	/**
+	 * Simples( '*' ).html: to read or write to the dom basd on the elements on the Simples object
+	 * @param {String} location to specify how to return the dom options are desctructive: [remove, empty, outer, text, inner/undefined ], non-destructive: [top, bottom, unwrap, before, after, wrap ]
+	 * @param {String|Elements} html the string or Elements to put into the dom, if not specfied where location is [ outer, text, inner/undefined ] will read
+	 * @returns {Simples|String} if writing to the dom will return this, else will return string of dom
+	 */
 	html : function( location, html ){
 
 		if ( arguments.length === 0 || ( arguments.length === 1 && SINGLE_ARG_READ.test( location ) ) ) {
@@ -1171,7 +1407,11 @@ Simples.extend({
 
 		return this;
 	},
-	// attributes	
+	/**
+	 * Simples( '*' ).hasClass: to determine whether any of the elements on the Simples object has the specified className
+	 * @params {String} className the exact className to test for
+	 * @returns {Boolean} indicating whether className is on elements of Simples object
+	 */
 	hasClass : function( className ){
 		for ( var i = 0, l = this.length; i < l; i++ ) {
 			if ( Simples.className( this[i], className ) ) {
@@ -1179,19 +1419,34 @@ Simples.extend({
 			}
 		}
 		return false;
-	},     
+	},
+	/**
+	 * Simples( '*' ).addClass: to add the specified className to the elements on the Simples object with the specified className
+	 * @params {String} className the className to add to the elements
+	 */
 	addClass : function( className ){
-		for ( var i = 0, l = this.length; i < l; i++ ) {
-			Simples.className( this[i], className, "add" );
+		var l = this.length;
+		while ( l ) {
+			Simples.className( this[ --l ], className, "add" );
 		}
 		return this;
 	},
-	removeClass : function( className ){  
-		for ( var i = 0, l = this.length; i < l; i++ ) {
-			Simples.className( this[i], className, "remove" );
+	/**
+	 * Simples( '*' ).removeClass: to remove the specified className to the elements on the Simples object with the specified className
+	 * @params {String} className the className to remove to the elements
+	 */
+	removeClass : function( className ){
+		var l = this.length;
+		while ( l ) {
+			Simples.className( this[ --l ], className, "remove" );
 		}
 		return this;		
 	},
+	/**
+	 * Simples( '*' ).attr: to read / write the given attribute to the elements on the Simples object
+	 * @param {String} name the name of the attribute
+	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
+	 */
 	attr : function(name, value){
 		var nameClass = toString.call( name );
 			
@@ -1213,17 +1468,26 @@ Simples.extend({
 		return this;
 	},
 	/* TODO: Rename me as I don't indicate functionality */
+	/**
+	 * Simples( '*' ).traverse: to select a new set of elements off of the elements in the Simples object
+	 * @params {String|Function} name the string to specify the traversing, i.e. childNodes, parentNode, etc or a function to walk 
+	 */
 	traverse : function( name ){
-		var isWhat = toString.call( name ), results = new Simples();
-		this.each(function(){
-			var elem = ( isWhat === StringClass ) ? this[ name ] : ( isWhat === FunctionClass ) ? name.call( this, this ) : null;
+		var isWhat = toString.call( name ), results = new Simples(), i=0,l = this.length;
+		while( i<l ){
+			var current = this[i++], elem = ( isWhat === StringClass ) ? current[ name ] : ( isWhat === FunctionClass ) ? name.call( current, current ) : null;
 			if( elem ){
 				results.push.apply( results, elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ] );
 			}
-		});
+		}
 		
 		return results;
 	},
+	/**
+	 * Simples( '*' ).slice: to return a subset of the selected elements
+	 * @params {Number} i the first element to start slicing
+	 * @params {Number} len the last element to finish slicing this is optional if not specified then the slice is to the last element
+	 */	
 	slice : function( i, len ){
 		len = ( 0 < len ) ? len : 1 ;
 		return Simples( slice.apply( this, i < 0 ? [ i ] : [+i, i+len]  ), true );
@@ -1252,9 +1516,13 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
-// Create innerHeight, innerWidth, outerHeight and outerWidth methods
-
 Simples.merge({
+	/**
+	 * Simples.getStyle: Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
+	 * @param {Element} elem the element to read the somputed style off
+	 * @param {String} type of the attribute to read
+	 * @param {Boolean} extra used to determine on outerHeight, outerWidth whether to include the margin or just the border
+	 */
 	getStyle : (function( Simples ){
 
         var RWIDTH_HEIGHT = /width|height/i,
@@ -1324,7 +1592,7 @@ Simples.merge({
 					// Get window width or height
 					// does it walk and quack like a window?
 					if( "scrollTo" in elem && elem.document ){
-						var client = "client" + ( type === WIDTH ) ? "Width" : "Height";
+						var client = "client" + ( ( type === WIDTH ) ? "Width" : "Height" );
 						// Everyone else use document.documentElement or document.body depending on Quirks vs Standards mode
 						return elem.document.compatMode === "CSS1Compat" && elem.document.documentElement[ client ] || elem.document.body[ client ];
 				
@@ -1354,14 +1622,19 @@ Simples.merge({
 				return null;
 			} else if( elem && ( type === TOP || type === LEFT ) ){
 				// shortcut to prevent the instantiation of another Simples object
-				return Simples.prototype.offset.call( [ elem ] )[ type ];
+				return Simples.offset( elem )[ type ];
 			}
 
-			return Simples.currentCSS( elem, type, extra );
+			return Simples.currentCSS( elem, type );
 		};
 
 	})( Simples ),
-	currentCSS : function(elem, name, extra) {
+	/**
+	 * Simples.currentCSS: 
+	 * @param {Element} elem the element to read the current style attributes off 
+	 * @param {String} name of the style atttribute to read
+	 */	
+	currentCSS : function(elem, name) {
 
 	    var ret, style = elem.style, filter;
 
@@ -1434,6 +1707,12 @@ Simples.merge({
 
 	    return ret;
 	},
+	/**
+	 * Simples.setStyle: use to set the supplied elements style attribute 
+	 * @param {Element} elem the element to set the style attribute on
+	 * @param {String} name the name of the attribute to set
+	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
+	 */	
 	setStyle : function( elem, name, value ){                       
 		// don't set styles on text and comment nodes
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
@@ -1445,7 +1724,7 @@ Simples.merge({
 			value = undefined;
 		}
 
-		if ( typeof value === "number" && !REXCLUDE.test(name) ) {
+		if ( typeof value === NUMBER && !REXCLUDE.test(name) ) {
 			value += "px";
 		}
 
@@ -1483,6 +1762,11 @@ Simples.merge({
 });
 
 Simples.extend({
+	/**
+	 * Simples( '*' ).style: Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+	 * @param {String} type the computed style attribute to read
+	 * @param {Boolean} extra whether to include extra
+	 */	
 	style : function( type, extra ){
 		if( !extra || typeof extra === "boolean" ){
 			return this[0] ? Simples.getStyle( this[0], type, extra ) : null;
@@ -1490,6 +1774,11 @@ Simples.extend({
 			return this.css( type, extra );
 		}
 	},
+	/**
+	 * Simples( '*' ).css: Used to read the current style attribute or set the current style attribute
+	 * @param {String} name of the attribute to set
+	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
+	 */	
 	css : function( name, value ){ 
 		if( value === undefined && typeof name === STRING ){
 			return Simples.currentCSS( this[0], name );  
@@ -1514,14 +1803,37 @@ Simples.extend({
 		return this;
 	}
 });
+/**
+ * @private
+ */
 function returnFalse() {
 	return false;
 }
-
+/**
+ * @private
+ */
 function returnTrue() {
 	return true;
 }
+/**
+ * @private used to clear all events on a provided element
+ */
+function clearEvents( elem, type, events, handlers ){
+	// check whether it is a W3C browser or not
+	if ( elem.removeEventListener ) {
+		// remove event listener and unregister element event
+		elem.removeEventListener( type, handlers[ type ], false );
+	} else if ( elem.detachEvent ) {
 
+		elem.detachEvent( "on" + type, handlers[ type ] );
+	}
+	if( events && events[type] ){ delete events[ type ]; }
+	if( handlers && handlers[type] ){ delete handlers[ type ]; }
+}
+/**
+ * Simples.Event: the event constructor to provide unified event object support
+ * @param {String|Event} the name or event to coerce into a Simples.Event to bridge the differences between implementations
+ */
 Simples.Event = function( event ){
 	// Allow instantiation without the 'new' keyword
 	if ( !this.isDefaultPrevented ) {
@@ -1546,8 +1858,13 @@ Simples.Event = function( event ){
 	// return self
 	return this;   
 };
-
+/**
+ * Simples.Event: the event constructor to provide unified event object support
+ */
 Simples.Event.prototype = {
+	/** 
+	 * Simples.Event( '*' ).preventDefault: used to prevent the browser from performing its default action
+	 */
 	preventDefault: function() {
 		this.isDefaultPrevented = returnTrue;
 
@@ -1563,6 +1880,9 @@ Simples.Event.prototype = {
 		// otherwise set the returnValue property of the original event to false (IE)
 		e.returnValue = false;
 	},
+	/** 
+	 * Simples.Event( '*' ).stopPropagation: used to stop the event from continuing its bubbling
+	 */	
 	stopPropagation: function() {
 		this.isPropagationStopped = returnTrue;
 
@@ -1577,16 +1897,34 @@ Simples.Event.prototype = {
 		// otherwise set the cancelBubble property of the original event to true (IE)
 		e.cancelBubble = true;
 	},
+	/** 
+	 * Simples.Event( '*' ).stopImmediatePropagation: used to stop the event bubbling up and any other event callbacks from being triggered on the current element
+	 */	
 	stopImmediatePropagation: function() {
-		this.isImmediatePropagationStopped = returnTrue;
-		this.stopPropagation();
+	    this.isImmediatePropagationStopped = returnTrue;
+	    this.stopPropagation();
 	},
+	/** 
+	 * Simples.Event( '*' ).isDefaultPrevented: used to determine wherther the event has had preventDefault called
+	 */	
 	isDefaultPrevented: returnFalse,
+	/** 
+	 * Simples.Event( '*' ).isPropagationStopped: used to determine wherther the event has had stopPropagation called
+	 */	
 	isPropagationStopped: returnFalse,
+	/** 
+	 * Simples.Event( '*' ).isImmediatePropagationStopped: used to determine wherther the event has had stopImmediatePropagation called
+	 */	
 	isImmediatePropagationStopped: returnFalse
 };
 	
 Simples.Events = {
+	/**
+	 * Simples.Events.attach: to add the event to the provided element
+	 * @param {Element} elem the element to attach the event to	
+	 * @param {String} type the type of event to bind i.e. click, custom, etc
+	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
+	 */
 	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
@@ -1631,18 +1969,12 @@ Simples.Events = {
 			
 		}
 	},
-	clearEvent : function( elem, type, events, handlers ){
-		// check whether it is a W3C browser or not
-		if ( elem.removeEventListener ) {
-			// remove event listener and unregister element event
-			elem.removeEventListener( type, handlers[ type ], false );
-		} else if ( elem.detachEvent ) {
-
-			elem.detachEvent( "on" + type, handlers[ type ] );
-		}
-		if( events && events[type] ){ delete events[ type ]; }
-		if( handlers && handlers[type] ){ delete handlers[ type ]; }
-	},
+	/**
+	 * Simples.Events.detach: to remove the event from the provided element
+	 * @param {Element} elem the element to detach the event from
+	 * @param {String} type the type of event to unbind i.e. click, custom, etc, if no type is specifed then all events are unbound
+	 * @param {Function} callback the callback to unbind, if not specified will unbind all the callbacks to this event	
+	 */
 	detach : function( elem, type, callback ){
 		
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
@@ -1679,6 +2011,12 @@ Simples.Events = {
 			}
 		}
 	},
+	/**
+	 * Simples.Events.trigger: to trigger an event on a supplied element
+	 * @param {Element} elem the element to trigger the event on
+	 * @param {String} type the type of event to trigger i.e. click, custom, etc
+	 * @param {Any} data the data to attach to the event	
+	 */
 	trigger : function( elem, type, data ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
@@ -1702,7 +2040,13 @@ Simples.Events = {
 			} 
 		}		                                         
 	},
+	/**
+	 * @private properties as part of the fix process
+	 */
 	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
+	/**
+	 * @private to fix the native Event
+	 */
 	fix : function( event ){
 		 if( event[ accessID ] ){
 			return event;
@@ -1758,8 +2102,14 @@ Simples.Events = {
 		}
 
 	    return event;
-	},       
+	},
+	/**
+	 * @private to create a unique identifier for each event callback
+	 */
 	guid : 1e6,
+	/**
+	 * @private event handler this is bound to the elem event
+	 */
 	handler : function( event ){ 
 		var events, callbacks;
 		var args = slice.call( arguments );
@@ -1795,6 +2145,11 @@ Simples.Events = {
 };
 
 Simples.extend({
+	/**
+	 * Simples( '*' ).bind: to add the event from the elements on the Simples object
+	 * @param {String} type the type of event to bind i.e. click, custom, etc
+	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
+	 */
 	bind : function( type, callback ){
 		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
@@ -1806,6 +2161,11 @@ Simples.extend({
 		}
 		return this;	
 	},
+	/**
+	 * Simples( '*' ).unbind: to remove the event from the elements on the Simples object
+	 * @param {String} type the type of event to unbind i.e. click, custom, etc, if no type is specifed then all events are unbound
+	 * @param {Function} callback the callback to unbind, if not specified will unbind all the callbacks to this event
+	 */
 	unbind : function( type, callback ){
 		// Loop over elements    
 		var detach = Simples.Events.detach,i=0,l=this.length;
@@ -1814,7 +2174,12 @@ Simples.extend({
 			detach( this[i++], type, callback );
 		}
 		return this;
-	}, 
+	},
+	/**
+	 * Simples( '*' ).trigger: to trigger an event on the elements on the Simples object
+	 * @param {String} type the type of event to trigger i.e. click, custom, etc
+	 * @param {Any} data the data to attach to the event
+	 */
 	trigger : function( type, data ){
 		if( typeof type === STRING){ 
 			// Loop over elements
@@ -1828,9 +2193,21 @@ Simples.extend({
 	}
 });
 // OMG its another non-W3C standard browser 
-var REGEX_HTML_BODY = /^body|html$/i;
+var REGEX_HTML_BODY = /^body|html$/i,
+getWindow = function( elem ) {
+	return ("scrollTo" in elem && elem.document) ?
+		elem :
+		elem.nodeType === 9 ?
+			elem.defaultView || elem.parentWindow :
+			false;
+};
 
 if( "getBoundingClientRect" in document.documentElement ){
+	/**
+	 * Simples.offset: to get the top, left offset of an element
+	 * @param {Element} elem the element to get the offset of
+	 * @returns {Object} top, left
+	 */
 	Simples.offset = function( elem ){
 
 		if ( !elem || !elem.ownerDocument ) {
@@ -1913,7 +2290,9 @@ if( "getBoundingClientRect" in document.documentElement ){
 		return { top: top, left: left };
 	};
 }
-
+/**
+ * @private 
+ */
 Simples.offset.init = function(){
 	var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
 		html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
@@ -1949,6 +2328,11 @@ Simples.offset.init = function(){
 };
 
 Simples.merge({
+	/**
+	 * Simples.bodyOffset: to get the offset of the body 
+	 * @param {Body} body body element to measure
+	 * @returns {Object} top, left
+	 */
 	bodyOffset : function( body ) {
 		var top = body.offsetTop, left = body.offsetLeft;
 
@@ -1961,7 +2345,13 @@ Simples.merge({
 
 		return { top: top, left: left };
 	},
-
+	/**
+	 * Simples.setOffset: to set the offset of the top and left of an element passed on its current offset
+	 * @param {Element} elem element to set the offset on
+	 * @param {Object} options
+	 * @param {Number} options.top the top offset desired
+	 * @param {Number} options.left	the left offset desired
+	 */
 	setOffset : function( elem, options ) {
 		var position = Simples.currentCSS( elem, "position" );
 
@@ -1994,7 +2384,11 @@ Simples.merge({
 
 		curElem.css( props );
 	},
-
+	/**
+	 * Simples.offsetParent: to get the offsetParent of an element
+	 * @param {Element} elem the element to get the offsetParent of
+	 * @returns {Element}
+	 */
 	offsetParent : function( elem ) {
 		var offsetParent = elem.offsetParent || document.body;
 		while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && Simples.currentCSS(offsetParent, "position") === "static") ) {
@@ -2003,7 +2397,11 @@ Simples.merge({
 
 		return offsetParent;
 	},
-
+	/**
+	 * Simples.position: to get the position of the element
+	 * @param {Element} elem to get the position of
+	 * @returns {Object} top, left
+	 */
 	position: function( elem ) {
 
 		// Get *real* offsetParent
@@ -2029,7 +2427,12 @@ Simples.merge({
 			left: offset.left - parentOffset.left
 		};
 	},
-
+	/**
+	 * Simples.setScroll:
+	 * @param {Element} elem element to set the scroll on
+	 * @param {String} name 'top' or 'left'
+	 * @param {Number} value
+	 */
 	setScroll : function( elem, name, val ){
 		win = getWindow( elem );
 
@@ -2044,24 +2447,28 @@ Simples.merge({
 			elem[ name ] = val;
 		}
 	},
+	/**
+	 * Simples.getScroll: To retrieve the scrollTop / scrollLeft for a given element
+	 * @param {Element} elem element to get the scroll of
+	 * @param {String} name 'top' or 'left'
+	 * @returns {Number} the value of the scrollTop / scrollLeft
+	 */	
 	getScroll : function( elem, name ){
-		name = name === TOP ? "scrollTop" : "scrollLeft";
+		var isTop = name === TOP;
+		name = isTop ? "scrollTop" : "scrollLeft";
 		win = getWindow( elem );
 
 		// Return the scroll offset
-		return win ? ( ("pageXOffset" in win) ? win[ name === TOP ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
+		return win ? ( ("pageXOffset" in win) ? win[ isTop ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
 	}
 });
 
-function getWindow( elem ) {
-	return ("scrollTo" in elem && elem.document) ?
-		elem :
-		elem.nodeType === 9 ?
-			elem.defaultView || elem.parentWindow :
-			false;
-}
-
 Simples.extend({
+	/**
+	 * Simples( '*' ).offset: To set or retrieve the offset of the selected elements on the Simples object
+	 * @param {Object} options object with top and / or left specified to set the offset
+	 * @returns {Number|Simples} the value of the offset or Simples object
+	 */	
 	offset : function( options ){
 
 		if ( options ) {
@@ -2074,6 +2481,9 @@ Simples.extend({
 
 		return this[0] ? Simples.offset( this[0] ) : null;
 	},
+	/**
+	 * Simples( '*' ).offsetParent: To return the same object with the offsetParents added in place of the selected elements
+	 */	
 	offsetParent : function(){
 		var len = this.length;
 		while( len ){
@@ -2081,6 +2491,12 @@ Simples.extend({
 		}
 		return this;
 	},
+	/**
+	 * Simples( '*' ).scroll: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
+	 * @param {String} name 'top' or 'left'
+	 * @param {Number} val the value to set the offset to
+	 * @returns {Number|Simples} the value of the scrollTop / scrollLeft or Simples object
+	 */	
 	scroll : function( name, val ){
 		if( val !== undefined ){
 			var len = this.length;
@@ -2091,18 +2507,39 @@ Simples.extend({
 		}
 		return this[0] ? Simples.getScroll( this[0], name ) : null;
 	},
+	/**
+	 * Simples( '*' ).position: To retrieve or set the scrollTop / scrollLeft elements on the simples object
+	 * @param {String} name 'top' or 'left'
+	 * @param {Number} val the value to set the offset to
+	 * @returns {Number} the value of the scrollTop / scrollLeft
+	 */	
 	position : function(){
 		return this[0] ? Simples.position( this[0] ) : null;
 	}
 });
-var REGEX_PIXEL = /px\s?$/;
-
+// ======= ANIMATION ========== //
+// Regexp used in this file
+var REGEX_PIXEL = /px\s?$/,
+	ALLOW_TYPES = /padding|margin|height|width|top|left|right|bottom|fontSize/,
+	TIMER_ID;
+/**
+ * @namespace Simples.Animation
+ */
 Simples.Animation = {
+	/* animations: currently active animations being run */
 	animations : {},
+	/* frameRate: global frame rate for animations */
 	frameRate : 24,
+	/* length: count of current active animations */
 	length : 0,
+	/* guid: unique identifier for animations */
 	guid : 1e6,
-	allowTypes : /padding|margin|height|width|top|left|right|bottom|fontSize/,
+	/* tweens: default tweens for animation 
+	 * @param frame: current frame
+	 * @param frameCount: total frames for animations
+	 * @param start: start value for tween
+	 * @param delta: difference to end value		
+	 */
 	tweens : {
 		easing : function( frame, frameCount, start, delta ) {
 			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
@@ -2113,18 +2550,16 @@ Simples.Animation = {
 		quadratic : function( frame, frameCount, start, delta ){
 			return start + (((Math.cos((frame/frameCount)*Math.PI) )/2) * delta );
 		}
-	},  
-	timerID : null,
+	},
 	interval : Math.round( 1000 / this.frameRate ),
 	/**
-	 * @name Simples.Animation.create
-	 * @description used to to create an animation object which can be used by the animation queue runner
-	 * elem {Element}
-	 * setStyle {Object} 
-	 * opts {Object}  
-	 * opts.callback {Function}
-	 * opts.reverse {Boolean}
-	 * opts.duration {Object}
+	 * Simples.Animation.create: used to to create an animation object which can be used by the animation queue runner
+	 * @param elem {Element} DOM Element to animate
+	 * @param setStyle {Object} CSS to use in animation, final position 
+	 * @param opts {Object}
+	 * @param opts.callback {Function} when animation complete
+	 * @param opts.tween {Function} tween to use when animating
+	 * @param opts.duration {Object} the time to elapse during animation
 	 */
 	create : function( elem, setStyle, opts ){
 		opts = opts || {};
@@ -2139,7 +2574,7 @@ Simples.Animation = {
 			0 : elem,
 			id : Simples.Animation.guid++,
 			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
-			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
+			duration : ( typeof opts.duration === NUMBER && opts.duration > -1 ) ? opts.duration : 600,
 			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
 			start : {},
 			finish : {}
@@ -2150,15 +2585,15 @@ Simples.Animation = {
 			var cKey = key.replace( RDASH_ALPHA, fcamelCase ),
 				opacity = ( cKey === OPACITY && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
-			if( opacity || Simples.Animation.allowTypes.test( cKey ) ){
-				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
-				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING || '0').replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+			if( opacity || ALLOW_TYPES.test( cKey ) ){
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING ).replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING ).replace(REGEX_PIXEL,EMPTY_STRING) * 1;
 			}                                        
 		}
 
 		var data = Simples.data(elem);
 		data.animations = data.animations || {};
-		data.animations[anim.id] = anim;
+		data.animations[ anim.id ] = anim;
 
 		if( opts.manualStart !== true ){
 			Simples.Animation.start( anim );
@@ -2166,9 +2601,8 @@ Simples.Animation = {
 		return anim;
 	},
 	/**
-	 * @name Simples.Animation.start
-	 * @description used to add the animation to the animation runner queue
-	 * animation {Object} animation to perform action on
+	 * Simples.Animation.start: used to add the animation to the animation runner queue
+	 * @param animation {Object} animation to perform action on
 	 */
 	start : function( animation ){
 
@@ -2183,16 +2617,15 @@ Simples.Animation = {
 				}
 			}
 			
-			if( !this.timerID ){
+			if( !TIMER_ID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				this.timerID = window.setInterval(function(){ Simples.Animation._step(); }, this.interval );
+				TIMER_ID = window.setInterval(function(){ Simples.Animation._step(); }, this.interval );
 			}
 		}
 	},
 	/**
-	 * @name Simples.Animation.reverse
-	 * @description used to take an animation in its current position and reverse and run
-	 * animation {Object} animation to perform action on
+	 * Simples.Animation.reverse: used to take an animation in its current position and reverse and run
+	 * @param animation {Object} animation to perform action on
 	 */
 	reverse : function( animation ){
 		var start = animation.start, finish = animation.finish;
@@ -2200,20 +2633,20 @@ Simples.Animation = {
 		animation.start = finish;
 		animation.finish = start;
 		
-		if( animation.startTime ){
+		if( this.animations[ animation.id ] && animation.startTime ){
 			var now = new Date().getTime(),
 				diff = now - animation.startTime;
 
 			animation.startTime = now - ( animation.duration - diff );
-			this.length--;
 		} else {
+			delete this.animations[ animation.id ];
 			this.start( animation );
 		}
 	}, 
 	/**
-	 * @description used to reset an animation to either the start or finish position
-	 * animation {Object} animation to perform action on
-	 * resetToEnd {Boolean} whether to reset to finish (true) or start (false||undefined) state
+	 * Simples.Animation.reset: used to reset an animation to either the start or finish position
+	 * @param animation {Object} animation to perform action on
+	 * @param resetToEnd {Boolean} whether to reset to finish (true) or start (false||undefined) state
 	 */
 	reset : function( animation, resetToEnd ){
 
@@ -2230,7 +2663,7 @@ Simples.Animation = {
 	},
 	/**
 	 * @private
-	 * @description a private method used by the queue runner to iterate over queued animations and update each postion
+	 * Simples.Animation._step: a private method used by the queue runner to iterate over queued animations and update each postion
 	 */
 	_step : function(){
 		if( this.length ){ 
@@ -2251,15 +2684,15 @@ Simples.Animation = {
 					}
 				}
 			}
-		} else if( this.timerID ){
-			window.clearInterval( this.timerID );
-			this.timerID = null;
+		} else if( TIMER_ID ){
+			window.clearInterval( TIMER_ID );
+			TIMER_ID = null;
 		}
 	},
 	/**
-	 * @description used to stop a supplied animation and cleanup after itsef
-	 * animation {Object} the animation object to use and work on.
-	 * jumpToEnd {Boolean} whether to leave in current position or set css to finish position
+	 * Simples.Animation.stop: used to stop a supplied animation and cleanup after itsef
+	 * @param animation {Object} the animation object to use and work on.
+	 * @param jumpToEnd {Boolean} whether to leave in current position or set css to finish position
 	 */
 	stop : function( animation, jumpToEnd ){
 		if( animation && hasOwn.call( this.animations, animation.id ) ){
@@ -2281,30 +2714,30 @@ Simples.Animation = {
 	}
 };
 
-Simples.merge({
-	animate : Simples.Animation.create,
-	animations : function( elem, action ) {
-		if( elem && Simples.Animation[ action ] ){
-			var anims = Simples.data( elem, "animation" );
-
-			if( anims && action != ("create" || "_step") ){
-				for( var id in anims ){
-					var anim = anims[ id ];
-					Simples.Animation[ action ]( anim, arguments[2] );
-				}
-			}
-		}
-	}
-});
-
 Simples.extend({
+	/**
+	 * Simples( '*' ).animations: From the instance of the Simples object used to bridge to the Simples.Animation functionality
+	 * @param action {String} the name of the action to be performed, excluding create && _step
+	 */
 	animations: function(action) {
-		var i = this.length;
-		while (i) {
-			Simples.animations( this[--i], action, arguments[1] );
+		if( action != ("create" || "_step") && Simples.Animation[ action ] ){
+			var i = this.length;
+			while (i) {
+				var anims = Simples.data( this[--i], "animation" );
+				Simples.Animation[ action ]( anim, arguments[2] );
+			}
 		}
 		return this;
 	},
+	/**
+	 * Simples( '*' ).animate: Used to create animations off the elements in the instance of the Simples object
+	 * @param action {String} the name of the action to be performed, excluding create && _step
+	 * @param css {Object} CSS to use in animation, final position 
+	 * @param opts {Object}
+	 * @param opts.callback {Function} when animation complete
+	 * @param opts.tween {Function} tween to use when animating
+	 * @param opts.duration {Object} the time to elapse during animation
+	 */
 	animate: function(css, opts) {
 		var i = this.length;
 		while (i) {
