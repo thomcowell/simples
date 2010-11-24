@@ -6,11 +6,31 @@ var accessID = 'simples'+ new Date().getTime(),
 		"object": true,
 		"applet": true
 	},
+	HAS_DATASET = Simples.support.hasDataset,
 	/**
 	 * @private
 	 */
 	canDoData = function( elem ){
 		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
+	},
+	readHTML5Data = function( elem, key ){
+		if( key ){
+			return HAS_DATASET ? elem.dataset[ key ] : elem.getAttribute( "data-" + key );
+		} else {
+			var data = {};
+			if (HAS_DATASET) {
+				data = Simples.merge( data, elem.dataset );
+			} else {
+				var attrs = elem.attributes, i = attrs.length;
+				while (i) {
+					var attr = attrs[ --i ];
+					if (attr.name.indexOf('data-') === 0) {
+						data[attr.name.substr(5)] = attr.value;
+					}
+				}
+			}
+			return data;
+		}
 	};
 
 Simples.merge({
@@ -32,9 +52,9 @@ Simples.merge({
 				}      
 			} else if( value === undefined ){
 				if( key === undefined ){
-					return data;
+					return Simples.merge( readHTML5Data( elem ), data );
 				} else if( key ) {
-					return data[ key ];
+					return data[ key ] || readHTML5Data( elem, key );
 				}
 			}
 		}

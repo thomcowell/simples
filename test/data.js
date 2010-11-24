@@ -101,6 +101,22 @@ test("Simples.data on element with data as requested", 2, function() {
 	
 	same( Simples.data( r_div, 'test'), data, "a div should return the same as provided");
 	same( Simples.data( r_div, 'note'), undefined, "a div should return undefined as provided");
+});
+
+test("Simples.data and data-*",6,function(){
+	var r_div = document.createElement('div');
+	r_div.setAttribute('data-test2',"super");
+	r_div[ accessID ] = { test: data };
+
+	equal( Simples.data( r_div ), { test:data, test2:"super" }, "a div should return the same as provided with data-*");
+	same( Simples.data( r_div, 'test'), data, "a div should return the same as provided");
+	same( Simples.data( r_div, 'test2'), "super", "a div should return the same as provided");
+	same( Simples.data( r_div, 'note'), undefined, "a div should return undefined as provided");
+	
+	r_div[ accessID ].test2 = data;
+	equal( Simples.data( r_div ), {test:data, test2:data }, "a div should return the same as provided with data-*");
+	same( Simples.data( r_div, 'test'), data, "a div should return the same as provided");
+	same( Simples.data( r_div, 'test2'), data, "a div should return the same as provided");
 }); 
 
 module("Data: Simples.data( remove )");
