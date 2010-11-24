@@ -70,6 +70,16 @@ test("Simples.data to element with existing data same key", 1, function() {
 	same( div[ accessID ][ 'hammer' ], data, "div should return the same data as provided");   
 });
 
+test("Simples.data to element with existing data-* key", 1, function() { 
+	var string = 'ready steady go';
+	var div = document.createElement('div');
+	div.setAttribute('data-hammer', "stupendous");
+	Simples.data( div, 'hammer', data);
+
+	same( div[ accessID ][ 'hammer' ], data, "div should return the same data as provided");
+	same( div.getAttribute('data-test'), null, "a div should have data removed");   
+});
+
 test("Simples.data on invalid element", 1, function() { 
 	var object = document.createElement('object');
 	Simples.data( object, 'test', data);

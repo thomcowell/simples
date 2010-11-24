@@ -13,6 +13,13 @@ var accessID = 'simples'+ new Date().getTime(),
 	canDoData = function( elem ){
 		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 	},
+	removeHTML5Data = function( elem, key ){
+		if( HAS_DATASET && elem.dataset[ key ] ){
+			delete elem.dataset[ key ];
+		} else if( !HAS_DATASET && elem.getAttribute('data-'+key) ){
+			elem.removeAttribute('data-'+key);
+		}
+	},
 	readHTML5Data = function( elem, key ){
 		if( key ){
 			return HAS_DATASET ? elem.dataset[ key ] : elem.getAttribute( "data-" + key );
@@ -44,15 +51,15 @@ Simples.merge({
 	data : function( elem, key, value ){
 		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
+
 			if( key && value !== undefined ){
 				if( value !== null ){
-					data[ key ] = value; 
+					// To remove the existing data-* attribute to ensure data is the ultimate source
+					removeHTML5Data( elem, key );
+					data[ key ] = value;
 				} else {
-					if( HAS_DATASET ){
-						delete elem.dataset[ key ];
-					} else {
-						elem.removeAttribute('data-'+key);
-					}
+					// To remove the existing data-* attribute as well as the data value
+					removeHTML5Data( elem, key );
 					delete data[ key ];
 				}      
 			} else if( value === undefined ){
