@@ -29,3 +29,11 @@ end
 task :lint => [:simples] do
   sh "java -jar build/js.jar build/jslint-check.js"
 end
+
+task :min => [:lint] do
+  sh "java -jar build/google-compiler-20100330.jar --js dist/simples.js --warning_level QUIET --js_output_file dist/simples.min.js"
+end
+
+task :docs do
+  sh "java -jar build/jsdoc-toolkit/jsrun.jar build/jsdoc-toolkit/app/run.js #{files.map { |file| file =~ /header.js|footer.js/ ? "" : "src/" + file }.join(" ")} -a -t=build/jsdoc-toolkit/templates/jsdoc -d=docs/"
+end

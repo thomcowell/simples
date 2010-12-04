@@ -49,6 +49,13 @@
         <echo message="${SIMPLE} built." />
     </target>
 
+	<target name="docs" description="Creates documentation for the js">
+		
+		<exec executable="java">
+			<arg line="-jar build/jsdoc-toolkit/jsrun.jar build/jsdoc-toolkit/app/run.js src/core.js src/support.js src/data.js src/ajax.js src/selector.js src/dom.js src/css.js src/events.js src/position.js src/animation.js -a -t=build/jsdoc-toolkit/templates/jsdoc -d=docs/" />
+		</exec>
+	</target>
+	
 	<target name="lint" depends="simples" description="Check jQuery against JSLint">
 		<exec executable="java">
 			<arg line="-jar build/js.jar build/jslint-check.js" />
