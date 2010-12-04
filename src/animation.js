@@ -127,7 +127,10 @@ Simples.Animation = {
 
 			animation.startTime = now - ( animation.duration - diff );
 		} else {
-			delete this.animations[ animation.id ];
+			if( this.animations[ animation.id ] ){
+				delete this.animations[ animation.id ];
+				this.length--;
+			}
 			this.start( animation );
 		}
 	}, 
@@ -228,7 +231,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	animate: function(css, opts) {
 		var i = this.length;
 		while (i) {
-			Simples.animate( this[--i], css, opts );
+			Simples.Animation.create( this[--i], css, opts );
 		}
 		return this;
 	}

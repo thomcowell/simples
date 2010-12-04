@@ -81,7 +81,7 @@ module("Simples.Animation", {
 	setup:function(){
 		window.__clearInterval__ = window.clearInterval;
 		Simples.setStyle( testArea, "opacity", 1 );
-		Simples.Animation.timerID = null;
+		TIMER_ID = null;
 		Simples.Animation.animations = {};
 		Simples.Animation.length = 0;
 		Simples.Animation.frameRate = 24;
@@ -89,8 +89,8 @@ module("Simples.Animation", {
 	},
 	teardown:function(){                                                    
 		window.clearInterval = window.__clearInterval__;
-		window.clearInterval( Simples.Animation.timerID );
-		Simples.Animation.timerID = null;
+		window.clearInterval( TIMER_ID );
+		TIMER_ID = null;
 		Simples.Animation.animations = {};
 	}
 });
@@ -184,24 +184,24 @@ test("start() basics", 10, function(){
 	Simples.Animation.start();
 
 	equal( Simples.Animation.interval, Math.round( 1000 / 24 ), "should have a default interval" );
-	equal( Simples.Animation.timerID, undefined, "should have a frameRate of undefined" );
+	same( TIMER_ID, null, "should have a timer of undefined" );
 
 	var anim = createAnim( 1e6 ),
-		id = Simples.Animation.timerID;
+		id = TIMER_ID;
 
 	Simples.Animation.start( anim );
 
 	equal( Simples.Animation.length, 1, "should have one animation" );
-	ok( Simples.Animation.timerID > id, "should start the timer" );
+	ok( TIMER_ID > id, "should start the timer" );
 	equal( Simples.Animation.interval, 1000, "should have set the interval correctly" );   
 	ok( anim.startTime > ( new Date().getTime() - 100 ), "should have correctly set the start time" );  
     
 	Simples.Animation.frameRate = 12;
-	id = Simples.Animation.timerID;
+	id = TIMER_ID;
 	Simples.Animation.start( anim );
 
 	equal( Simples.Animation.length, 1, "should have one animation" );
-	equal( Simples.Animation.timerID, id, "should have one timer" );
+	equal( TIMER_ID, id, "should have one timer" );
 	equal( Simples.Animation.interval, 1000, "should have one animation" );	
 	 
 	var startTime = new Date().getTime() - 200;
@@ -219,10 +219,10 @@ test("_step() thorough", 52, function(){
 		ok( true, "should call clearInterval" );
 	};
 	
-	Simples.Animation.timerID = 34324;
+	TIMER_ID = 34324;
  	Simples.Animation._step();
 
-	equal( Simples.Animation.timerID, undefined, "when timerID but no animations should stop timer");
+	equal( TIMER_ID, null, "when timerID but no animations should stop timer");
 	
 	for( var id=0;id<10;id++){
 		var anim = createAnim( id );
@@ -298,30 +298,30 @@ test("stop() thorough", 34, function(){
 }); 
 
 test("reverse()", 11, function(){
-	var id = 79, willStart = true, length=9, startAnim, time;
+	var id = 79, willStart = true, length=2, startAnim, time = undefined;
 	
 	Simples.Animation.length = length;
 	Simples.Animation._start = Simples.Animation.start;
 	Simples.Animation.start = function( anim ){
-		ok( willStart, "should call stop");
+		ok( willStart, "should call Simples.Animation.start");
 		equal( startAnim.id, anim.id, "should pass in valid anim" );
 		equal( startAnim.finish, anim.start, "should reverse css start");
 		equal( startAnim.start, anim.finish, "should reverse css finish");
-		equal( null, anim.startTime, "should set the correct time +/- 20ms");
+		equal( time, anim.startTime, "should set the correct time +/- 20ms");
 		equal( length, Simples.Animation.length, "should reduce the length when calling start");
 	};
 
-	var anim = createAnim( id );
+	var anim = createAnim( id++ );
 	startAnim = clone( anim );
 
 	Simples.Animation.reverse( anim );
 
-	var anim = createAnim( id ),
+	var anim = createAnim( id++ ),
 		now = new Date().getTime();
-
+	
+	Simples.Animation.animations[ anim.id ] = anim;
 	time = now - 400;
-	anim.startTime = now - 200; 
-	length = 8;
+	anim.startTime = now - 200;
 	willStart = false;
 	startAnim = clone( anim );
 		
@@ -350,7 +350,7 @@ test("reset()", 6, function(){
 	anim[0].style.opacity = 0.5;
 	Simples.Animation.animations[ id ] = anim
 	Simples.Animation.length = 1;
-	Simples.Animation.timerID = 3434;
+	TIMER_ID = 3434;
 	
 	Simples.Animation.reset( anim );
 	equal( 1, anim[0].style.opacity, "will reset to start");
@@ -371,7 +371,7 @@ test("reset()", 6, function(){
 
 module( "Simples( element ).animate()", {
    setup : function(){
-		Simples.Animation.timerID = null;
+		TIMER_ID = null;
 		Simples.Animation.animations = {};
 		Simples.Animation.length = 0;
 		Simples.Animation.frameRate = 24;
@@ -379,8 +379,8 @@ module( "Simples( element ).animate()", {
 		Simples.Animation.guid = 1e6;
 	},
 	teardown: function(){
-		window.clearInterval( Simples.Animation.timerID );
-		Simples.Animation.timerID = null;
+		window.clearInterval( TIMER_ID );
+		TIMER_ID = null;
 		Simples.Animation.animations = {};
 		Simples.Animation.length = 0;
 	}
