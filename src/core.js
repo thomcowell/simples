@@ -35,7 +35,7 @@ var toString = Object.prototype.toString,
 	// The functions to execute on DOM ready
 	readyList = [];
 /**
- * Simples: used to instantiate the Simples object
+ * @description used to instantiate the Simples object
  * @param {String|Element} selector element is used by object and string is used to select Element(s), see Simples.Selector for more information
  * @param {Element} context element used to provide context
  **/
@@ -44,7 +44,7 @@ function Simples( selector, context ) {
 }      
 
 /**
- * Simples.merge: used to merge objects onto the first specfied object
+ * @description used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj1, obj2.... native javascript object or array to be merged onto first
  **/
@@ -72,9 +72,9 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     return target;
 };
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.extend: used to add functionality to the Simples instance object
+	 * @description used to add functionality to the Simples instance object
 	 * @param {Object|String} addMethods list of names of functions and the function in a opbject, when 2 arguments provided the first should be the name of the function and the function to be added.
 	 */
 	extend : function( addMethods ){
@@ -91,7 +91,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.isEmptyObject: used to check an object to see whether it is empty
+	 * @description used to check an object to see whether it is empty
 	 * @param {Object} obj object to check whether is empty
 	 */
 	isEmptyObject : function( obj ) {
@@ -99,11 +99,11 @@ Simples.merge({
 		return true;
 	},
 	/**
-	 * Simples.isReady: a value to indicate whether the browser has been triggered as ready
+	 * @description a value to indicate whether the browser has been triggered as ready
 	 */
 	isReady : false,
 	/**
-	 * Simples.ready: used to add functions to browser ready queue and are triggered when DOMContentLoaded has been fired or latest window.onload
+	 * @description used to add functions to browser ready queue and are triggered when DOMContentLoaded has been fired or latest window.onload
 	 * @param {Function} callback the function to be fired when ready and or fired if already ready
 	 */
 	ready: function( callback ) {
@@ -121,9 +121,7 @@ Simples.merge({
 			readyList.push( callback );
 		}
 	},
-	/**
-	 * @private Handle when the DOM is ready
-	 */
+	/** @private Handle when the DOM is ready */
 	readyHandler : function() {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
@@ -148,9 +146,7 @@ Simples.merge({
 			}
 		}
 	},
-	/**
-	 * @private To setup the event listeners for the ready event
-	 */
+	/** @private To setup the event listeners for the ready event */
 	bindReady : function(){
 		if ( readyBound ) {
 			return;
@@ -195,7 +191,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.setContext: used to set the context on a function when the returned function is executed
+	 * @description used to set the context on a function when the returned function is executed
 	 * @param {Object} context object to execute with
 	 * @param {Function} func the function you want to call with the given context
 	 */
@@ -205,7 +201,7 @@ Simples.merge({
 		};
 	},
 	/**
-	 * Simples.trim: Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	 * @description Use native String.trim function wherever possible, Otherwise use our own trimming functionality
 	 * @param {String} text string to trim
 	 */
 	trim : function( text ) {
@@ -213,19 +209,22 @@ Simples.merge({
 		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
 	},
 	/**
-	 * Simples.noop: an empty function to use as noop function
+	 * @description an empty function to use as noop function
 	 */
 	noop : function(){}
 });
 
 // Cleanup functions for the document ready method
+/** @private */
 if ( document.addEventListener ) {
+	/** @private */
 	DOMContentLoaded = function() {
 		document.removeEventListener( DOMLOADED, DOMContentLoaded, false );
 		Simples.readyHandler();
 	};
 
 } else if ( document.attachEvent ) {
+	/** @private */
 	DOMContentLoaded = function() {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 		if ( document.readyState === COMPLETE ) {
@@ -235,7 +234,7 @@ if ( document.addEventListener ) {
 	};
 } 
 
-// The DOM ready check for Internet Explorer
+/** @private The DOM ready check for Internet Explorer */
 function doScrollCheck() {
 	if ( Simples.isReady ) {
 		return;
@@ -254,10 +253,14 @@ function doScrollCheck() {
 	Simples.readyHandler();
 }
 
-
+/**
+ * @namespace Simples.fn
+ * @description the instance of a Simples object functions / instance methods
+ */
 Simples.fn = Simples.prototype = {
 	/**
-	 * Simples( '*' ).init: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
+	 * @constructs
+	 * @description to initialize the Simples constructor
 	 * @param {String|Element} selector
 	 * @param {Object} context
 	 * @returns {Simples} the simples onject with the results of the selector
@@ -312,20 +315,21 @@ Simples.fn = Simples.prototype = {
 		return this;		
 	},
 	/**
-	 * Simples( '*' ).length: The count of items on the Simples object 
+	 * @description The count of items on the Simples object 
 	 */
 	length : 0,
 	/**
-	 * Simples( '*' ).selector: The selector used to create the Simples object
+	 * @description The selector used to create the Simples object
 	 */
 	selector : EMPTY_STRING,
 	/**
-	 * Simples( '*' ).version: The version of the Simples library
+	 * @description The version of the Simples library
 	 */
 	version : '@VERSION',
 	/**
-	 * Simples( '*' ).each: To loop over each item in the Simples object
-	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 * @function each
+	 * @description To loop over each item in the Simples object
+	 * @param {Function} callback the function to call with each item, this is current item, arguments[ item, index, object ]
 	 */
 	each : function( callback ){
 		var i=0,l=this.length;
@@ -336,10 +340,10 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * Simples( '*' ).reduce: To reduce the selected elements on the Simples object 
-	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 * @description To filter the selected elements on the Simples object 
+	 * @param {Function} callback the function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
 	 */
-	reduce : function( testFn ){
+	filter : function( testFn ){
 		var i = 0,c = 0,l = this.length;
 		while( i<l ){
 			if( testFn.call( this[c], i, l ) !== true ){ this.splice( c--, 1 ); }
@@ -348,7 +352,7 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * Simples( '*' ).find: used to find elements off of the elements currently on the Simples object 
+	 * @description used to find elements off of the elements currently on the Simples object 
 	 * @param {String} selector string to find elements
 	 */
 	find: function( selector ){ 
@@ -359,7 +363,7 @@ Simples.fn = Simples.prototype = {
 		return results;
 	},
 	/**
-	 * Simples( '*' ).add: used to add more elements to the current Simples object
+	 * @description used to add more elements to the current Simples object
 	 * @param {Elements} An array or Simples object of elements to concatenate to the current simples Object
 	 */
 	add : function( elems ){
@@ -368,8 +372,11 @@ Simples.fn = Simples.prototype = {
 	},
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
+	/** @private */
 	push: push,
+	/** @private */
 	sort: [].sort,
+	/** @private */
 	splice: [].splice
 };      
 

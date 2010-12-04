@@ -32,7 +32,7 @@ var eventSupported = function( eventName ) {
 	return isSupported; 
 };
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	support : { 
 		// to determine whether querySelector is avaliable
 		useQuerySelector : typeof document.querySelectorAll === FUNC,
@@ -65,6 +65,11 @@ Simples.merge({
 	},
 	// Use of Simples.browser is frowned upon.
 	// More details: http://docs.jquery.com/Utilities/jQuery.browser
+	/**
+	 * @description takes a navigator.userAgent and returns a usable rendition of it 
+	 * @params {String} navigator.userAgent
+	 * @returns {Object} i.e. { browser: msie|opera|webkit|mozilla, version: 1 }
+	 */
 	uaMatch: function( ua ) {
 		ua = ua.toLowerCase();
 

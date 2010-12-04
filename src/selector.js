@@ -9,9 +9,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
 	QUERY_SELECTOR = Simples.support.useQuerySelector,
-	/**
-	 * @private
-	 */
+	/** @private */
 	getElements = function(selector, context) {
 
 	    context = context || document;
@@ -66,9 +64,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	        return find ? slice.call(find, 0) : [];
 	    }
 	},
-	/**
-	 * @private provide html & object to bind to
-	 */
+	/** @private */
 	createDOM = function( selector, results ){
 
 		results.context = document;
@@ -91,7 +87,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	};
 
 /**
- * Simples.Selector: used to create or select Elements selector based on .class #id and [name=name]
+ * @description used to create or select Elements selector based on .class #id and [name=name]
  * @param {String|Element} selector element is used by object and string is used to select Element(s), based on className, id and name and where the querySelector is available using querySelectorAll
  * @param {Element} context element used to provide context
  * @param {Object|Array} results optional object to return selected Elements

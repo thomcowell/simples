@@ -5,6 +5,7 @@ var REGEX_PIXEL = /px\s?$/,
 	TIMER_ID;
 /**
  * @namespace Simples.Animation
+ * @description Animation controller if provide a standard animation object to this functionality it will execute the animation 
  */
 Simples.Animation = {
 	/* animations: currently active animations being run */
@@ -15,19 +16,25 @@ Simples.Animation = {
 	length : 0,
 	/* guid: unique identifier for animations */
 	guid : 1e6,
-	/* tweens: default tweens for animation 
-	 * @param frame: current frame
-	 * @param frameCount: total frames for animations
-	 * @param start: start value for tween
-	 * @param delta: difference to end value		
+	/**
+	 * @namespace Simples.Animation.tweens 
+	 * @description default tweens for animation 
 	 */
 	tweens : {
+		/**
+		 * @param frame: current frame
+		 * @param frameCount: total frames for animations
+		 * @param start: start value for tween
+		 * @param delta: difference to end value
+		*/
 		easing : function( frame, frameCount, start, delta ) {
 			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
 		},
+		/** @see Simples.Animation.tweens.easing */
 		linear : function( frame, frameCount, start, delta ){
 			return start + ( delta * ( frame/frameCount ));
 		},
+		/** @see Simples.Animation.tweens.easing */
 		quadratic : function( frame, frameCount, start, delta ){
 			return start + (((Math.cos((frame/frameCount)*Math.PI) )/2) * delta );
 		}
@@ -143,8 +150,7 @@ Simples.Animation = {
 		}
 	},
 	/**
-	 * @private
-	 * Simples.Animation._step: a private method used by the queue runner to iterate over queued animations and update each postion
+	 * @private used by the queue runner to iterate over queued animations and update each postion
 	 */
 	_step : function(){
 		if( this.length ){ 
@@ -195,9 +201,9 @@ Simples.Animation = {
 	}
 };
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).animations: From the instance of the Simples object used to bridge to the Simples.Animation functionality
+	 * @description From the instance of the Simples object used to bridge to the Simples.Animation functionality
 	 * @param action {String} the name of the action to be performed, excluding create && _step
 	 */
 	animations: function(action) {
@@ -211,7 +217,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).animate: Used to create animations off the elements in the instance of the Simples object
+	 * @description Used to create animations off the elements in the instance of the Simples object
 	 * @param action {String} the name of the action to be performed, excluding create && _step
 	 * @param css {Object} CSS to use in animation, final position 
 	 * @param opts {Object}

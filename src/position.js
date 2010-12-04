@@ -1,5 +1,6 @@
 // OMG its another non-W3C standard browser 
 var REGEX_HTML_BODY = /^body|html$/i,
+/** @private */
 getWindow = function( elem ) {
 	return ("scrollTo" in elem && elem.document) ?
 		elem :
@@ -10,7 +11,7 @@ getWindow = function( elem ) {
 
 if( "getBoundingClientRect" in document.documentElement ){
 	/**
-	 * Simples.offset: to get the top, left offset of an element
+	 * @description to get the top, left offset of an element
 	 * @param {Element} elem the element to get the offset of
 	 * @returns {Object} top, left
 	 */
@@ -96,9 +97,7 @@ if( "getBoundingClientRect" in document.documentElement ){
 		return { top: top, left: left };
 	};
 }
-/**
- * @private 
- */
+/** @private */
 Simples.offset.init = function(){
 	var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
 		html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
@@ -133,9 +132,9 @@ Simples.offset.init = function(){
 	this.init = Simples.noop;
 };
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.bodyOffset: to get the offset of the body 
+	 * @description to get the offset of the body 
 	 * @param {Body} body body element to measure
 	 * @returns {Object} top, left
 	 */
@@ -152,7 +151,7 @@ Simples.merge({
 		return { top: top, left: left };
 	},
 	/**
-	 * Simples.setOffset: to set the offset of the top and left of an element passed on its current offset
+	 * @description to set the offset of the top and left of an element passed on its current offset
 	 * @param {Element} elem element to set the offset on
 	 * @param {Object} options
 	 * @param {Number} options.top the top offset desired
@@ -191,7 +190,7 @@ Simples.merge({
 		curElem.css( props );
 	},
 	/**
-	 * Simples.offsetParent: to get the offsetParent of an element
+	 * @description to get the offsetParent of an element
 	 * @param {Element} elem the element to get the offsetParent of
 	 * @returns {Element}
 	 */
@@ -204,7 +203,7 @@ Simples.merge({
 		return offsetParent;
 	},
 	/**
-	 * Simples.position: to get the position of the element
+	 * @description to get the position of the element
 	 * @param {Element} elem to get the position of
 	 * @returns {Object} top, left
 	 */
@@ -234,7 +233,7 @@ Simples.merge({
 		};
 	},
 	/**
-	 * Simples.setScroll:
+	 * @description To set the scrollTop / scrollLeft for a given element
 	 * @param {Element} elem element to set the scroll on
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} value
@@ -254,7 +253,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.getScroll: To retrieve the scrollTop / scrollLeft for a given element
+	 * @description To retrieve the scrollTop / scrollLeft for a given element
 	 * @param {Element} elem element to get the scroll of
 	 * @param {String} name 'top' or 'left'
 	 * @returns {Number} the value of the scrollTop / scrollLeft
@@ -269,9 +268,9 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).offset: To set or retrieve the offset of the selected elements on the Simples object
+	 * @description To set or retrieve the offset of the selected elements on the Simples object
 	 * @param {Object} options object with top and / or left specified to set the offset
 	 * @returns {Number|Simples} the value of the offset or Simples object
 	 */	
@@ -288,7 +287,7 @@ Simples.extend({
 		return this[0] ? Simples.offset( this[0] ) : null;
 	},
 	/**
-	 * Simples( '*' ).offsetParent: To return the same object with the offsetParents added in place of the selected elements
+	 * @description To return the same object with the offsetParents added in place of the selected elements
 	 */	
 	offsetParent : function(){
 		var len = this.length;
@@ -298,7 +297,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).scroll: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
+	 * @description To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} val the value to set the offset to
 	 * @returns {Number|Simples} the value of the scrollTop / scrollLeft or Simples object
@@ -314,7 +313,7 @@ Simples.extend({
 		return this[0] ? Simples.getScroll( this[0], name ) : null;
 	},
 	/**
-	 * Simples( '*' ).position: To retrieve or set the scrollTop / scrollLeft elements on the simples object
+	 * @description To retrieve or set the scrollTop / scrollLeft elements on the simples object
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} val the value to set the offset to
 	 * @returns {Number} the value of the scrollTop / scrollLeft

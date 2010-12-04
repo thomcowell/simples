@@ -1,18 +1,12 @@
-/**
- * @private
- */
+/** @private */
 function returnFalse() {
 	return false;
 }
-/**
- * @private
- */
+/** @private */
 function returnTrue() {
 	return true;
 }
-/**
- * @private used to clear all events on a provided element
- */
+/** @private used to clear all events on a provided element */
 function clearEvents( elem, type, events, handlers ){
 	// check whether it is a W3C browser or not
 	if ( elem.removeEventListener ) {
@@ -26,7 +20,8 @@ function clearEvents( elem, type, events, handlers ){
 	if( handlers && handlers[type] ){ delete handlers[ type ]; }
 }
 /**
- * Simples.Event: the event constructor to provide unified event object support
+ * @constructor
+ * @description the event constructor to provide unified event object support
  * @param {String|Event} the name or event to coerce into a Simples.Event to bridge the differences between implementations
  */
 Simples.Event = function( event ){
@@ -58,7 +53,7 @@ Simples.Event = function( event ){
  */
 Simples.Event.prototype = {
 	/** 
-	 * Simples.Event( '*' ).preventDefault: used to prevent the browser from performing its default action
+	 * @description used to prevent the browser from performing its default action
 	 */
 	preventDefault: function() {
 		this.isDefaultPrevented = returnTrue;
@@ -76,7 +71,7 @@ Simples.Event.prototype = {
 		e.returnValue = false;
 	},
 	/** 
-	 * Simples.Event( '*' ).stopPropagation: used to stop the event from continuing its bubbling
+	 * @description used to stop the event from continuing its bubbling
 	 */	
 	stopPropagation: function() {
 		this.isPropagationStopped = returnTrue;
@@ -93,29 +88,29 @@ Simples.Event.prototype = {
 		e.cancelBubble = true;
 	},
 	/** 
-	 * Simples.Event( '*' ).stopImmediatePropagation: used to stop the event bubbling up and any other event callbacks from being triggered on the current element
+	 * @description used to stop the event bubbling up and any other event callbacks from being triggered on the current element
 	 */	
 	stopImmediatePropagation: function() {
 	    this.isImmediatePropagationStopped = returnTrue;
 	    this.stopPropagation();
 	},
 	/** 
-	 * Simples.Event( '*' ).isDefaultPrevented: used to determine wherther the event has had preventDefault called
+	 * @description used to determine wherther the event has had preventDefault called
 	 */	
 	isDefaultPrevented: returnFalse,
 	/** 
-	 * Simples.Event( '*' ).isPropagationStopped: used to determine wherther the event has had stopPropagation called
+	 * @description used to determine wherther the event has had stopPropagation called
 	 */	
 	isPropagationStopped: returnFalse,
 	/** 
-	 * Simples.Event( '*' ).isImmediatePropagationStopped: used to determine wherther the event has had stopImmediatePropagation called
+	 * @description used to determine wherther the event has had stopImmediatePropagation called
 	 */	
 	isImmediatePropagationStopped: returnFalse
 };
 	
-Simples.Events = {
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.Events.attach: to add the event to the provided element
+	 * @description to add the event to the provided element
 	 * @param {Element} elem the element to attach the event to	
 	 * @param {String} type the type of event to bind i.e. click, custom, etc
 	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
@@ -165,7 +160,7 @@ Simples.Events = {
 		}
 	},
 	/**
-	 * Simples.Events.detach: to remove the event from the provided element
+	 * @description to remove the event from the provided element
 	 * @param {Element} elem the element to detach the event from
 	 * @param {String} type the type of event to unbind i.e. click, custom, etc, if no type is specifed then all events are unbound
 	 * @param {Function} callback the callback to unbind, if not specified will unbind all the callbacks to this event	
@@ -207,7 +202,7 @@ Simples.Events = {
 		}
 	},
 	/**
-	 * Simples.Events.trigger: to trigger an event on a supplied element
+	 * @description to trigger an event on a supplied element
 	 * @param {Element} elem the element to trigger the event on
 	 * @param {String} type the type of event to trigger i.e. click, custom, etc
 	 * @param {Any} data the data to attach to the event	
@@ -235,14 +230,10 @@ Simples.Events = {
 			} 
 		}		                                         
 	},
-	/**
-	 * @private properties as part of the fix process
-	 */
 	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
-	/**
-	 * @private to fix the native Event
-	 */
 	fix : function( event ){
+	/** @private properties as part of the fix process */
+	/** @private to fix the native Event */
 		 if( event[ accessID ] ){
 			return event;
 		}
@@ -298,14 +289,10 @@ Simples.Events = {
 
 	    return event;
 	},
-	/**
-	 * @private to create a unique identifier for each event callback
-	 */
+	/** @private to create a unique identifier for each event callback */
 	guid : 1e6,
-	/**
-	 * @private event handler this is bound to the elem event
-	 */
 	handler : function( event ){ 
+	/** @private event handler this is bound to the elem event */
 		var events, callbacks;
 		var args = slice.call( arguments );
 		event = args[0] = Simples.Events.fix( event || window.event );
@@ -339,9 +326,9 @@ Simples.Events = {
 	}
 };
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).bind: to add the event from the elements on the Simples object
+	 * @description to add the event from the elements on the Simples object
 	 * @param {String} type the type of event to bind i.e. click, custom, etc
 	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
 	 */
@@ -357,7 +344,7 @@ Simples.extend({
 		return this;	
 	},
 	/**
-	 * Simples( '*' ).unbind: to remove the event from the elements on the Simples object
+	 * @description to remove the event from the elements on the Simples object
 	 * @param {String} type the type of event to unbind i.e. click, custom, etc, if no type is specifed then all events are unbound
 	 * @param {Function} callback the callback to unbind, if not specified will unbind all the callbacks to this event
 	 */
@@ -371,7 +358,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).trigger: to trigger an event on the elements on the Simples object
+	 * @description to trigger an event on the elements on the Simples object
 	 * @param {String} type the type of event to trigger i.e. click, custom, etc
 	 * @param {Any} data the data to attach to the event
 	 */

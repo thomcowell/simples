@@ -12,18 +12,19 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
 	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
-	// normalize float css property
+	/** @private normalize float css property */
 	fcamelCase = function( all, letter ) {
 		return letter.toUpperCase();
 	},
+	/** @private */
 	fcapitalise = function( all, first, rest ){
 		return first.toUpperCase() + rest.toLowerCase();
 	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.getStyle: Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
+	 * @description Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
 	 * @param {Element} elem the element to read the somputed style off
 	 * @param {String} type of the attribute to read
 	 * @param {Boolean} extra used to determine on outerHeight, outerWidth whether to include the margin or just the border
@@ -135,7 +136,7 @@ Simples.merge({
 
 	})( Simples ),
 	/**
-	 * Simples.currentCSS: 
+	 * @description to read the current style attribute 
 	 * @param {Element} elem the element to read the current style attributes off 
 	 * @param {String} name of the style atttribute to read
 	 */	
@@ -213,7 +214,7 @@ Simples.merge({
 	    return ret;
 	},
 	/**
-	 * Simples.setStyle: use to set the supplied elements style attribute 
+	 * @description use to set the supplied elements style attribute 
 	 * @param {Element} elem the element to set the style attribute on
 	 * @param {String} name the name of the attribute to set
 	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
@@ -266,9 +267,9 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).style: Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+	 * @description Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
 	 * @param {String} type the computed style attribute to read
 	 * @param {Boolean} extra whether to include extra
 	 */	
@@ -280,7 +281,7 @@ Simples.extend({
 		}
 	},
 	/**
-	 * Simples( '*' ).css: Used to read the current style attribute or set the current style attribute
+	 * @description Used to read the current style attribute or set the current style attribute
 	 * @param {String} name of the attribute to set
 	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
 	 */	

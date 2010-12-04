@@ -7,12 +7,11 @@ var accessID = 'simples'+ new Date().getTime(),
 		"applet": true
 	},
 	HAS_DATASET = Simples.support.hasDataset,
-	/**
-	 * @private
-	 */
+	/** @private */
 	canDoData = function( elem ){
 		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 	},
+	/** @private */
 	removeHTML5Data = function( elem, key ){
 		if( HAS_DATASET && elem.dataset[ key ] ){
 			delete elem.dataset[ key ];
@@ -40,9 +39,9 @@ var accessID = 'simples'+ new Date().getTime(),
 		}
 	};
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.data: for the provided element you can save data to the elements dataset where a simple string or read data off of the element
+	 * @description for the provided element you can save data to the elements dataset where a simple string or read data off of the element
 	 * @param {Element} elem the element to read and manipulate dataset
 	 * @param {String} key the name of the dataset to work with
 	 * @param {All} value the value to write to the dataset, where value is undefined will read, where value is null will remove the key and data
@@ -73,7 +72,7 @@ Simples.merge({
 		return null;
 	},
 	/**
-	 * Simples.cleanData: for the provided element you can save data to the elements dataset where a simple string or read data off of the element
+	 * @description for the provided element you can save data to the elements dataset where a simple string or read data off of the element
 	 * @param {Element} elem the element to clean all data off of the children
 	 * @param {Boolean} andSelf whether to include the provided element in with its children in the cleaning process
 	 */
@@ -104,7 +103,7 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
 	 * Simples( '*' ).data: for the elements on the Simples object you can save data to the elements dataset where a simple string or read data off of the element, Simples.data for more information
 	 * @param {String} key the name of the dataset to work with

@@ -57,9 +57,9 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	    return element;
 	};
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.domRead: to read the html from a elem
+	 * @description to read the html from a elem
 	 * @param {Element} elem the element to read the dom html from
 	 * @param {String} location to specify how to return the dom options are [ outer, text, inner/undefined ] use outer for outerHTML, text to read all the textNodes and inner or no argument for innerHTML
 	 */
@@ -96,7 +96,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.domManip: to write the dom new html string or dom elements
+	 * @description to write the dom new html string or dom elements
 	 * @param {Element} elem the element to read the dom html from
 	 * @param {String} location to specify how to return the dom options are desctructive: [remove, empty, outer, text, inner/undefined ], non-destructive: [top, bottom, unwrap, before, after, wrap ]
 	 * @param {String|Elements} html the string or Elements to put into the dom
@@ -190,7 +190,7 @@ Simples.merge({
 		return el;
 	},
 	/**
-	 * Simples.className: to either check for a className, add or remove a className
+	 * @description to either check for a className, add or remove a className
 	 * @param {Element} elem the element to manipulate the className on
 	 * @param {String} className the class to work with
 	 * @param {String} action to perform the step [ add, remove, has/undefined ]
@@ -213,7 +213,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.attr: read / write the attribute on an element
+	 * @description read / write the attribute on an element
 	 * @param {Element} elem the element to manipulate the attribute
 	 * @param {String} name the name of the attribute
 	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
@@ -261,9 +261,9 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).html: to read or write to the dom basd on the elements on the Simples object
+	 * @description to read or write to the dom basd on the elements on the Simples object
 	 * @param {String} location to specify how to return the dom options are desctructive: [remove, empty, outer, text, inner/undefined ], non-destructive: [top, bottom, unwrap, before, after, wrap ]
 	 * @param {String|Elements} html the string or Elements to put into the dom, if not specfied where location is [ outer, text, inner/undefined ] will read
 	 * @returns {Simples|String} if writing to the dom will return this, else will return string of dom
@@ -283,7 +283,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).hasClass: to determine whether any of the elements on the Simples object has the specified className
+	 * @description to determine whether any of the elements on the Simples object has the specified className
 	 * @params {String} className the exact className to test for
 	 * @returns {Boolean} indicating whether className is on elements of Simples object
 	 */
@@ -296,7 +296,7 @@ Simples.extend({
 		return false;
 	},
 	/**
-	 * Simples( '*' ).addClass: to add the specified className to the elements on the Simples object with the specified className
+	 * @description to add the specified className to the elements on the Simples object with the specified className
 	 * @params {String} className the className to add to the elements
 	 */
 	addClass : function( className ){
@@ -307,7 +307,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).removeClass: to remove the specified className to the elements on the Simples object with the specified className
+	 * @description to remove the specified className to the elements on the Simples object with the specified className
 	 * @params {String} className the className to remove to the elements
 	 */
 	removeClass : function( className ){
@@ -318,7 +318,7 @@ Simples.extend({
 		return this;		
 	},
 	/**
-	 * Simples( '*' ).attr: to read / write the given attribute to the elements on the Simples object
+	 * @description to read / write the given attribute to the elements on the Simples object
 	 * @param {String} name the name of the attribute
 	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
 	 */
@@ -344,7 +344,7 @@ Simples.extend({
 	},
 	/* TODO: Rename me as I don't indicate functionality */
 	/**
-	 * Simples( '*' ).traverse: to select a new set of elements off of the elements in the Simples object
+	 * @description to select a new set of elements off of the elements in the Simples object
 	 * @params {String|Function} name the string to specify the traversing, i.e. childNodes, parentNode, etc or a function to walk 
 	 */
 	traverse : function( name ){
@@ -359,7 +359,7 @@ Simples.extend({
 		return results;
 	},
 	/**
-	 * Simples( '*' ).slice: to return a subset of the selected elements
+	 * @description to return a subset of the selected elements
 	 * @params {Number} i the first element to start slicing
 	 * @params {Number} len the last element to finish slicing this is optional if not specified then the slice is to the last element
 	 */	
