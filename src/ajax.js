@@ -126,6 +126,10 @@ Simples.merge( /** @lends Simples */ {
 	ajaxDefaults : /** @lends Simples.ajaxDefaults */ {
 	    // Functions to call when the request fails, succeeds,
 	    // or completes (either fail or succeed)
+		/** 
+		 * @description function to execute request is made to server ( xhrObject )
+		 */	
+		beforeSend : Simples.noop,
 		/**
 		 * @description function to execute when complete arguments are ( xhrObject, 'complete' )
 		 */
@@ -184,7 +188,7 @@ Simples.merge( /** @lends Simples */ {
 
 	    // Load the options object with defaults, if no
 	    // values were provided by the user
-	    if (!url) {
+	    if ( typeof url !== "string" ) {
 	        throw new Error('A URL must be provided.');
 	    }
 
@@ -252,6 +256,8 @@ Simples.merge( /** @lends Simples */ {
 	            xhr = null;
 	        }
 	    }
+        // to enable headers etc to be added to request
+        options.beforeSend( xhr );
 
 	    // Setup async ajax call
 	    if (options.async) {
