@@ -14,8 +14,6 @@ Simples.Animation = {
 	frameRate : 24,
 	/* length: count of current active animations */
 	length : 0,
-	/* guid: unique identifier for animations */
-	guid : 1e6,
 	/**
 	 * @namespace Simples.Animation.tweens 
 	 * @description default tweens for animation 
@@ -60,7 +58,7 @@ Simples.Animation = {
 
 		var anim = {
 			0 : elem,
-			id : Simples.Animation.guid++,
+			id : Simples.guid++,
 			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
 			duration : ( typeof opts.duration === NUMBER && opts.duration > -1 ) ? opts.duration : 600,
 			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),

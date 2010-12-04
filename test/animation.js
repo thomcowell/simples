@@ -115,7 +115,7 @@ test("create()", 9, function(){
 		ok( true, "expected start to be called");
 		
 		equal( anim[0], elem, "expected anim to have elem passed in" );
-		equal( anim.id, Simples.Animation.guid - 1, "to have the guid assigned" );
+		equal( anim.id, Simples.guid - 1, "to have the guid assigned" );
 		equal( anim.duration, 600, "should have default duration" );
 		equal( anim.tween, Simples.Animation.tweens.easing, "should have default tween" );
 		equal( typeof anim.callback, "function", "should always set a callback function" );
@@ -139,7 +139,7 @@ test("create() with opts", 31, function(){
 		var actualTween = typeof tween === "function" ? tween : ( Simples.Animation.tweens[ tween ] || Simples.Animation.tweens.easing )
 
 		equal( anim[0], elem, "expected anim to have elem passed in" );
-		equal( anim.id, Simples.Animation.guid - 1, "to have the guid assigned" );
+		equal( anim.id, Simples.guid - 1, "to have the guid assigned" );
 		equal( anim.duration, duration || 600, "should have duration specified "+duration );
 		equal( anim.callback, callback || Simples.noop, "should always set a callback function" );
 		equal( anim.tween, actualTween, "should always have a tween set" );

@@ -133,15 +133,14 @@ Simples.merge( /** @lends Simples */ {
 			
 			var data = Simples.data( elem ),
 				events = data.events ? data.events : data.events = {},
-				handlers = data.handlers ? data.handlers : data.handlers = {},
-				sEvts = Simples.Events;
+				handlers = data.handlers ? data.handlers : data.handlers = {};
 			
-			var guid = !callback.guid ? callback.guid = sEvts.guid++ : callback.guid, 
+			var guid = !callback.guid ? callback.guid = Simples.guid++ : callback.guid, 
 				handler = handlers[ type ];
 				
 			if( !handler ){
 				handler = handlers[ type ] = function( evt ){
-					return Simples !== undefined ? sEvts.handler.apply( handler.elem, arguments ) : undefined;
+					return Simples !== undefined ? Simples._eventHandler.apply( handler.elem, arguments ) : undefined;
 				};
 				handler.elem = elem;
 				// Attach to the element
@@ -180,12 +179,11 @@ Simples.merge( /** @lends Simples */ {
 		   
 		var elemData = Simples.data( elem ),
 			events = elemData.events,
-			handlers = elemData.handlers,
-			sEvts = Simples.Events;
+			handlers = elemData.handlers;
 		
 		if( type === undefined ){
 			for( var eventType in events ){
-				sEvts.clearEvent( elem, eventType, events, handlers );
+				clearEvents( elem, eventType, events, handlers );
 			}
 		} else {
 			var event = events[ type ];
@@ -197,7 +195,7 @@ Simples.merge( /** @lends Simples */ {
 			}
 
 			if( event.length === 0 ){
-				sEvts.clearEvent( elem, type, events, handlers );
+				clearEvents( elem, type, events, handlers );
 			}
 		}
 	},
@@ -230,22 +228,21 @@ Simples.merge( /** @lends Simples */ {
 			} 
 		}		                                         
 	},
-	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
-	fix : function( event ){
 	/** @private properties as part of the fix process */
+	_eventProperties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	/** @private to fix the native Event */
+	_eventFix : function( event ){
 		 if( event[ accessID ] ){
 			return event;
 		}
 	    // store a copy of the original event object
 	    // and "clone" to set read-only properties 
-		var originalEvent = event,
-			sEvts = Simples.Events;
+		var originalEvent = event;
 		
 		event = Simples.Event( originalEvent );
 
-	    for (var i=sEvts.properties.length, prop; i;) {
-	        prop = sEvts.properties[--i];
+	    for (var i=Simples._eventProperties.length, prop; i;) {
+	        prop = Simples._eventProperties[--i];
 	        event[ prop ] = originalEvent[ prop ];
 	    }
 
@@ -289,13 +286,13 @@ Simples.merge( /** @lends Simples */ {
 
 	    return event;
 	},
-	/** @private to create a unique identifier for each event callback */
+	/** @private to create a unique identifier */
 	guid : 1e6,
-	handler : function( event ){ 
 	/** @private event handler this is bound to the elem event */
+	_eventHandler : function( event ){ 
 		var events, callbacks;
 		var args = slice.call( arguments );
-		event = args[0] = Simples.Events.fix( event || window.event );
+		event = args[0] = Simples._eventFix( event || window.event );
         event.currentTarget = this;
 
 		events = Simples.data( this, "events" );
@@ -324,7 +321,7 @@ Simples.merge( /** @lends Simples */ {
 		}
 		return event.result;
 	}
-};
+});
 
 Simples.extend( /** @lends Simples.fn */ {
 	/**
@@ -335,10 +332,10 @@ Simples.extend( /** @lends Simples.fn */ {
 	bind : function( type, callback ){
 		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
-			var attach = Simples.Events.attach,i=0,l=this.length;
+			var i=0,l=this.length;
 			while(i<l){
 				// Register each original event and the handled event to allow better detachment
-				attach( this[i++], type, callback );
+				Simples.attach( this[i++], type, callback );
 			}
 		}
 		return this;	
@@ -350,10 +347,10 @@ Simples.extend( /** @lends Simples.fn */ {
 	 */
 	unbind : function( type, callback ){
 		// Loop over elements    
-		var detach = Simples.Events.detach,i=0,l=this.length;
+		var i=0,l=this.length;
 		while(i<l){
 			// Register each original event and the handled event to allow better detachment    
-			detach( this[i++], type, callback );
+			Simples.detach( this[i++], type, callback );
 		}
 		return this;
 	},
@@ -365,10 +362,10 @@ Simples.extend( /** @lends Simples.fn */ {
 	trigger : function( type, data ){
 		if( typeof type === STRING){ 
 			// Loop over elements
-			var trigger = Simples.Events.trigger,i=0,l=this.length;
+			var i=0,l=this.length;
 			while(i<l){
 				// Register each original event and the handled event to allow better detachment    
-				trigger( this[i++], type, data );
+				Simples.trigger( this[i++], type, data );
 			}
 		}
 		return this;
