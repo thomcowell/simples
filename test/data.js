@@ -223,24 +223,24 @@ test("on an simples object with multiple elements",function(){
 	equal(s_obj.data('hammer'), null, "should return null when reading data");
 	same(s_obj.data('hammer', null), s_obj, "should return self and shouldn't throw an exception");
 	
-	s_obj.each(function(){
-		Simples.data( this, 'hammer', 'thor\'s' );
-		if( !Simples.data( this, 'hammer' ) ){
+	s_obj.each(function( elem ){
+		Simples.data( elem, 'hammer', 'thor\'s' );
+		if( !Simples.data( elem, 'hammer' ) ){
 			ok(false, "Test not correctly setup");
 		}
 	});
 	
 	same(s_obj.data('hammer', null), s_obj, "should not return anything and shouldn't throw an exception");
 	
-	s_obj.each(function(){
-		equal( Simples.data(this, 'hammer'), null, "should call the Simples.data function");
+	s_obj.each(function(elem){
+		equal( Simples.data(elem, 'hammer'), null, "should call the Simples.data function");
 	});
 	  
 	same(s_obj.data('hammer', 'thor\'s'), s_obj, "should return self and shouldn't throw an exception");
 	
 	s_obj.data('hammer', 'thor\'s');
-	s_obj.each(function(){ 
-		same('thor\'s', Simples.data( this, 'hammer'), "set the same data on all the elements");
+	s_obj.each(function(elem){ 
+		same('thor\'s', Simples.data( elem, 'hammer'), "set the same data on all the elements");
 	});
 	
 	s_obj.data('hammer', null);

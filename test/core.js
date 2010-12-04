@@ -245,12 +245,10 @@ test("Simples constructor when instantiated with a call through to selector", 4,
 
 test('Simples.each',function(){
 	var s_obj = Simples('.row'), counter = 0, length = s_obj.length;
-    s_obj.each(function(i,l){
-		same( this, s_obj[i], "should be the same dom elem as position on instance" );
-	  	equal(i, counter, "counter should be the same position as passed through");
-		if(l!==length){
-			ok(false, "length should be the same as instance length" );
-		}
+    s_obj.each(function(item,index,array){
+		equal( s_obj[counter], item, "should be the same dom elem as position on instance" );
+		equal( index, counter, "counter should be the same position as passed through");
+		equal( array, s_obj, "should have the same obj passed through")
 		counter++;
 	});
 }); 
@@ -290,19 +288,16 @@ test('Simples.find',function(){
 	Simples.Selector = oldSelector;
 });
 
-test('Simples.reduce', 14, function(){ 
+test('Simples.filter', 212, function(){ 
 
 	var s_obj = Simples('div'), counter=0, length = s_obj.length, set = Simples('.row');
 
-	s_obj.reduce(function(i,l){ 
-		if( i !== counter ){
-			ok( false, "i doesn't equal counter ");
-		} 
-		if(l!==length){
-			ok(false, "length should be the same as instance length" );
-		}  
-		counter++;     
-		return this.className === "row";
+	s_obj.filter(function(item,index,object){
+		equal( item, s_obj[ counter + s_obj.length - length ], "should have the same item" );
+		same( counter, index, "should have the same counter");
+		equal( s_obj, object, "should be the same object" );
+		counter++;
+		return Simples.className( item, "row" );
 	});
 
 	ok( s_obj instanceof Simples, "should return an instance of Simples"); 
@@ -315,16 +310,16 @@ test('Simples.reduce', 14, function(){
 	equal( s_obj.length, 8, "should return an instance of Simples");
 	
 	s_obj = Simples('div');
-	s_obj.reduce(function(i,l){  
-		if(i===0){ 
+	s_obj.filter(function(item,index,object){  
+		if(index===0){ 
 			return undefined; 
-		} else if( i===(length-1) ){
+		} else if( index===(object.length-1) ){
 			return null;
-		} else if( i%5 === 0) {
+		} else if( index%5 === 0) {
 			return this;
-		} else if(i%4 === 0 ){
+		} else if(index%4 === 0 ){
 			return [];
-		} else if( i%3 === 0 ){
+		} else if( index%3 === 0 ){
 			return new Simples();
 		}
 		return {};

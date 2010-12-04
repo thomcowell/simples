@@ -87,8 +87,8 @@ test("bind(), trigger change on select", 3, function() {
 		equals( Simples( event.target ).data( "pos" ), counter++, "Event.data is not a global event object" );
 	};
 
-	Simples("#form select").each(function(i){
-		Simples( this ).data( 'pos', i ).bind( 'change', selectOnChange );
+	Simples("#form select").each(function(elem, index, object ){
+		Simples( elem ).data( 'pos', index ).bind( 'change', selectOnChange );
 	}).trigger('change');
 });
 

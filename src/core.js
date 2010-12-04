@@ -334,8 +334,7 @@ Simples.fn = Simples.prototype = {
 	each : function( callback ){
 		var i=0,l=this.length;
 		while(i<l){
-			callback.call( this[i], i, l );
-			i++;
+			callback.call( this[i], this[i], i++, this );
 		}
 		return this;
 	},
@@ -346,7 +345,9 @@ Simples.fn = Simples.prototype = {
 	filter : function( testFn ){
 		var i = 0,c = 0,l = this.length;
 		while( i<l ){
-			if( testFn.call( this[c], i, l ) !== true ){ this.splice( c--, 1 ); }
+			if( testFn.call( this[c], this[c], i, this ) !== true ){ 
+				this.splice( c--, 1 );
+			}
 			c++; i++;
 		}
 		return this;

@@ -325,19 +325,20 @@ Simples.extend( /** @lends Simples.fn */ {
 	attr : function(name, value){
 		var nameClass = toString.call( name );
 			
-		if( nameClass === ObjectClass ){   
-			this.each(function(){
-				for( var key in name ){
-					Simples.attr( this, key, name[key] );
+		if( nameClass === ObjectClass ){
+			for( var key in name ){
+				var i=0,l=this.length,value = name[key];
+				while(i<l){
+					Simples.attr( this[i++], key, value );
 				}
-			});
+			}
 		} else if( nameClass === StringClass ){
 			if( value === undefined ){
 				return Simples.attr( this[0], name, value );
 			} else { 
-				this.each(function(){
-					Simples.attr( this, name, value );
-				});			
+				for(var i=0,l=this.length;i<l;i++){
+					Simples.attr( this[i], name, value );
+				}
 			}
 		}
 		return this;

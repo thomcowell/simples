@@ -96,10 +96,13 @@ test("attr(String)",function(){
 	equals( Simples("<option/>").attr("selected"), false, "Check selected attribute on disconnected element." );
 });
 
-test("attr(Hash)", 1, function() {
-	var pass = true;
-	Simples("div").attr({foo: 'baz', zoo: 'ping'}).each(function(){
-		if ( this.getAttribute('foo') != "baz" || this.getAttribute('zoo') != "ping" ) pass = false;
+test("attr(Hash)", function() {
+	var pass = false, s_obj = Simples("div");
+	expect( s_obj.length * 2 + 1 );
+	s_obj.attr({foo: 'baz', zoo: 'ping'}).each(function( elem ){
+		equal( "baz", elem.getAttribute('foo'), "should set foo" );
+		equal( "ping", elem.getAttribute('zoo'), "should set zoo" );
+		pass = true;
 	});
 	ok( pass, "Set Multiple Attributes" );
 });
