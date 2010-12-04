@@ -1,10 +1,13 @@
 /**
- * @name merge
- * @description used to merge objects into one
- * @param {Object} target native javascript object to be merged
- * @param {Object|Array} obj native javascript object or array to be merged onto first
+ * @namespace Simples.OO
  **/
 Simples.OO = {
+	/**
+	 * @description used to create pseudo classical class inheritance
+	 * @param {Object} superClass native javascript object to be merged
+	 * @param {Object} subClass native javascript object to be merged	
+	 * @param {Object|Array} addMethods native javascript object to merge functions onto the prototype object for the subClass
+	 **/
     extend: function(superClass, subClass, addMethods) {
         var F = function() {};
 
@@ -22,12 +25,11 @@ Simples.OO = {
         }
         
 		Simples.merge( subClass.prototype, addMethods );
-        for (var key in addMethods) {
-            if ( addMethods.hasOwnProperty( key ) ) {
-                subClass.prototype[ key ] = addMethods[ key ];
-            }
-        }
     },
+	/**
+	 * @description used to create a new instance of your current object
+	 * @param {Object|Array} object native javascript object to merge functions onto the prototype object for the subClass
+	 **/
 	clone: function(object) {
 		function F() {}
 	    F.prototype = object;

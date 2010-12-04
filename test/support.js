@@ -1,5 +1,5 @@
 module("Support");
-test("test that values are assigned", 10, function() {
+test("test that values are assigned", 11, function() {
 	ok( typeof Simples.support.opacity === 'boolean', "opacity is a boolean value" );
 	ok( typeof Simples.support.cssFloat === 'boolean', "cssFloat is a boolean value" );
 	ok( typeof Simples.support.leadingWhitespace === 'boolean', "leadingWhitespace is a boolean value" ); 

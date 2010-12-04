@@ -327,17 +327,17 @@ Simples.extend( /** @lends Simples.fn */ {
 			
 		if( nameClass === ObjectClass ){
 			for( var key in name ){
-				var i=0,l=this.length,value = name[key];
+				var i=0,l=this.length,val = name[key];
 				while(i<l){
-					Simples.attr( this[i++], key, value );
+					Simples.attr( this[i++], key, val );
 				}
 			}
 		} else if( nameClass === StringClass ){
 			if( value === undefined ){
 				return Simples.attr( this[0], name, value );
 			} else { 
-				for(var i=0,l=this.length;i<l;i++){
-					Simples.attr( this[i], name, value );
+				for(var m=0,n=this.length;m<n;m++){
+					Simples.attr( this[m], name, value );
 				}
 			}
 		}

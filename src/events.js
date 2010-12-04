@@ -94,15 +94,18 @@ Simples.Event.prototype = {
 	    this.isImmediatePropagationStopped = returnTrue;
 	    this.stopPropagation();
 	},
-	/** 
+	/**
+	 * @function
 	 * @description used to determine wherther the event has had preventDefault called
 	 */	
 	isDefaultPrevented: returnFalse,
 	/** 
+	 * @function
 	 * @description used to determine wherther the event has had stopPropagation called
 	 */	
 	isPropagationStopped: returnFalse,
 	/** 
+	 * @function
 	 * @description used to determine wherther the event has had stopImmediatePropagation called
 	 */	
 	isImmediatePropagationStopped: returnFalse
