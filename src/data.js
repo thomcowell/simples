@@ -6,28 +6,33 @@ var accessID = 'simples'+ new Date().getTime(),
 		"object": true,
 		"applet": true
 	},
-	HAS_DATASET = Simples.support.hasDataset,
 	/** @private */
 	canDoData = function( elem ){
 		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
 	},
 	/** @private */
 	removeHTML5Data = function( elem, key ){
-		if( HAS_DATASET && elem.dataset[ key ] ){
+		
+		var data = elem.dataset;
+		
+		if( data && data[ key ] ){
 			delete elem.dataset[ key ];
-		} else if( !HAS_DATASET && elem.getAttribute('data-'+key) ){
-			elem.removeAttribute('data-'+key);
+		} else if( !data ){
+			Simples.attr( elem, "data-" + key, null );
 		}
 	},
-	readHTML5Data = function( elem, key ){
+	/** @private */
+	readHTML5Data = function( elem, key, original ){
+		
+		var data = elem.dataset;
+		
 		if( key ){
-			return HAS_DATASET ? elem.dataset[ key ] : elem.getAttribute( "data-" + key );
+			var val = data ? data[ key ] : Simples.attr( elem, "data-" + key );
+			return val === null ? undefined : val;
 		} else {
-			var data = {};
-			if (HAS_DATASET) {
-				data = Simples.merge( data, elem.dataset );
-			} else {
-				var attrs = elem.attributes, i = attrs.length;
+			if (!data) {
+				data = {};
+				var attrs = elem.attributes, i = attrs ? attrs.length : 0;
 				while (i) {
 					var attr = attrs[ --i ];
 					if (attr.name.indexOf('data-') === 0) {
@@ -35,7 +40,7 @@ var accessID = 'simples'+ new Date().getTime(),
 					}
 				}
 			}
-			return data;
+			return Simples.merge( data, original || {} );
 		}
 	};
 
@@ -52,20 +57,19 @@ Simples.merge( /** @lends Simples */ {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
 
 			if( key && value !== undefined ){
+				// To remove the existing data-* attribute as well as the data value
+				removeHTML5Data( elem, key );
 				if( value !== null ){
-					// To remove the existing data-* attribute to ensure data is the ultimate source
-					removeHTML5Data( elem, key );
 					data[ key ] = value;
 				} else {
-					// To remove the existing data-* attribute as well as the data value
-					removeHTML5Data( elem, key );
 					delete data[ key ];
 				}      
 			} else if( value === undefined ){
-				if( key === undefined ){
-					return Simples.merge( readHTML5Data( elem ), data );
-				} else if( key ) {
-					return data[ key ] || readHTML5Data( elem, key );
+				if( !key ){
+					return Simples.merge( data, readHTML5Data( elem, null, data ) );
+				} else {
+					var val = data[ key ];
+					return typeof val === "undefined" ? readHTML5Data( elem, key ) : val;
 				}
 			}
 		}

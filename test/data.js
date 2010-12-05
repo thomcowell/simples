@@ -70,7 +70,7 @@ test("Simples.data to element with existing data same key", 1, function() {
 	same( div[ accessID ][ 'hammer' ], data, "div should return the same data as provided");   
 });
 
-test("Simples.data to element with existing data-* key", 1, function() { 
+test("Simples.data to element with existing data-* key", 2, function() { 
 	var string = 'ready steady go';
 	var div = document.createElement('div');
 	div.setAttribute('data-hammer', "stupendous");
@@ -113,18 +113,25 @@ test("Simples.data on element with data as requested", 2, function() {
 	same( Simples.data( r_div, 'note'), undefined, "a div should return undefined as provided");
 });
 
-test("Simples.data and data-*",6,function(){
+test("Simples.data and data-*",9,function(){
 	var r_div = document.createElement('div');
-	r_div.setAttribute('data-test2',"super");
+	Simples.attr( r_div, 'data-test2', "super" );
 	r_div[ accessID ] = { test: data };
 
-	equal( Simples.data( r_div ), { test:data, test2:"super" }, "a div should return the same as provided with data-*");
+	var elemData = Simples.data( r_div );
+	same( elemData.test, data, "a div should return the same as provided");
+	same( elemData.test2, "super", "a div should return the same as provided");	
+	
 	same( Simples.data( r_div, 'test'), data, "a div should return the same as provided");
 	same( Simples.data( r_div, 'test2'), "super", "a div should return the same as provided");
 	same( Simples.data( r_div, 'note'), undefined, "a div should return undefined as provided");
 	
 	r_div[ accessID ].test2 = data;
-	equal( Simples.data( r_div ), {test:data, test2:data }, "a div should return the same as provided with data-*");
+
+	elemData = Simples.data( r_div );
+	same( elemData.test, data, "a div should return the same as provided");
+	same( elemData.test2, data, "a div should return the same as provided");
+	
 	same( Simples.data( r_div, 'test'), data, "a div should return the same as provided");
 	same( Simples.data( r_div, 'test2'), data, "a div should return the same as provided");
 }); 
@@ -139,10 +146,10 @@ test("Simples.data on invalid element", 1, function() {
 	ok( noError, "should not throw an error");
 });
 
-test("Simples.data on element with data as requested", 1, function() {
+test("Simples.data on element with data as requested", 2, function() {
 	var r_div = document.createElement('div');
 	r_div[ accessID ] = {test:data};
-	r_div.setAttribute('data-test',"sandwich");
+	Simples.attr(r_div, 'data-test', "sandwich" );
 	Simples.data( r_div, 'test', null);	
 	same( r_div[ accessID ].test, undefined, "a div should have data removed");
 	same( r_div.getAttribute('data-test'), null, "a div should have data removed");	
