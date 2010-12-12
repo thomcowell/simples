@@ -1,11 +1,11 @@
 /** 
  * @license 
- * Simples JavaScript Library v0.1.4
+ * Simples JavaScript Library v0.1.5
  * http://simples.eightsquarestudio.com/
  * Copyright (c) 2009 - 2010, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sun Dec 12 09:31:04 2010 +0000
+ * Date: Sun Dec 12 21:17:48 2010 +0000
  */
 (function( window, undefined ) {
 
@@ -339,7 +339,7 @@ Simples.fn = Simples.prototype = {
 	 * @name Simples.fn.version	
 	 * @description The version of the Simples library
 	 */
-	version : '0.1.4',
+	version : '0.1.5',
 	/**
 	 * @memberof Simples.fn
 	 * @name each
@@ -566,7 +566,7 @@ var accessID = 'simples'+ new Date().getTime(),
 		
 		if( key ){
 			var val = data ? data[ key ] : Simples.attr( elem, "data-" + key );
-			return val === null ? undefined : val;
+			return ( val == null || val == "" ) ? undefined : val;
 		} else {
 			if (!data) {
 				data = {};
@@ -577,6 +577,12 @@ var accessID = 'simples'+ new Date().getTime(),
 						data[attr.name.substr(5)] = attr.value;
 					}
 				}
+			} else {
+				var newData = {};
+				for( var name in data ){
+					newData[ name ] = data[ name ];
+				}
+				data = newData;
 			}
 			return Simples.merge( data, original || {} );
 		}
