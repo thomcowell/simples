@@ -199,7 +199,7 @@
 <span class='line'>192</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='line'>193</span> </span><span class="WHIT">	</span><span class="COMM">/**
 <span class='line'>194</span> 	 * @description used to set the context on a function when the returned function is executed
-<span class='line'>195</span> 	 * @param {Object} context object to execute with
+<span class='line'>195</span> 	 * @param {Object} context object to use as the execution context
 <span class='line'>196</span> 	 * @param {Function} func the function you want to call with the given context
 <span class='line'>197</span> 	 */</span><span class="WHIT">
 <span class='line'>198</span> </span><span class="WHIT">	</span><span class="NAME">setContext</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">context</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">func</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
@@ -209,7 +209,7 @@
 <span class='line'>202</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='line'>203</span> </span><span class="WHIT">	</span><span class="COMM">/**
 <span class='line'>204</span> 	 * @description Use native String.trim function wherever possible, Otherwise use our own trimming functionality
-<span class='line'>205</span> 	 * @param {String} text string to trim
+<span class='line'>205</span> 	 * @param {String} text String to trim
 <span class='line'>206</span> 	 */</span><span class="WHIT">
 <span class='line'>207</span> </span><span class="WHIT">	</span><span class="NAME">trim</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">text</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>208</span> </span><span class="WHIT">		</span><span class="NAME">text</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">text</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">EMPTY_STRING</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">text</span><span class="PUNC">;</span><span class="WHIT">
@@ -268,8 +268,8 @@
 <span class='line'>261</span> </span><span class="WHIT">	</span><span class="COMM">/**
 <span class='line'>262</span> 	 * @constructs
 <span class='line'>263</span> 	 * @description to initialize the Simples constructor
-<span class='line'>264</span> 	 * @param {String|Element} selector
-<span class='line'>265</span> 	 * @param {Object} context
+<span class='line'>264</span> 	 * @param {String|Element} selector Query String to find in the DOM and add to Simples instance or the Element use as the selected object
+<span class='line'>265</span> 	 * @param {Object} context The document or element used to do the query on 
 <span class='line'>266</span> 	 * @returns {Simples} the simples onject with the results of the selector
 <span class='line'>267</span> 	 */</span><span class="WHIT">
 <span class='line'>268</span> </span><span class="WHIT">	</span><span class="NAME">init</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">selector</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">context</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
@@ -322,71 +322,83 @@
 <span class='line'>315</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">		
 <span class='line'>316</span> 	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
 <span class='line'>317</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>318</span> 	 * @description The count of items on the Simples object 
-<span class='line'>319</span> 	 */</span><span class="WHIT">
-<span class='line'>320</span> </span><span class="WHIT">	</span><span class="NAME">length</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>321</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>322</span> 	 * @description The selector used to create the Simples object
-<span class='line'>323</span> 	 */</span><span class="WHIT">
-<span class='line'>324</span> </span><span class="WHIT">	</span><span class="NAME">selector</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">EMPTY_STRING</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>325</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>326</span> 	 * @description The version of the Simples library
-<span class='line'>327</span> 	 */</span><span class="WHIT">
-<span class='line'>328</span> </span><span class="WHIT">	</span><span class="NAME">version</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'@VERSION'</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>329</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>330</span> 	 * @function each
-<span class='line'>331</span> 	 * @description To loop over each item in the Simples object
-<span class='line'>332</span> 	 * @param {Function} callback the function to call with each item, this is current item, arguments[ item, index, object ]
-<span class='line'>333</span> 	 */</span><span class="WHIT">
-<span class='line'>334</span> </span><span class="WHIT">	</span><span class="NAME">each</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">forEach</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">forEach</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">callback</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>335</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">this.length</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>336</span> </span><span class="WHIT">		</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>337</span> </span><span class="WHIT">			</span><span class="NAME">callback</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>338</span> </span><span class="WHIT">			</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>339</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>340</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>341</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>342</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>343</span> 	 * @description To filter the selected elements on the Simples object 
-<span class='line'>344</span> 	 * @param {Function} callback the function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
-<span class='line'>345</span> 	 */</span><span class="WHIT">
-<span class='line'>346</span> </span><span class="WHIT">	</span><span class="NAME">filter</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">testFn</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>347</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">c</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.length</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>348</span> </span><span class="WHIT">		</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">l</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>349</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">testFn</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">c</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT"> 
-<span class='line'>350</span> 				</span><span class="NAME">this.splice</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">c</span><span class="PUNC">--</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>351</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>352</span> </span><span class="WHIT">			</span><span class="NAME">c</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>353</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>354</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>355</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>356</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>357</span> 	 * @description used to find elements off of the elements currently on the Simples object 
-<span class='line'>358</span> 	 * @param {String} selector string to find elements
-<span class='line'>359</span> 	 */</span><span class="WHIT">
-<span class='line'>360</span> </span><span class="WHIT">	</span><span class="NAME">find</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">selector</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT"> 
-<span class='line'>361</span> 		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">results</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Simples</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">this.length</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>362</span> </span><span class="WHIT">		</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>363</span> </span><span class="WHIT">			</span><span class="NAME">Simples.Selector</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">selector</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">results</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>364</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>365</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">results</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>366</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>367</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>368</span> 	 * @description used to add more elements to the current Simples object
-<span class='line'>369</span> 	 * @param {Elements} An array or Simples object of elements to concatenate to the current simples Object
-<span class='line'>370</span> 	 */</span><span class="WHIT">
-<span class='line'>371</span> </span><span class="WHIT">	</span><span class="NAME">add</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">elems</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>372</span> </span><span class="WHIT">		</span><span class="NAME">this.push.apply</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">slice.call</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">Simples</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">elems</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>373</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>374</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>375</span> </span><span class="WHIT">	</span><span class="COMM">// For internal use only.</span><span class="WHIT">
-<span class='line'>376</span> </span><span class="WHIT">	</span><span class="COMM">// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.</span><span class="WHIT">
-<span class='line'>377</span> </span><span class="WHIT">	</span><span class="COMM">/** @private */</span><span class="WHIT">
-<span class='line'>378</span> </span><span class="WHIT">	</span><span class="NAME">push</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">push</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>379</span> </span><span class="WHIT">	</span><span class="COMM">/** @private */</span><span class="WHIT">
-<span class='line'>380</span> </span><span class="WHIT">	</span><span class="NAME">sort</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">sort</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>381</span> </span><span class="WHIT">	</span><span class="COMM">/** @private */</span><span class="WHIT">
-<span class='line'>382</span> </span><span class="WHIT">	</span><span class="NAME">splice</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">splice</span><span class="WHIT">
-<span class='line'>383</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">      
-<span class='line'>384</span> 
-<span class='line'>385</span> </span><span class="NAME">Simples.fn.init.prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Simples.fn</span><span class="PUNC">;</span></pre></body></html>
+<span class='line'>318</span> 	 * @name Simples.fn.length
+<span class='line'>319</span> 	 * @description The count of items on the Simples object 
+<span class='line'>320</span> 	 */</span><span class="WHIT">
+<span class='line'>321</span> </span><span class="WHIT">	</span><span class="NAME">length</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>322</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>323</span> 	 * @name Simples.fn.selector	
+<span class='line'>324</span> 	 * @description The selector used to create the Simples object
+<span class='line'>325</span> 	 */</span><span class="WHIT">
+<span class='line'>326</span> </span><span class="WHIT">	</span><span class="NAME">selector</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">EMPTY_STRING</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>327</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>328</span> 	 * @name Simples.fn.version	
+<span class='line'>329</span> 	 * @description The version of the Simples library
+<span class='line'>330</span> 	 */</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="WHIT">	</span><span class="NAME">version</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'@VERSION'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>333</span> 	 * @memberof Simples.fn
+<span class='line'>334</span> 	 * @name each
+<span class='line'>335</span> 	 * @function
+<span class='line'>336</span> 	 * @description To loop over each item in the Simples object
+<span class='line'>337</span> 	 * @param {Function} callback The function to call with each item, this is current item, arguments[ item, index, object ]
+<span class='line'>338</span> 	 */</span><span class="WHIT">
+<span class='line'>339</span> </span><span class="WHIT">	</span><span class="NAME">each</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">callback</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>340</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">this.length</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>341</span> </span><span class="WHIT">		</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>342</span> </span><span class="WHIT">			</span><span class="NAME">callback.call</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>343</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>344</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>345</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>346</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>347</span> 	 * @memberof Simples.fn
+<span class='line'>348</span> 	 * @name filter
+<span class='line'>349</span> 	 * @description To filter the selected elements on the Simples object 
+<span class='line'>350</span> 	 * @param {Function} testFn The function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
+<span class='line'>351</span> 	 */</span><span class="WHIT">
+<span class='line'>352</span> </span><span class="WHIT">	</span><span class="NAME">filter</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">testFn</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>353</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">c</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">this.length</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>354</span> </span><span class="WHIT">		</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">l</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>355</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">testFn.call</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">c</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">c</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT"> 
+<span class='line'>356</span> 				</span><span class="NAME">this.splice</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">c</span><span class="PUNC">--</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>357</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>358</span> </span><span class="WHIT">			</span><span class="NAME">c</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>359</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>360</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>361</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>362</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>363</span> 	 * @memberof Simples.fn
+<span class='line'>364</span> 	 * @name find
+<span class='line'>365</span> 	 * @function
+<span class='line'>366</span> 	 * @description used to find elements off of the elements currently on the Simples object 
+<span class='line'>367</span> 	 * @param {String} selector Selector string to find elements
+<span class='line'>368</span> 	 */</span><span class="WHIT">
+<span class='line'>369</span> </span><span class="WHIT">	</span><span class="NAME">find</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">selector</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT"> 
+<span class='line'>370</span> 		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">results</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Simples</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">this.length</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>371</span> </span><span class="WHIT">		</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>372</span> </span><span class="WHIT">			</span><span class="NAME">Simples.Selector</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">selector</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">results</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>373</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>374</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">results</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>375</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>376</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>377</span> 	 * @memberof Simples.fn
+<span class='line'>378</span> 	 * @name add
+<span class='line'>379</span> 	 * @function
+<span class='line'>380</span> 	 * @description used to add more elements to the current Simples object
+<span class='line'>381</span> 	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
+<span class='line'>382</span> 	 */</span><span class="WHIT">
+<span class='line'>383</span> </span><span class="WHIT">	</span><span class="NAME">add</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">elems</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>384</span> </span><span class="WHIT">		</span><span class="NAME">this.push.apply</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">slice.call</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">Simples</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="NAME">elems</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>385</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>386</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>387</span> </span><span class="WHIT">	</span><span class="COMM">// For internal use only.</span><span class="WHIT">
+<span class='line'>388</span> </span><span class="WHIT">	</span><span class="COMM">// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.</span><span class="WHIT">
+<span class='line'>389</span> </span><span class="WHIT">	</span><span class="COMM">/** @private */</span><span class="WHIT">
+<span class='line'>390</span> </span><span class="WHIT">	</span><span class="NAME">push</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">push</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>391</span> </span><span class="WHIT">	</span><span class="COMM">/** @private */</span><span class="WHIT">
+<span class='line'>392</span> </span><span class="WHIT">	</span><span class="NAME">sort</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">sort</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>393</span> </span><span class="WHIT">	</span><span class="COMM">/** @private */</span><span class="WHIT">
+<span class='line'>394</span> </span><span class="WHIT">	</span><span class="NAME">splice</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">splice</span><span class="WHIT">
+<span class='line'>395</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">      
+<span class='line'>396</span> 
+<span class='line'>397</span> </span><span class="NAME">Simples.fn.init.prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">Simples.fn</span><span class="PUNC">;</span></pre></body></html>

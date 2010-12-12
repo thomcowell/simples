@@ -25,6 +25,7 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 Simples.merge( /** @lends Simples */ {
 	/**
 	 * @description Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
+	 * @function
 	 * @param {Element} elem the element to read the somputed style off
 	 * @param {String} type of the attribute to read
 	 * @param {Boolean} extra used to determine on outerHeight, outerWidth whether to include the margin or just the border

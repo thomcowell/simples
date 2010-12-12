@@ -192,7 +192,7 @@ Simples.merge( /** @lends Simples */ {
 	},
 	/**
 	 * @description used to set the context on a function when the returned function is executed
-	 * @param {Object} context object to execute with
+	 * @param {Object} context object to use as the execution context
 	 * @param {Function} func the function you want to call with the given context
 	 */
 	setContext : function( context, func ){
@@ -202,7 +202,7 @@ Simples.merge( /** @lends Simples */ {
 	},
 	/**
 	 * @description Use native String.trim function wherever possible, Otherwise use our own trimming functionality
-	 * @param {String} text string to trim
+	 * @param {String} text String to trim
 	 */
 	trim : function( text ) {
 		text = text == null ? EMPTY_STRING : text;
@@ -261,8 +261,8 @@ Simples.fn = Simples.prototype = {
 	/**
 	 * @constructs
 	 * @description to initialize the Simples constructor
-	 * @param {String|Element} selector
-	 * @param {Object} context
+	 * @param {String|Element} selector Query String to find in the DOM and add to Simples instance or the Element use as the selected object
+	 * @param {Object} context The document or element used to do the query on 
 	 * @returns {Simples} the simples onject with the results of the selector
 	 */
 	init : function( selector, context ){
@@ -315,21 +315,26 @@ Simples.fn = Simples.prototype = {
 		return this;		
 	},
 	/**
+	 * @name Simples.fn.length
 	 * @description The count of items on the Simples object 
 	 */
 	length : 0,
 	/**
+	 * @name Simples.fn.selector	
 	 * @description The selector used to create the Simples object
 	 */
 	selector : EMPTY_STRING,
 	/**
+	 * @name Simples.fn.version	
 	 * @description The version of the Simples library
 	 */
 	version : '@VERSION',
 	/**
-	 * @function each
+	 * @memberof Simples.fn
+	 * @name each
+	 * @function
 	 * @description To loop over each item in the Simples object
-	 * @param {Function} callback the function to call with each item, this is current item, arguments[ item, index, object ]
+	 * @param {Function} callback The function to call with each item, this is current item, arguments[ item, index, object ]
 	 */
 	each : function( callback ){
 		var i=0,l=this.length;
@@ -339,8 +344,10 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
+	 * @memberof Simples.fn
+	 * @name filter
 	 * @description To filter the selected elements on the Simples object 
-	 * @param {Function} callback the function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
+	 * @param {Function} testFn The function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
 	 */
 	filter : function( testFn ){
 		var i = 0,c = 0,l = this.length;
@@ -353,8 +360,11 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
+	 * @memberof Simples.fn
+	 * @name find
+	 * @function
 	 * @description used to find elements off of the elements currently on the Simples object 
-	 * @param {String} selector string to find elements
+	 * @param {String} selector Selector string to find elements
 	 */
 	find: function( selector ){ 
 		var results = Simples(), i=0,l=this.length;
@@ -364,8 +374,11 @@ Simples.fn = Simples.prototype = {
 		return results;
 	},
 	/**
+	 * @memberof Simples.fn
+	 * @name add
+	 * @function
 	 * @description used to add more elements to the current Simples object
-	 * @param {Elements} An array or Simples object of elements to concatenate to the current simples Object
+	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
 	 */
 	add : function( elems ){
 		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
