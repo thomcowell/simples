@@ -44,7 +44,7 @@ function isWithIn( expected, actual, range, message ){
 	
 	// can't use ok, as that would double-escape messages
 	QUnit.log(result, output);
-	QUnit.config.assertions.push({
+	QUnit.push({
 		result: result,
 		message: output
 	});
@@ -174,7 +174,7 @@ test("create() with opts", 31, function(){
 
 test("start() basics", 10, function(){
 	//setup
-	Simples.Animation._step_ = Simples.Animation._step;
+	Simples.Animation.__step = Simples.Animation._step;
 	// test setup
 	Simples.Animation._step = function(){
 		ok( false, "Should not have called _step" );
@@ -210,7 +210,7 @@ test("start() basics", 10, function(){
 	Simples.Animation.start( anim );
 	equal( anim.startTime, startTime, "should not alter existing startTime" );
 	// cleanup	
-	Simples.Animation._step = Simples.Animation._step_;
+	Simples.Animation._step = Simples.Animation.__step;
 });
 
 test("_step() thorough", 52, function(){
@@ -220,16 +220,23 @@ test("_step() thorough", 52, function(){
 	};
 	
 	TIMER_ID = 34324;
- 	Simples.Animation._step();
+	Simples.Animation._step();
 
 	equal( TIMER_ID, null, "when timerID but no animations should stop timer");
-	
+
+	var timeNow = new Date().getTime() - 300;
+
 	for( var id=0;id<10;id++){
 		var anim = createAnim( id );
 		Simples.Animation.animations[ id ] = anim;
 		Simples.Animation.length = id+1;
-		anim.startTime = new Date().getTime() - 300;
+		anim.startTime = timeNow;
 	}
+
+	Simples.Animation._stop = Simples.Animation.stop;
+	Simples.Animation.stop = function( animation ){
+		ok( false, "should not call stop" );
+	};
 	
 	Simples.Animation._step();
 	
@@ -238,7 +245,6 @@ test("_step() thorough", 52, function(){
 		isWithIn( 0.5, anim[0].style.opacity, 0.05, "should set the opacity to be 0.5 +/- 0.05" );
 	}
 	
-	Simples.Animation._stop = Simples.Animation.stop;
     var count = 0;
 	Simples.Animation.stop = function( anim, resetToEnd ){
 		ok( true, "should call stop");
