@@ -94,12 +94,6 @@ test("Simples.data on element without data attribute", 2, function() {
 	same( div[ accessID ], {}, "a div should return undefined as provided");
 });
 
-test("Simples.data on element without data attribute", 2, function() {
-	var div = document.createElement('div');
-	same( Simples.data( div, 'test'), undefined, "a div should return undefined as provided");
-	same( div[ accessID ], {}, "a div should return undefined as provided");
-});
-
 test("Simples.data on invalid element", 1, function() {
 	var object = document.createElement('object');
 	same( Simples.data( object, 'test'), null, "a div should return undefined as provided");

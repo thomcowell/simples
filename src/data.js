@@ -28,7 +28,7 @@ var accessID = 'simples'+ new Date().getTime(),
 		
 		if( key ){
 			var val = data ? data[ key ] : Simples.attr( elem, "data-" + key );
-			return val === null ? undefined : val;
+			return ( val == null || val == "" ) ? undefined : val;
 		} else {
 			if (!data) {
 				data = {};
@@ -39,6 +39,12 @@ var accessID = 'simples'+ new Date().getTime(),
 						data[attr.name.substr(5)] = attr.value;
 					}
 				}
+			} else {
+				var newData = {};
+				for( var name in data ){
+					newData[ name ] = data[ name ];
+				}
+				data = newData;
 			}
 			return Simples.merge( data, original || {} );
 		}
