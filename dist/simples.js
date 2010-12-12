@@ -1,11 +1,11 @@
 /** 
  * @license 
- * Simples JavaScript Library v0.1.3
+ * Simples JavaScript Library v0.1.4
  * http://simples.eightsquarestudio.com/
  * Copyright (c) 2009 - 2010, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Tue Nov 23 19:42:34 2010 -0800
+ * Date: Sun Dec 12 09:31:04 2010 +0000
  */
 (function( window, undefined ) {
 
@@ -46,7 +46,7 @@ var toString = Object.prototype.toString,
 	// The functions to execute on DOM ready
 	readyList = [];
 /**
- * Simples: used to instantiate the Simples object
+ * @description used to instantiate the Simples object
  * @param {String|Element} selector element is used by object and string is used to select Element(s), see Simples.Selector for more information
  * @param {Element} context element used to provide context
  **/
@@ -55,7 +55,7 @@ function Simples( selector, context ) {
 }      
 
 /**
- * Simples.merge: used to merge objects onto the first specfied object
+ * @description used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj1, obj2.... native javascript object or array to be merged onto first
  **/
@@ -83,9 +83,9 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     return target;
 };
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.extend: used to add functionality to the Simples instance object
+	 * @description used to add functionality to the Simples instance object
 	 * @param {Object|String} addMethods list of names of functions and the function in a opbject, when 2 arguments provided the first should be the name of the function and the function to be added.
 	 */
 	extend : function( addMethods ){
@@ -102,7 +102,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.isEmptyObject: used to check an object to see whether it is empty
+	 * @description used to check an object to see whether it is empty
 	 * @param {Object} obj object to check whether is empty
 	 */
 	isEmptyObject : function( obj ) {
@@ -110,11 +110,11 @@ Simples.merge({
 		return true;
 	},
 	/**
-	 * Simples.isReady: a value to indicate whether the browser has been triggered as ready
+	 * @description a value to indicate whether the browser has been triggered as ready
 	 */
 	isReady : false,
 	/**
-	 * Simples.ready: used to add functions to browser ready queue and are triggered when DOMContentLoaded has been fired or latest window.onload
+	 * @description used to add functions to browser ready queue and are triggered when DOMContentLoaded has been fired or latest window.onload
 	 * @param {Function} callback the function to be fired when ready and or fired if already ready
 	 */
 	ready: function( callback ) {
@@ -132,9 +132,7 @@ Simples.merge({
 			readyList.push( callback );
 		}
 	},
-	/**
-	 * @private Handle when the DOM is ready
-	 */
+	/** @private Handle when the DOM is ready */
 	readyHandler : function() {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
@@ -159,9 +157,7 @@ Simples.merge({
 			}
 		}
 	},
-	/**
-	 * @private To setup the event listeners for the ready event
-	 */
+	/** @private To setup the event listeners for the ready event */
 	bindReady : function(){
 		if ( readyBound ) {
 			return;
@@ -206,8 +202,8 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.setContext: used to set the context on a function when the returned function is executed
-	 * @param {Object} context object to execute with
+	 * @description used to set the context on a function when the returned function is executed
+	 * @param {Object} context object to use as the execution context
 	 * @param {Function} func the function you want to call with the given context
 	 */
 	setContext : function( context, func ){
@@ -216,27 +212,30 @@ Simples.merge({
 		};
 	},
 	/**
-	 * Simples.trim: Use native String.trim function wherever possible, Otherwise use our own trimming functionality
-	 * @param {String} text string to trim
+	 * @description Use native String.trim function wherever possible, Otherwise use our own trimming functionality
+	 * @param {String} text String to trim
 	 */
 	trim : function( text ) {
 		text = text == null ? EMPTY_STRING : text;
 		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
 	},
 	/**
-	 * Simples.noop: an empty function to use as noop function
+	 * @description an empty function to use as noop function
 	 */
 	noop : function(){}
 });
 
 // Cleanup functions for the document ready method
+/** @private */
 if ( document.addEventListener ) {
+	/** @private */
 	DOMContentLoaded = function() {
 		document.removeEventListener( DOMLOADED, DOMContentLoaded, false );
 		Simples.readyHandler();
 	};
 
 } else if ( document.attachEvent ) {
+	/** @private */
 	DOMContentLoaded = function() {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 		if ( document.readyState === COMPLETE ) {
@@ -246,7 +245,7 @@ if ( document.addEventListener ) {
 	};
 } 
 
-// The DOM ready check for Internet Explorer
+/** @private The DOM ready check for Internet Explorer */
 function doScrollCheck() {
 	if ( Simples.isReady ) {
 		return;
@@ -265,12 +264,16 @@ function doScrollCheck() {
 	Simples.readyHandler();
 }
 
-
+/**
+ * @namespace Simples.fn
+ * @description the instance of a Simples object functions / instance methods
+ */
 Simples.fn = Simples.prototype = {
 	/**
-	 * Simples( '*' ).init: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
-	 * @param {String|Element} selector
-	 * @param {Object} context
+	 * @constructs
+	 * @description to initialize the Simples constructor
+	 * @param {String|Element} selector Query String to find in the DOM and add to Simples instance or the Element use as the selected object
+	 * @param {Object} context The document or element used to do the query on 
 	 * @returns {Simples} the simples onject with the results of the selector
 	 */
 	init : function( selector, context ){
@@ -323,44 +326,56 @@ Simples.fn = Simples.prototype = {
 		return this;		
 	},
 	/**
-	 * Simples( '*' ).length: The count of items on the Simples object 
+	 * @name Simples.fn.length
+	 * @description The count of items on the Simples object 
 	 */
 	length : 0,
 	/**
-	 * Simples( '*' ).selector: The selector used to create the Simples object
+	 * @name Simples.fn.selector	
+	 * @description The selector used to create the Simples object
 	 */
 	selector : EMPTY_STRING,
 	/**
-	 * Simples( '*' ).version: The version of the Simples library
+	 * @name Simples.fn.version	
+	 * @description The version of the Simples library
 	 */
-	version : '0.1.3',
+	version : '0.1.4',
 	/**
-	 * Simples( '*' ).each: To loop over each item in the Simples object
-	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 * @memberof Simples.fn
+	 * @name each
+	 * @function
+	 * @description To loop over each item in the Simples object
+	 * @param {Function} callback The function to call with each item, this is current item, arguments[ item, index, object ]
 	 */
 	each : function( callback ){
 		var i=0,l=this.length;
 		while(i<l){
-			callback.call( this[i], i, l );
-			i++;
+			callback.call( this[i], this[i], i++, this );
 		}
 		return this;
 	},
 	/**
-	 * Simples( '*' ).reduce: To reduce the selected elements on the Simples object 
-	 * @param {Function} callback the function to call with each item, this is current item, arguments[ index, length ]
+	 * @memberof Simples.fn
+	 * @name filter
+	 * @description To filter the selected elements on the Simples object 
+	 * @param {Function} testFn The function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
 	 */
-	reduce : function( testFn ){
+	filter : function( testFn ){
 		var i = 0,c = 0,l = this.length;
 		while( i<l ){
-			if( testFn.call( this[c], i, l ) !== true ){ this.splice( c--, 1 ); }
+			if( testFn.call( this[c], this[c], i, this ) !== true ){ 
+				this.splice( c--, 1 );
+			}
 			c++; i++;
 		}
 		return this;
 	},
 	/**
-	 * Simples( '*' ).find: used to find elements off of the elements currently on the Simples object 
-	 * @param {String} selector string to find elements
+	 * @memberof Simples.fn
+	 * @name find
+	 * @function
+	 * @description used to find elements off of the elements currently on the Simples object 
+	 * @param {String} selector Selector string to find elements
 	 */
 	find: function( selector ){ 
 		var results = Simples(), i=0,l=this.length;
@@ -370,8 +385,11 @@ Simples.fn = Simples.prototype = {
 		return results;
 	},
 	/**
-	 * Simples( '*' ).add: used to add more elements to the current Simples object
-	 * @param {Elements} An array or Simples object of elements to concatenate to the current simples Object
+	 * @memberof Simples.fn
+	 * @name add
+	 * @function
+	 * @description used to add more elements to the current Simples object
+	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
 	 */
 	add : function( elems ){
 		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
@@ -379,8 +397,11 @@ Simples.fn = Simples.prototype = {
 	},
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
+	/** @private */
 	push: push,
+	/** @private */
 	sort: [].sort,
+	/** @private */
 	splice: [].splice
 };      
 
@@ -419,12 +440,10 @@ var eventSupported = function( eventName ) {
 	return isSupported; 
 };
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	support : { 
 		// to determine whether querySelector is avaliable
 		useQuerySelector : typeof document.querySelectorAll === FUNC,
-		// to check whether native support is available for the dataset
-		hasDataset : toString.call( document.body.dataset ) === ObjectClass,
 		// Make sure that element opacity exists
 		// (IE uses filter instead)
 		// Use a regex to work around a WebKit issue. See jQuery #5145
@@ -452,6 +471,11 @@ Simples.merge({
 	},
 	// Use of Simples.browser is frowned upon.
 	// More details: http://docs.jquery.com/Utilities/jQuery.browser
+	/**
+	 * @description takes a navigator.userAgent and returns a usable rendition of it 
+	 * @params {String} navigator.userAgent
+	 * @returns {Object} i.e. { browser: msie|opera|webkit|mozilla, version: 1 }
+	 */
 	uaMatch: function( ua ) {
 		ua = ua.toLowerCase();
 
@@ -520,17 +544,47 @@ var accessID = 'simples'+ new Date().getTime(),
 		"object": true,
 		"applet": true
 	},
-	// HAS_DATASET = Simples.support.hasDataset,
-	/**
-	 * @private
-	 */
+	/** @private */
 	canDoData = function( elem ){
 		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
+	},
+	/** @private */
+	removeHTML5Data = function( elem, key ){
+		
+		var data = elem.dataset;
+		
+		if( data && data[ key ] ){
+			delete elem.dataset[ key ];
+		} else if( !data ){
+			Simples.attr( elem, "data-" + key, null );
+		}
+	},
+	/** @private */
+	readHTML5Data = function( elem, key, original ){
+		
+		var data = elem.dataset;
+		
+		if( key ){
+			var val = data ? data[ key ] : Simples.attr( elem, "data-" + key );
+			return val === null ? undefined : val;
+		} else {
+			if (!data) {
+				data = {};
+				var attrs = elem.attributes, i = attrs ? attrs.length : 0;
+				while (i) {
+					var attr = attrs[ --i ];
+					if (attr.name.indexOf('data-') === 0) {
+						data[attr.name.substr(5)] = attr.value;
+					}
+				}
+			}
+			return Simples.merge( data, original || {} );
+		}
 	};
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.data: for the provided element you can save data to the elements dataset where a simple string or read data off of the element
+	 * @description for the provided element you can save data to the elements dataset where a simple string or read data off of the element
 	 * @param {Element} elem the element to read and manipulate dataset
 	 * @param {String} key the name of the dataset to work with
 	 * @param {All} value the value to write to the dataset, where value is undefined will read, where value is null will remove the key and data
@@ -539,43 +593,28 @@ Simples.merge({
 	data : function( elem, key, value ){
 		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
-			// if (!data.hasReadDataset) {
-			//     if (HAS_DATASET) {
-			//         var dset = elem.dataset;
-			//         for (var name in elem.dataset) {
-			//             data[name] = dset[name];
-			//             dset[name] = "Simples.data( Element, " + name + ")"
-			//         }
-			//     } else {
-			//         var attrs = elem.attributes,
-			//         i = attrs.length;
-			//         while (i) {
-			//             var attr = attrs[--i];
-			//             if (attr.name.indexOf('data-') === 0) {
-			//                 data[attr.name.substring(5)] = attr.value;
-			//             }
-			//         }
-			//     }
-			//     data.hasReadDataset = true;
-			// }
+
 			if( key && value !== undefined ){
+				// To remove the existing data-* attribute as well as the data value
+				removeHTML5Data( elem, key );
 				if( value !== null ){
-					data[ key ] = value; 
+					data[ key ] = value;
 				} else {
 					delete data[ key ];
 				}      
 			} else if( value === undefined ){
-				if( key === undefined ){
-					return data;
-				} else if( key ) {
-					return data[ key ];
+				if( !key ){
+					return Simples.merge( data, readHTML5Data( elem, null, data ) );
+				} else {
+					var val = data[ key ];
+					return typeof val === "undefined" ? readHTML5Data( elem, key ) : val;
 				}
 			}
 		}
 		return null;
 	},
 	/**
-	 * Simples.cleanData: for the provided element you can save data to the elements dataset where a simple string or read data off of the element
+	 * @description for the provided element you can save data to the elements dataset where a simple string or read data off of the element
 	 * @param {Element} elem the element to clean all data off of the children
 	 * @param {Boolean} andSelf whether to include the provided element in with its children in the cleaning process
 	 */
@@ -606,7 +645,7 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
 	 * Simples( '*' ).data: for the elements on the Simples object you can save data to the elements dataset where a simple string or read data off of the element, Simples.data for more information
 	 * @param {String} key the name of the dataset to work with
@@ -630,6 +669,7 @@ Simples.extend({
 
 // ======= AJAX ========== //
 // borrowed from jQuery
+/** @private */
 var ACCEPTS = {
     xml: "application/xml, text/xml",
     html: "text/html",
@@ -651,7 +691,7 @@ LAST_AMP = /&$/,
 PARSEERROR = "parsererror",
 // count of active ajax requests
 ActiveAjaxRequests = 0,
-// private method used by Simples.params to build data for request
+/** @private method used by Simples.params to build data for request */
 formatData = function(name, value) {
 
     var str = EMPTY_STRING;
@@ -681,7 +721,7 @@ formatData = function(name, value) {
     }
     return str;
 },
-// private method to determine the success of the HTTP response
+/** @private method to determine the success of the HTTP response */
 httpSuccess = function(xhr) {
     try {
         // If no server status is provided, and we're actually
@@ -701,7 +741,7 @@ httpSuccess = function(xhr) {
     // If checking the status failed, then assume that the request failed too
     return false;
 },
-// private method for httpData parsing is from jQuery 1.4
+/** @private method for httpData parsing is from jQuery 1.4 */
 httpData = function(xhr, type, dataFilter) {
 
     var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
@@ -746,43 +786,48 @@ httpData = function(xhr, type, dataFilter) {
     return data;
 };
 // public methods
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.ajaxDefaults: default behaviour for all ajax requests
+	 * @namespace Simples.ajaxDefaults
+	 * @description default behaviour for all ajax requests
 	 */
-	ajaxDefaults : {
+	ajaxDefaults : /** @lends Simples.ajaxDefaults */ {
 	    // Functions to call when the request fails, succeeds,
 	    // or completes (either fail or succeed)
+		/** 
+		 * @description function to execute request is made to server ( xhrObject )
+		 */	
+		beforeSend : Simples.noop,
 		/**
-		 * Simples.ajaxDefaults.complete: function to execute when complete arguments are ( xhrObject, 'complete' )
+		 * @description function to execute when complete arguments are ( xhrObject, 'complete' )
 		 */
 	    complete: Simples.noop,
 		/**
-		 * Simples.ajaxDefaults.error: function to execute when complete arguments are ( xhrObject, 'error' || 'pareseerror' )
+		 * @description function to execute when complete arguments are ( xhrObject, 'error' || 'pareseerror' )
 		 */	
 	    error: Simples.noop,
 		/**
-		 * Simples.ajaxDefaults.success: function to execute when complete arguments are ( data, 'success', xhrObject )
+		 * @description function to execute when complete arguments are ( data, 'success', xhrObject )
 		 */	
 	    success: Simples.noop,
 		/**
-		 * Simples.ajaxDefaults.dataType: The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
+		 * @description The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
 		 */
 	    dataType: JSON,
 		/**
-		 * Simples.ajaxDefaults.async: boolean value of whether you want the request to be asynchronous or blocking
+		 * @description boolean value of whether you want the request to be asynchronous or blocking
 		 */
 	    async: true,
 		/**
-		 * Simples.ajaxDefaults.type: the HTTP verb type of request GET, POST, PUT, DELETE
+		 * @description the HTTP verb type of request GET, POST, PUT, DELETE
 		 */		
 	    type: GET,
 		/**
-		 * Simples.ajaxDefaults.timeout: the time to allow the request to be open before a timeout is triggered
+		 * @description the time to allow the request to be open before a timeout is triggered
 		 */
 	    timeout: 5000,
 		/**
-		 * Simples.ajaxDefaults.xhr: helper to return the correct XHR object for your platform
+		 * @description helper to return the correct XHR object for your platform
 		 */
 		xhr: window.XMLHttpRequest && (window.location.protocol !== FILE || !window.ActiveXObject) ?
 			function() {
@@ -803,7 +848,7 @@ Simples.merge({
 		context : window
 	},
 	/**
-	 * Simples.ajax: used to send an ajax requests
+	 * @description used to send an ajax requests
 	 * @param url {String}
 	 * @param options {Object} the options to use specified for each individual request see Simples.ajaxDefaults for description of options
 	 */	
@@ -811,7 +856,7 @@ Simples.merge({
 
 	    // Load the options object with defaults, if no
 	    // values were provided by the user
-	    if (!url) {
+	    if ( typeof url !== "string" ) {
 	        throw new Error('A URL must be provided.');
 	    }
 
@@ -879,6 +924,8 @@ Simples.merge({
 	            xhr = null;
 	        }
 	    }
+        // to enable headers etc to be added to request
+        options.beforeSend( xhr );
 
 	    // Setup async ajax call
 	    if (options.async) {
@@ -906,7 +953,7 @@ Simples.merge({
 
 	},
 	/**
-	 * Simples.scriptLoader: used to get scripts from a server
+	 * @description used to get scripts from a server
 	 * @param src {String} the source to point to for the request
 	 * @param callback {Function} called when the script is finished loading
 	 */
@@ -916,6 +963,7 @@ Simples.merge({
 			head = document.getElementsByTagName("head")[0] || document.documentElement;
 		
 	    if (script.readyState) {
+			/** @private */
 	        script.onreadystatechange = function() {
 	            if (script.readyState === "loaded" || script.readyState === "complete") {
 	                script.onreadystatechange = null;
@@ -924,6 +972,7 @@ Simples.merge({
 	            }
 	        };
 	    } else {
+			/** @private */
 	        script.onload = function() {
 	            ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
 				this.parentNode.removeChild( this );
@@ -940,13 +989,13 @@ Simples.merge({
 	    script = null;
 	},
 	/**
-	 * Simples.ajaxSettings: used to update the global default settings, see Simples.ajaxDefaults description
+	 * @description used to update the global default settings, see Simples.ajaxDefaults description
 	 */
     ajaxSettings: function(opts) {
 	    Simples.ajaxDefaults = Simples.merge(Simples.ajaxDefaults, opts);
 	},
 	/**
-	 * Simples.param: used to format data into a transmittable format takes either one argument of an object of array of objects or 2 arguments of strings
+	 * @description used to format data into a transmittable format takes either one argument of an object of array of objects or 2 arguments of strings
 	 * @param {Object|Array|String} name : value OR [{name:'',value:''}] OR "name" 
 	 * @param {String} value 
 	 */
@@ -986,9 +1035,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	SPACE_WITH_BOUNDARY = /\b\s+/g,
 	COMMA_WITH_BOUNDARY = /\s?\,\s?/g,
 	QUERY_SELECTOR = Simples.support.useQuerySelector,
-	/**
-	 * @private
-	 */
+	/** @private */
 	getElements = function(selector, context) {
 
 	    context = context || document;
@@ -1043,9 +1090,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	        return find ? slice.call(find, 0) : [];
 	    }
 	},
-	/**
-	 * @private provide html & object to bind to
-	 */
+	/** @private */
 	createDOM = function( selector, results ){
 
 		results.context = document;
@@ -1068,7 +1113,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	};
 
 /**
- * Simples.Selector: used to create or select Elements selector based on .class #id and [name=name]
+ * @description used to create or select Elements selector based on .class #id and [name=name]
  * @param {String|Element} selector element is used by object and string is used to select Element(s), based on className, id and name and where the querySelector is available using querySelectorAll
  * @param {Element} context element used to provide context
  * @param {Object|Array} results optional object to return selected Elements
@@ -1182,9 +1227,9 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	    return element;
 	};
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.domRead: to read the html from a elem
+	 * @description to read the html from a elem
 	 * @param {Element} elem the element to read the dom html from
 	 * @param {String} location to specify how to return the dom options are [ outer, text, inner/undefined ] use outer for outerHTML, text to read all the textNodes and inner or no argument for innerHTML
 	 */
@@ -1221,7 +1266,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.domManip: to write the dom new html string or dom elements
+	 * @description to write the dom new html string or dom elements
 	 * @param {Element} elem the element to read the dom html from
 	 * @param {String} location to specify how to return the dom options are desctructive: [remove, empty, outer, text, inner/undefined ], non-destructive: [top, bottom, unwrap, before, after, wrap ]
 	 * @param {String|Elements} html the string or Elements to put into the dom
@@ -1315,7 +1360,7 @@ Simples.merge({
 		return el;
 	},
 	/**
-	 * Simples.className: to either check for a className, add or remove a className
+	 * @description to either check for a className, add or remove a className
 	 * @param {Element} elem the element to manipulate the className on
 	 * @param {String} className the class to work with
 	 * @param {String} action to perform the step [ add, remove, has/undefined ]
@@ -1338,7 +1383,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.attr: read / write the attribute on an element
+	 * @description read / write the attribute on an element
 	 * @param {Element} elem the element to manipulate the attribute
 	 * @param {String} name the name of the attribute
 	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
@@ -1386,9 +1431,9 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).html: to read or write to the dom basd on the elements on the Simples object
+	 * @description to read or write to the dom basd on the elements on the Simples object
 	 * @param {String} location to specify how to return the dom options are desctructive: [remove, empty, outer, text, inner/undefined ], non-destructive: [top, bottom, unwrap, before, after, wrap ]
 	 * @param {String|Elements} html the string or Elements to put into the dom, if not specfied where location is [ outer, text, inner/undefined ] will read
 	 * @returns {Simples|String} if writing to the dom will return this, else will return string of dom
@@ -1408,7 +1453,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).hasClass: to determine whether any of the elements on the Simples object has the specified className
+	 * @description to determine whether any of the elements on the Simples object has the specified className
 	 * @params {String} className the exact className to test for
 	 * @returns {Boolean} indicating whether className is on elements of Simples object
 	 */
@@ -1421,7 +1466,7 @@ Simples.extend({
 		return false;
 	},
 	/**
-	 * Simples( '*' ).addClass: to add the specified className to the elements on the Simples object with the specified className
+	 * @description to add the specified className to the elements on the Simples object with the specified className
 	 * @params {String} className the className to add to the elements
 	 */
 	addClass : function( className ){
@@ -1432,7 +1477,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).removeClass: to remove the specified className to the elements on the Simples object with the specified className
+	 * @description to remove the specified className to the elements on the Simples object with the specified className
 	 * @params {String} className the className to remove to the elements
 	 */
 	removeClass : function( className ){
@@ -1443,33 +1488,34 @@ Simples.extend({
 		return this;		
 	},
 	/**
-	 * Simples( '*' ).attr: to read / write the given attribute to the elements on the Simples object
+	 * @description to read / write the given attribute to the elements on the Simples object
 	 * @param {String} name the name of the attribute
 	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
 	 */
 	attr : function(name, value){
 		var nameClass = toString.call( name );
 			
-		if( nameClass === ObjectClass ){   
-			this.each(function(){
-				for( var key in name ){
-					Simples.attr( this, key, name[key] );
+		if( nameClass === ObjectClass ){
+			for( var key in name ){
+				var i=0,l=this.length,val = name[key];
+				while(i<l){
+					Simples.attr( this[i++], key, val );
 				}
-			});
+			}
 		} else if( nameClass === StringClass ){
 			if( value === undefined ){
 				return Simples.attr( this[0], name, value );
 			} else { 
-				this.each(function(){
-					Simples.attr( this, name, value );
-				});			
+				for(var m=0,n=this.length;m<n;m++){
+					Simples.attr( this[m], name, value );
+				}
 			}
 		}
 		return this;
 	},
 	/* TODO: Rename me as I don't indicate functionality */
 	/**
-	 * Simples( '*' ).traverse: to select a new set of elements off of the elements in the Simples object
+	 * @description to select a new set of elements off of the elements in the Simples object
 	 * @params {String|Function} name the string to specify the traversing, i.e. childNodes, parentNode, etc or a function to walk 
 	 */
 	traverse : function( name ){
@@ -1484,7 +1530,7 @@ Simples.extend({
 		return results;
 	},
 	/**
-	 * Simples( '*' ).slice: to return a subset of the selected elements
+	 * @description to return a subset of the selected elements
 	 * @params {Number} i the first element to start slicing
 	 * @params {Number} len the last element to finish slicing this is optional if not specified then the slice is to the last element
 	 */	
@@ -1507,18 +1553,20 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
 	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
-	// normalize float css property
+	/** @private normalize float css property */
 	fcamelCase = function( all, letter ) {
 		return letter.toUpperCase();
 	},
+	/** @private */
 	fcapitalise = function( all, first, rest ){
 		return first.toUpperCase() + rest.toLowerCase();
 	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.getStyle: Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
+	 * @description Used to read the current computed style of the element including width, height, innerWidth, innerHeight, offset.top, offset.left, border, etc.
+	 * @function
 	 * @param {Element} elem the element to read the somputed style off
 	 * @param {String} type of the attribute to read
 	 * @param {Boolean} extra used to determine on outerHeight, outerWidth whether to include the margin or just the border
@@ -1630,7 +1678,7 @@ Simples.merge({
 
 	})( Simples ),
 	/**
-	 * Simples.currentCSS: 
+	 * @description to read the current style attribute 
 	 * @param {Element} elem the element to read the current style attributes off 
 	 * @param {String} name of the style atttribute to read
 	 */	
@@ -1708,7 +1756,7 @@ Simples.merge({
 	    return ret;
 	},
 	/**
-	 * Simples.setStyle: use to set the supplied elements style attribute 
+	 * @description use to set the supplied elements style attribute 
 	 * @param {Element} elem the element to set the style attribute on
 	 * @param {String} name the name of the attribute to set
 	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
@@ -1761,9 +1809,9 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).style: Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+	 * @description Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
 	 * @param {String} type the computed style attribute to read
 	 * @param {Boolean} extra whether to include extra
 	 */	
@@ -1775,7 +1823,7 @@ Simples.extend({
 		}
 	},
 	/**
-	 * Simples( '*' ).css: Used to read the current style attribute or set the current style attribute
+	 * @description Used to read the current style attribute or set the current style attribute
 	 * @param {String} name of the attribute to set
 	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
 	 */	
@@ -1803,21 +1851,15 @@ Simples.extend({
 		return this;
 	}
 });
-/**
- * @private
- */
+/** @private */
 function returnFalse() {
 	return false;
 }
-/**
- * @private
- */
+/** @private */
 function returnTrue() {
 	return true;
 }
-/**
- * @private used to clear all events on a provided element
- */
+/** @private used to clear all events on a provided element */
 function clearEvents( elem, type, events, handlers ){
 	// check whether it is a W3C browser or not
 	if ( elem.removeEventListener ) {
@@ -1831,7 +1873,8 @@ function clearEvents( elem, type, events, handlers ){
 	if( handlers && handlers[type] ){ delete handlers[ type ]; }
 }
 /**
- * Simples.Event: the event constructor to provide unified event object support
+ * @constructor
+ * @description the event constructor to provide unified event object support
  * @param {String|Event} the name or event to coerce into a Simples.Event to bridge the differences between implementations
  */
 Simples.Event = function( event ){
@@ -1863,7 +1906,7 @@ Simples.Event = function( event ){
  */
 Simples.Event.prototype = {
 	/** 
-	 * Simples.Event( '*' ).preventDefault: used to prevent the browser from performing its default action
+	 * @description used to prevent the browser from performing its default action
 	 */
 	preventDefault: function() {
 		this.isDefaultPrevented = returnTrue;
@@ -1881,7 +1924,7 @@ Simples.Event.prototype = {
 		e.returnValue = false;
 	},
 	/** 
-	 * Simples.Event( '*' ).stopPropagation: used to stop the event from continuing its bubbling
+	 * @description used to stop the event from continuing its bubbling
 	 */	
 	stopPropagation: function() {
 		this.isPropagationStopped = returnTrue;
@@ -1898,29 +1941,32 @@ Simples.Event.prototype = {
 		e.cancelBubble = true;
 	},
 	/** 
-	 * Simples.Event( '*' ).stopImmediatePropagation: used to stop the event bubbling up and any other event callbacks from being triggered on the current element
+	 * @description used to stop the event bubbling up and any other event callbacks from being triggered on the current element
 	 */	
 	stopImmediatePropagation: function() {
 	    this.isImmediatePropagationStopped = returnTrue;
 	    this.stopPropagation();
 	},
-	/** 
-	 * Simples.Event( '*' ).isDefaultPrevented: used to determine wherther the event has had preventDefault called
+	/**
+	 * @function
+	 * @description used to determine wherther the event has had preventDefault called
 	 */	
 	isDefaultPrevented: returnFalse,
 	/** 
-	 * Simples.Event( '*' ).isPropagationStopped: used to determine wherther the event has had stopPropagation called
+	 * @function
+	 * @description used to determine wherther the event has had stopPropagation called
 	 */	
 	isPropagationStopped: returnFalse,
 	/** 
-	 * Simples.Event( '*' ).isImmediatePropagationStopped: used to determine wherther the event has had stopImmediatePropagation called
+	 * @function
+	 * @description used to determine wherther the event has had stopImmediatePropagation called
 	 */	
 	isImmediatePropagationStopped: returnFalse
 };
 	
-Simples.Events = {
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.Events.attach: to add the event to the provided element
+	 * @description to add the event to the provided element
 	 * @param {Element} elem the element to attach the event to	
 	 * @param {String} type the type of event to bind i.e. click, custom, etc
 	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
@@ -1943,15 +1989,14 @@ Simples.Events = {
 			
 			var data = Simples.data( elem ),
 				events = data.events ? data.events : data.events = {},
-				handlers = data.handlers ? data.handlers : data.handlers = {},
-				sEvts = Simples.Events;
+				handlers = data.handlers ? data.handlers : data.handlers = {};
 			
-			var guid = !callback.guid ? callback.guid = sEvts.guid++ : callback.guid, 
+			var guid = !callback.guid ? callback.guid = Simples.guid++ : callback.guid, 
 				handler = handlers[ type ];
 				
 			if( !handler ){
 				handler = handlers[ type ] = function( evt ){
-					return Simples !== undefined ? sEvts.handler.apply( handler.elem, arguments ) : undefined;
+					return Simples !== undefined ? Simples._eventHandler.apply( handler.elem, arguments ) : undefined;
 				};
 				handler.elem = elem;
 				// Attach to the element
@@ -1970,7 +2015,7 @@ Simples.Events = {
 		}
 	},
 	/**
-	 * Simples.Events.detach: to remove the event from the provided element
+	 * @description to remove the event from the provided element
 	 * @param {Element} elem the element to detach the event from
 	 * @param {String} type the type of event to unbind i.e. click, custom, etc, if no type is specifed then all events are unbound
 	 * @param {Function} callback the callback to unbind, if not specified will unbind all the callbacks to this event	
@@ -1990,12 +2035,11 @@ Simples.Events = {
 		   
 		var elemData = Simples.data( elem ),
 			events = elemData.events,
-			handlers = elemData.handlers,
-			sEvts = Simples.Events;
+			handlers = elemData.handlers;
 		
 		if( type === undefined ){
 			for( var eventType in events ){
-				sEvts.clearEvent( elem, eventType, events, handlers );
+				clearEvents( elem, eventType, events, handlers );
 			}
 		} else {
 			var event = events[ type ];
@@ -2007,12 +2051,12 @@ Simples.Events = {
 			}
 
 			if( event.length === 0 ){
-				sEvts.clearEvent( elem, type, events, handlers );
+				clearEvents( elem, type, events, handlers );
 			}
 		}
 	},
 	/**
-	 * Simples.Events.trigger: to trigger an event on a supplied element
+	 * @description to trigger an event on a supplied element
 	 * @param {Element} elem the element to trigger the event on
 	 * @param {String} type the type of event to trigger i.e. click, custom, etc
 	 * @param {Any} data the data to attach to the event	
@@ -2040,26 +2084,21 @@ Simples.Events = {
 			} 
 		}		                                         
 	},
-	/**
-	 * @private properties as part of the fix process
-	 */
-	properties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
-	/**
-	 * @private to fix the native Event
-	 */
-	fix : function( event ){
+	/** @private properties as part of the fix process */
+	_eventProperties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
+	/** @private to fix the native Event */
+	_eventFix : function( event ){
 		 if( event[ accessID ] ){
 			return event;
 		}
 	    // store a copy of the original event object
 	    // and "clone" to set read-only properties 
-		var originalEvent = event,
-			sEvts = Simples.Events;
+		var originalEvent = event;
 		
 		event = Simples.Event( originalEvent );
 
-	    for (var i=sEvts.properties.length, prop; i;) {
-	        prop = sEvts.properties[--i];
+	    for (var i=Simples._eventProperties.length, prop; i;) {
+	        prop = Simples._eventProperties[--i];
 	        event[ prop ] = originalEvent[ prop ];
 	    }
 
@@ -2103,17 +2142,13 @@ Simples.Events = {
 
 	    return event;
 	},
-	/**
-	 * @private to create a unique identifier for each event callback
-	 */
+	/** @private to create a unique identifier */
 	guid : 1e6,
-	/**
-	 * @private event handler this is bound to the elem event
-	 */
-	handler : function( event ){ 
+	/** @private event handler this is bound to the elem event */
+	_eventHandler : function( event ){ 
 		var events, callbacks;
 		var args = slice.call( arguments );
-		event = args[0] = Simples.Events.fix( event || window.event );
+		event = args[0] = Simples._eventFix( event || window.event );
         event.currentTarget = this;
 
 		events = Simples.data( this, "events" );
@@ -2142,51 +2177,51 @@ Simples.Events = {
 		}
 		return event.result;
 	}
-};
+});
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).bind: to add the event from the elements on the Simples object
+	 * @description to add the event from the elements on the Simples object
 	 * @param {String} type the type of event to bind i.e. click, custom, etc
 	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
 	 */
 	bind : function( type, callback ){
 		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
 			// Loop over elements    
-			var attach = Simples.Events.attach,i=0,l=this.length;
+			var i=0,l=this.length;
 			while(i<l){
 				// Register each original event and the handled event to allow better detachment
-				attach( this[i++], type, callback );
+				Simples.attach( this[i++], type, callback );
 			}
 		}
 		return this;	
 	},
 	/**
-	 * Simples( '*' ).unbind: to remove the event from the elements on the Simples object
+	 * @description to remove the event from the elements on the Simples object
 	 * @param {String} type the type of event to unbind i.e. click, custom, etc, if no type is specifed then all events are unbound
 	 * @param {Function} callback the callback to unbind, if not specified will unbind all the callbacks to this event
 	 */
 	unbind : function( type, callback ){
 		// Loop over elements    
-		var detach = Simples.Events.detach,i=0,l=this.length;
+		var i=0,l=this.length;
 		while(i<l){
 			// Register each original event and the handled event to allow better detachment    
-			detach( this[i++], type, callback );
+			Simples.detach( this[i++], type, callback );
 		}
 		return this;
 	},
 	/**
-	 * Simples( '*' ).trigger: to trigger an event on the elements on the Simples object
+	 * @description to trigger an event on the elements on the Simples object
 	 * @param {String} type the type of event to trigger i.e. click, custom, etc
 	 * @param {Any} data the data to attach to the event
 	 */
 	trigger : function( type, data ){
 		if( typeof type === STRING){ 
 			// Loop over elements
-			var trigger = Simples.Events.trigger,i=0,l=this.length;
+			var i=0,l=this.length;
 			while(i<l){
 				// Register each original event and the handled event to allow better detachment    
-				trigger( this[i++], type, data );
+				Simples.trigger( this[i++], type, data );
 			}
 		}
 		return this;
@@ -2194,6 +2229,7 @@ Simples.extend({
 });
 // OMG its another non-W3C standard browser 
 var REGEX_HTML_BODY = /^body|html$/i,
+/** @private */
 getWindow = function( elem ) {
 	return ("scrollTo" in elem && elem.document) ?
 		elem :
@@ -2204,7 +2240,7 @@ getWindow = function( elem ) {
 
 if( "getBoundingClientRect" in document.documentElement ){
 	/**
-	 * Simples.offset: to get the top, left offset of an element
+	 * @description to get the top, left offset of an element
 	 * @param {Element} elem the element to get the offset of
 	 * @returns {Object} top, left
 	 */
@@ -2290,9 +2326,7 @@ if( "getBoundingClientRect" in document.documentElement ){
 		return { top: top, left: left };
 	};
 }
-/**
- * @private 
- */
+/** @private */
 Simples.offset.init = function(){
 	var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
 		html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
@@ -2327,9 +2361,9 @@ Simples.offset.init = function(){
 	this.init = Simples.noop;
 };
 
-Simples.merge({
+Simples.merge( /** @lends Simples */ {
 	/**
-	 * Simples.bodyOffset: to get the offset of the body 
+	 * @description to get the offset of the body 
 	 * @param {Body} body body element to measure
 	 * @returns {Object} top, left
 	 */
@@ -2346,7 +2380,7 @@ Simples.merge({
 		return { top: top, left: left };
 	},
 	/**
-	 * Simples.setOffset: to set the offset of the top and left of an element passed on its current offset
+	 * @description to set the offset of the top and left of an element passed on its current offset
 	 * @param {Element} elem element to set the offset on
 	 * @param {Object} options
 	 * @param {Number} options.top the top offset desired
@@ -2385,7 +2419,7 @@ Simples.merge({
 		curElem.css( props );
 	},
 	/**
-	 * Simples.offsetParent: to get the offsetParent of an element
+	 * @description to get the offsetParent of an element
 	 * @param {Element} elem the element to get the offsetParent of
 	 * @returns {Element}
 	 */
@@ -2398,7 +2432,7 @@ Simples.merge({
 		return offsetParent;
 	},
 	/**
-	 * Simples.position: to get the position of the element
+	 * @description to get the position of the element
 	 * @param {Element} elem to get the position of
 	 * @returns {Object} top, left
 	 */
@@ -2428,7 +2462,7 @@ Simples.merge({
 		};
 	},
 	/**
-	 * Simples.setScroll:
+	 * @description To set the scrollTop / scrollLeft for a given element
 	 * @param {Element} elem element to set the scroll on
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} value
@@ -2448,7 +2482,7 @@ Simples.merge({
 		}
 	},
 	/**
-	 * Simples.getScroll: To retrieve the scrollTop / scrollLeft for a given element
+	 * @description To retrieve the scrollTop / scrollLeft for a given element
 	 * @param {Element} elem element to get the scroll of
 	 * @param {String} name 'top' or 'left'
 	 * @returns {Number} the value of the scrollTop / scrollLeft
@@ -2463,9 +2497,9 @@ Simples.merge({
 	}
 });
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).offset: To set or retrieve the offset of the selected elements on the Simples object
+	 * @description To set or retrieve the offset of the selected elements on the Simples object
 	 * @param {Object} options object with top and / or left specified to set the offset
 	 * @returns {Number|Simples} the value of the offset or Simples object
 	 */	
@@ -2482,7 +2516,7 @@ Simples.extend({
 		return this[0] ? Simples.offset( this[0] ) : null;
 	},
 	/**
-	 * Simples( '*' ).offsetParent: To return the same object with the offsetParents added in place of the selected elements
+	 * @description To return the same object with the offsetParents added in place of the selected elements
 	 */	
 	offsetParent : function(){
 		var len = this.length;
@@ -2492,7 +2526,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).scroll: To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
+	 * @description To retrieve or set the scrollTop / scrollLeft elements on the simples object, if no value is provided the first element has the value return
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} val the value to set the offset to
 	 * @returns {Number|Simples} the value of the scrollTop / scrollLeft or Simples object
@@ -2508,7 +2542,7 @@ Simples.extend({
 		return this[0] ? Simples.getScroll( this[0], name ) : null;
 	},
 	/**
-	 * Simples( '*' ).position: To retrieve or set the scrollTop / scrollLeft elements on the simples object
+	 * @description To retrieve or set the scrollTop / scrollLeft elements on the simples object
 	 * @param {String} name 'top' or 'left'
 	 * @param {Number} val the value to set the offset to
 	 * @returns {Number} the value of the scrollTop / scrollLeft
@@ -2524,6 +2558,7 @@ var REGEX_PIXEL = /px\s?$/,
 	TIMER_ID;
 /**
  * @namespace Simples.Animation
+ * @description Animation controller if provide a standard animation object to this functionality it will execute the animation 
  */
 Simples.Animation = {
 	/* animations: currently active animations being run */
@@ -2532,21 +2567,25 @@ Simples.Animation = {
 	frameRate : 24,
 	/* length: count of current active animations */
 	length : 0,
-	/* guid: unique identifier for animations */
-	guid : 1e6,
-	/* tweens: default tweens for animation 
-	 * @param frame: current frame
-	 * @param frameCount: total frames for animations
-	 * @param start: start value for tween
-	 * @param delta: difference to end value		
+	/**
+	 * @namespace Simples.Animation.tweens 
+	 * @description default tweens for animation 
 	 */
 	tweens : {
+		/**
+		 * @param frame: current frame
+		 * @param frameCount: total frames for animations
+		 * @param start: start value for tween
+		 * @param delta: difference to end value
+		*/
 		easing : function( frame, frameCount, start, delta ) {
 			return ((frame /= frameCount / 2) < 1) ? delta / 2 * frame * frame + start : -delta / 2 * ((--frame) * (frame - 2) - 1) + start;
 		},
+		/** @see Simples.Animation.tweens.easing */
 		linear : function( frame, frameCount, start, delta ){
 			return start + ( delta * ( frame/frameCount ));
 		},
+		/** @see Simples.Animation.tweens.easing */
 		quadratic : function( frame, frameCount, start, delta ){
 			return start + (((Math.cos((frame/frameCount)*Math.PI) )/2) * delta );
 		}
@@ -2572,7 +2611,7 @@ Simples.Animation = {
 
 		var anim = {
 			0 : elem,
-			id : Simples.Animation.guid++,
+			id : Simples.guid++,
 			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
 			duration : ( typeof opts.duration === NUMBER && opts.duration > -1 ) ? opts.duration : 600,
 			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
@@ -2639,7 +2678,10 @@ Simples.Animation = {
 
 			animation.startTime = now - ( animation.duration - diff );
 		} else {
-			delete this.animations[ animation.id ];
+			if( this.animations[ animation.id ] ){
+				delete this.animations[ animation.id ];
+				this.length--;
+			}
 			this.start( animation );
 		}
 	}, 
@@ -2662,8 +2704,7 @@ Simples.Animation = {
 		}
 	},
 	/**
-	 * @private
-	 * Simples.Animation._step: a private method used by the queue runner to iterate over queued animations and update each postion
+	 * @private used by the queue runner to iterate over queued animations and update each postion
 	 */
 	_step : function(){
 		if( this.length ){ 
@@ -2714,9 +2755,9 @@ Simples.Animation = {
 	}
 };
 
-Simples.extend({
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * Simples( '*' ).animations: From the instance of the Simples object used to bridge to the Simples.Animation functionality
+	 * @description From the instance of the Simples object used to bridge to the Simples.Animation functionality
 	 * @param action {String} the name of the action to be performed, excluding create && _step
 	 */
 	animations: function(action) {
@@ -2730,7 +2771,7 @@ Simples.extend({
 		return this;
 	},
 	/**
-	 * Simples( '*' ).animate: Used to create animations off the elements in the instance of the Simples object
+	 * @description Used to create animations off the elements in the instance of the Simples object
 	 * @param action {String} the name of the action to be performed, excluding create && _step
 	 * @param css {Object} CSS to use in animation, final position 
 	 * @param opts {Object}
@@ -2741,7 +2782,7 @@ Simples.extend({
 	animate: function(css, opts) {
 		var i = this.length;
 		while (i) {
-			Simples.animate( this[--i], css, opts );
+			Simples.Animation.create( this[--i], css, opts );
 		}
 		return this;
 	}
