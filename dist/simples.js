@@ -5,7 +5,7 @@
  * Copyright (c) 2009 - 2010, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sun Dec 12 21:17:48 2010 +0000
+ * Date: Wed Dec 15 14:11:14 2010 +0000
  */
 (function( window, undefined ) {
 
@@ -511,7 +511,7 @@ if ( div.attachEvent && div.fireEvent ) {
 	div.attachEvent("onclick", function click() {
 		// Cloning a node shouldn't copy over any
 		// bound event handlers (IE does this)
-		jQuery.support.noCloneEvent = false;
+		Simples.support.noCloneEvent = false;
 		div.detachEvent("onclick", click);
 	});
 	div.cloneNode(true).fireEvent("onclick");
