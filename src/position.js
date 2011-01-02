@@ -110,26 +110,26 @@ Simples.offset.init = function(){
 	checkDiv = innerDiv.firstChild;
 	td = innerDiv.nextSibling.firstChild.firstChild;
 
-	this.doesNotAddBorder = (checkDiv.offsetTop !== 5);
-	this.doesAddBorderForTableAndCells = (td.offsetTop === 5);
+	Simples.offset.doesNotAddBorder = (checkDiv.offsetTop !== 5);
+	Simples.offset.doesAddBorderForTableAndCells = (td.offsetTop === 5);
 
 	checkDiv.style.position = "fixed";
 	checkDiv.style.top = "20px";
 
 	// safari subtracts parent border width here which is 5px
-	this.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
+	Simples.offset.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
 	checkDiv.style.position = checkDiv.style.top = EMPTY_STRING;
 
 	innerDiv.style.overflow = "hidden";
 	innerDiv.style.position = "relative";
 
-	this.subtractsBorderForOverflowNotVisible = (checkDiv.offsetTop === -5);
+	Simples.offset.subtractsBorderForOverflowNotVisible = (checkDiv.offsetTop === -5);
 
-	this.doesNotIncludeMarginInBodyOffset = (body.offsetTop !== bodyMarginTop);
+	Simples.offset.doesNotIncludeMarginInBodyOffset = (body.offsetTop !== bodyMarginTop);
 
 	body.removeChild( container );
 	body = container = innerDiv = checkDiv = table = td = null;
-	this.init = Simples.noop;
+	Simples.offset.init = Simples.noop;
 };
 
 Simples.merge( /** @lends Simples */ {
