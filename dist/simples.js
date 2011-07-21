@@ -5,7 +5,7 @@
  * Copyright (c) 2009 - 2011, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Sun Jan 2 14:45:44 2011 +0000
+ * Date: Thu Jul 21 10:25:01 2011 +0100
  */
 (function( window, undefined ) {
 
@@ -138,7 +138,7 @@ Simples.merge( /** @lends Simples */ {
 		if ( !Simples.isReady ) {
 			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 			if ( !document.body ) {
-				return setTimeout( Simples.readyHandler, 13 );
+				return window.setTimeout( Simples.readyHandler, 13 );
 			}
 
 			// Remember that the DOM is ready
@@ -159,9 +159,7 @@ Simples.merge( /** @lends Simples */ {
 	},
 	/** @private To setup the event listeners for the ready event */
 	bindReady : function(){
-		if ( readyBound ) {
-			return;
-		}
+		if ( readyBound ) { return; }
 
 		readyBound = true;
 
@@ -732,7 +730,7 @@ httpSuccess = function(xhr) {
     try {
         // If no server status is provided, and we're actually
         // requesting a local file, then it was successful
-        return ! xhr.status && location.protocol == FILE ||
+        return !xhr.status && location.protocol == FILE ||
 
         // Any status in the 200 range is good
         (xhr.status >= 200 && xhr.status < 300) ||
