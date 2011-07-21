@@ -127,7 +127,7 @@ Simples.merge( /** @lends Simples */ {
 		if ( !Simples.isReady ) {
 			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 			if ( !document.body ) {
-				return setTimeout( Simples.readyHandler, 13 );
+				return window.setTimeout( Simples.readyHandler, 13 );
 			}
 
 			// Remember that the DOM is ready
@@ -148,9 +148,7 @@ Simples.merge( /** @lends Simples */ {
 	},
 	/** @private To setup the event listeners for the ready event */
 	bindReady : function(){
-		if ( readyBound ) {
-			return;
-		}
+		if ( readyBound ) { return; }
 
 		readyBound = true;
 

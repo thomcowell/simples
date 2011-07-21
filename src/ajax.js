@@ -58,7 +58,7 @@ httpSuccess = function(xhr) {
     try {
         // If no server status is provided, and we're actually
         // requesting a local file, then it was successful
-        return ! xhr.status && location.protocol == FILE ||
+        return !xhr.status && location.protocol == FILE ||
 
         // Any status in the 200 range is good
         (xhr.status >= 200 && xhr.status < 300) ||
