@@ -1,42 +1,31 @@
 module("Core");
-var CLASSES = {
-	array : '[object Array]',
-	object : '[object Object]',
-	nodelist : '[object NodeList]', 
-	string : "[object String]", 
-	number : "[object Number]",
-	function : "[object Function]",
-	boolean : "[object Boolean]",
-	htmlcollection : "[object HTMLCollection]",
-	window : "[object Window]",
-};
 // sense check to ensure no browser incorrectly returns bad values
 test("Class representations", 8, function(){
-	ok( Simples.isConstructor({0:'red',1:'green'}, "Object" ), "Should be "+CLASSES.object );
-	ok( Simples.isConstructor([1,2], "Array" ), "Should be "+CLASSES.array );
-	ok( Simples.isConstructor("ham", "String" ), "Should be "+CLASSES.string );
-	ok( Simples.isConstructor(12, "Number" ), "Should be "+CLASSES.number );
-	ok( Simples.isConstructor(function(){ return false; }, "Function" ), "Should be "+CLASSES.function ); 
-	ok( Simples.isConstructor(false, "Boolean" ), "Should be "+CLASSES.boolean );
-	ok( Simples.isConstructor(true, "Boolean" ), "Should be "+CLASSES.boolean );
+	ok( Simples.isConstructor({0:'red',1:'green'}, "Object" ), "Should be [object Object]" );
+	ok( Simples.isConstructor([1,2], "Array" ), "Should be [object Array]" );
+	ok( Simples.isConstructor("ham", "String" ), "Should be [object String]" );
+	ok( Simples.isConstructor(12, "Number" ), "Should be [object Number]" );
+	ok( Simples.isConstructor(function(){ return false; }, "Function" ), "Should be [object Function]" ); 
+	ok( Simples.isConstructor(false, "Boolean" ), "Should be [object Boolean]" );
+	ok( Simples.isConstructor(true, "Boolean" ), "Should be [object Boolean]" );
 	if( document.getElementsByClassName ){
 		var isNLorHC = Simples.getConstructor( document.getElementsByClassName('row') );
-		ok( isNLorHC === "NodeList" || isNLorHC === "HTMLCollection", "Should be "+CLASSES.nodelist+' or '+CLASSES.htmlcollection );
+		ok( isNLorHC === "NodeList" || isNLorHC === "HTMLCollection", "Should be [object NodeList] or [object HTMLCollection]" );
 	} else {
-		ok( Simples.isConstructor(document.getElementsByTagName('div'), "Object" ), "Should be "+CLASSES.object );
+		ok( Simples.isConstructor(document.getElementsByTagName('div'), "Object" ), "Should be [object Object]" );
 	}
 });
 
 test("Class String representations", 9, function(){
 	equal( Simples.getConstructor(undefined), false, "undefined Should be false" );
 	equal( Simples.getConstructor(null), false, "null Should be false" );
-	equal( Simples.getConstructor({0:'red',1:'green'}), "Object", "Should be "+CLASSES.object );
-	equal( Simples.getConstructor([1,2]), "Array", "Should be "+CLASSES.array );
-	equal( Simples.getConstructor("ham"), "String", "Should be "+CLASSES.string );
-	equal( Simples.getConstructor(12), "Number", "Should be "+CLASSES.number );
-	equal( Simples.getConstructor(function(){ return false; }), "Function", "Should be "+CLASSES.function ); 
-	equal( Simples.getConstructor(false), "Boolean","Should be "+CLASSES.boolean );
-	equal( Simples.getConstructor(true), "Boolean", "Should be "+CLASSES.boolean );
+	equal( Simples.getConstructor({0:'red',1:'green'}), "Object", "Should be [object Object]" );
+	equal( Simples.getConstructor([1,2]), "Array", "Should be [object Array]" );
+	equal( Simples.getConstructor("ham"), "String", "Should be [object String]" );
+	equal( Simples.getConstructor(12), "Number", "Should be [object Number]" );
+	equal( Simples.getConstructor(function(){ return false; }), "Function", "Should be [object Function]" ); 
+	equal( Simples.getConstructor(false), "Boolean","Should be [object Boolean]" );
+	equal( Simples.getConstructor(true), "Boolean", "Should be [object Boolean]" );
 });
 
 // sense check to ensure no browser incorrectly returns bad values
