@@ -7,5 +7,5 @@
  *
  * Date: 
  */
-(function( WIN, DOC, UNDEF ) {
+(function( window, document ) {
 
