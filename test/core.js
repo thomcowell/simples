@@ -205,7 +205,7 @@ test("Simples constructor when instantiated with the selector as 'body'", 5, fun
 });
 
 test('Simples constructor when instantiated with NodeList passed as selector', 4, function(){ 
-	var rows = document.getElementsByClassName('row');
+	var rows = document.getElementsByClassName ? document.getElementsByClassName('row') : document.getElementsByTagName("div");
 	var s_obj = Simples( rows );
 	same( s_obj.selector, '', "node list of .row -- should have empty selector");	              
 	same( s_obj.context, undefined, "node list of .row -- should have empty context");
