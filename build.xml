@@ -56,7 +56,7 @@
 		</exec>
 	</target>
 	
-	<target name="lint" depends="simples" description="Check jQuery against JSLint">
+	<target name="lint" depends="simples" description="Check Simples against JSLint">
 		<exec executable="java">
 			<arg line="-jar build/js.jar build/jslint-check.js" />
 		</exec>
