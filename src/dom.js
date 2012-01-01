@@ -13,8 +13,8 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	wrapHelper = function(xhtml, el) {
 		// insert into documentFragment to ensure insert occurs without messing up order
 		if( xhtml.toString().indexOf("[object ") > -1 ){
-			if( xhtml && xhtml.length !== undefined ){
-				var docFrag = document.createDocumentFragment();
+			if( xhtml && xhtml.length !== UNDEF ){
+				var docFrag = DOC.createDocumentFragment();
 				xhtml = slice.call( xhtml, 0 );
 				for(var p=0,r=xhtml.length;p<r;p++){
 					docFrag.appendChild( xhtml[p] );
@@ -25,20 +25,20 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 			return xhtml;
 		}
 	    var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
-	    xhtml = EMPTY_STRING + xhtml;
+	    xhtml = "" + xhtml;
 	    if ( VALID_ELEMENTS.test(xhtml) ) {
 	        result = VALID_ELEMENTS.exec(xhtml);
 			tag = result[1];
 
 	        // if the node has any attributes, convert to object
-	        if (result[2] !== EMPTY_STRING) {
+	        if (result[2] !== "") {
 	            attrList = result[2].split( SPLIT_ATTRIBUTE );
 
 	            for (var l=attrList.length; i < l; i++) {
 	                attr = Simples.trim( attrList[i] );
-	                if (attr !== EMPTY_STRING && attr !== " ") {
+	                if (attr !== "" && attr !== " ") {
 	                    node = attr.split('=');
-	                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, EMPTY_STRING);
+	                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, "");
 	                }
 	            }
 	        }
@@ -47,7 +47,7 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 			tag = (el.firstChild === null) ? TAG_LIST[el.tagName] || el.tagName : el.firstChild.tagName;
 		}
 
-	    element = document.createElement(tag);
+	    element = DOC.createElement(tag);
 
 	    for( x in attributes ){
 			Simples.attr( element, x, attributes[x] );
@@ -77,7 +77,7 @@ Simples.merge( /** @lends Simples */ {
 
 					return html;
 				case "text" :
-					var str = EMPTY_STRING, elems = elem.childNodes;
+					var str = "", elems = elem.childNodes;
 					for ( var i = 0; elems[i]; i++ ) {
 						elem = elems[i];
 
@@ -111,7 +111,7 @@ Simples.merge( /** @lends Simples */ {
 				while ( elem.firstChild ) {
 					elem.removeChild( elem.firstChild );
 				}
-				elem.appendChild( (elem && elem.ownerDocument || document).createTextNode( html.toString() ) );
+				elem.appendChild( (elem && elem.ownerDocument || DOC).createTextNode( html.toString() ) );
 				break;
 			case 'remove' :
 				if( parent ){
@@ -175,14 +175,14 @@ Simples.merge( /** @lends Simples */ {
 						html = html != null ? html : location;
 						var list, len, i = 0, testString = html.toString();
 						if ( testString.indexOf("[object ") === -1 ) {
-							elem.innerHTML = EMPTY_STRING+html;
+							elem.innerHTML = ""+html;
 							list = elem.getElementsByTagName('SCRIPT');
 							len = list.length;
 							for (; i < len; i++) {
 								eval(list[i].text);
 							}
 						} else if( testString.indexOf("[object ") > -1 ) {
-							elem.innerHTML = EMPTY_STRING;
+							elem.innerHTML = "";
 							elem.appendChild( wrapHelper( html, elem ) );
 						}					
 				}
@@ -220,10 +220,10 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	attr : function( elem, name, value ){
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
-			return undefined;
+			return UNDEF;
 		}
 
-		if( value === undefined ){
+		if( value === UNDEF ){
 			if ( elem.nodeName.toUpperCase() === "FORM" && elem.getAttributeNode(name) ) {
 				// browsers index elements by id/name on forms, give priority to attributes.				
 				return elem.getAttributeNode( name ).nodeValue;
@@ -243,19 +243,19 @@ Simples.merge( /** @lends Simples */ {
 				elem.removeAttribute( name );
 			}
 		} else { 
-			if ( ( typeof value == ( FUNC || 'object' ) ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
-				return undefined;
+			if ( ( typeof value == ( "function" || 'object' ) ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
+				return UNDEF;
 			}
 
 			if( name === "style" && !Simples.support.style ){
 				// get style correctly
-				elem.style.cssText = EMPTY_STRING + value;
+				elem.style.cssText = "" + value;
 			} else if ( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ) { 
 				// These attributes don't require special treatment 
-				elem[ name ] = EMPTY_STRING+value;
+				elem[ name ] = ""+value;
 			} else { 
 				// it must be this
-				elem.setAttribute(name, EMPTY_STRING+value);
+				elem.setAttribute(name, ""+value);
 			}
 		}
 	}
@@ -273,7 +273,7 @@ Simples.extend( /** @lends Simples.fn */ {
 		if ( arguments.length === 0 || ( arguments.length === 1 && SINGLE_ARG_READ.test( location ) ) ) {
 			return Simples.domRead( this[0], location );
 		}
-		location = location != null ? location : EMPTY_STRING;
+		location = location != null ? location : "";
 
 		var c=0,i=0,l=this.length, results;
 		while(i<l){
@@ -323,16 +323,16 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
 	 */
 	attr : function(name, value){
-		var nameClass = toString.call( name );
+		var klass = Simples.getConstructor( name );
 			
-		if( nameClass === ObjectClass ){
+		if( klass === "Object" ){
 			for( var key in name ){
 				var i=0,l=this.length,val = name[key];
 				while(i<l){
 					Simples.attr( this[i++], key, val );
 				}
 			}
-		} else if( nameClass === StringClass ){
+		} else if( klass === "String" ){
 			if( value === undefined ){
 				return Simples.attr( this[0], name, value );
 			} else { 
@@ -349,9 +349,9 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @params {String|Function} name the string to specify the traversing, i.e. childNodes, parentNode, etc or a function to walk 
 	 */
 	traverse : function( name ){
-		var isWhat = toString.call( name ), results = new Simples(), i=0,l = this.length;
+		var isWhat = Simples.getConstructor( name ), results = new Simples(), i=0,l = this.length;
 		while( i<l ){
-			var current = this[i++], elem = ( isWhat === StringClass ) ? current[ name ] : ( isWhat === FunctionClass ) ? name.call( current, current ) : null;
+			var current = this[i++], elem = ( isWhat === "String" ) ? current[ name ] : ( isWhat === "Function" ) ? name.call( current, current ) : null;
 			if( elem ){
 				results.push.apply( results, elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ] );
 			}

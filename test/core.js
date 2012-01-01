@@ -1,54 +1,76 @@
 module("Core");
-
-function isClass( obj, ClassName ){
-	return toString.call( obj ) === ClassName;
-}
-
+var CLASSES = {
+	array : '[object Array]',
+	object : '[object Object]',
+	nodelist : '[object NodeList]', 
+	string : "[object String]", 
+	number : "[object Number]",
+	function : "[object Function]",
+	boolean : "[object Boolean]",
+	htmlcollection : "[object HTMLCollection]",
+	window : "[object Window]",
+};
 // sense check to ensure no browser incorrectly returns bad values
-test("Class String representations", 8, function(){
-	ok( isClass({0:'red',1:'green'}, ObjectClass ), "Should be "+ObjectClass );
-	ok( isClass([1,2], ArrayClass ), "Should be "+ArrayClass );
-	ok( isClass("ham", StringClass ), "Should be "+StringClass );
-	ok( isClass(12, NumberClass ), "Should be "+NumberClass );
-	ok( isClass(function(){ return false; }, FunctionClass ), "Should be "+FunctionClass ); 
-	ok( isClass(false, BooleanClass ), "Should be "+BooleanClass );
-	ok( isClass(true, BooleanClass ), "Should be "+BooleanClass );
-	
-	var isNLorHC = toString.call( document.getElementsByClassName('row') );
-	ok( isNLorHC === NodeListClass || isNLorHC === HTMLCollectionClass, "Should be "+NodeListClass+' or '+HTMLCollectionClass );
+test("Class representations", 8, function(){
+	ok( Simples.isConstructor({0:'red',1:'green'}, "Object" ), "Should be "+CLASSES.object );
+	ok( Simples.isConstructor([1,2], "Array" ), "Should be "+CLASSES.array );
+	ok( Simples.isConstructor("ham", "String" ), "Should be "+CLASSES.string );
+	ok( Simples.isConstructor(12, "Number" ), "Should be "+CLASSES.number );
+	ok( Simples.isConstructor(function(){ return false; }, "Function" ), "Should be "+CLASSES.function ); 
+	ok( Simples.isConstructor(false, "Boolean" ), "Should be "+CLASSES.boolean );
+	ok( Simples.isConstructor(true, "Boolean" ), "Should be "+CLASSES.boolean );
+	if( document.getElementsByClassName ){
+		var isNLorHC = Simples.getConstructor( document.getElementsByClassName('row') );
+		ok( isNLorHC === "NodeList" || isNLorHC === "HTMLCollection", "Should be "+CLASSES.nodelist+' or '+CLASSES.htmlcollection );
+	} else {
+		ok( Simples.isConstructor(document.getElementsByTagName('div'), "Object" ), "Should be "+CLASSES.object );
+	}
 });
+
+test("Class String representations", 9, function(){
+	equal( Simples.getConstructor(undefined), false, "undefined Should be false" );
+	equal( Simples.getConstructor(null), false, "null Should be false" );
+	equal( Simples.getConstructor({0:'red',1:'green'}), "Object", "Should be "+CLASSES.object );
+	equal( Simples.getConstructor([1,2]), "Array", "Should be "+CLASSES.array );
+	equal( Simples.getConstructor("ham"), "String", "Should be "+CLASSES.string );
+	equal( Simples.getConstructor(12), "Number", "Should be "+CLASSES.number );
+	equal( Simples.getConstructor(function(){ return false; }), "Function", "Should be "+CLASSES.function ); 
+	equal( Simples.getConstructor(false), "Boolean","Should be "+CLASSES.boolean );
+	equal( Simples.getConstructor(true), "Boolean", "Should be "+CLASSES.boolean );
+});
+
 // sense check to ensure no browser incorrectly returns bad values
 test("isArray", 8, function() {
-	ok( !isClass( undefined, ArrayClass ), "Should not be "+ArrayClass );
-	ok( !isClass({simples:true}, ArrayClass), 'passing in an object should return false' );
-	ok( !isClass( null, ArrayClass ), 'passing in null should return false' );
-	ok( !isClass( 1, ArrayClass ), 'passing in a number should return false' );
-	ok( !isClass( 'string', ArrayClass ), 'passing in a string should return false' );
-	ok( !isClass( true, ArrayClass ), 'passing in a booelan should return false' );
-	ok( !isClass( function(){}, ArrayClass ), 'passing in a function should return false' );
-	ok( isClass( ['simples'], ArrayClass ), 'passing in an array should return true' );
+	ok( !Simples.isConstructor( undefined, "Array" ), "empty arguments should return false" );
+	ok( !Simples.isConstructor({simples:true}, "Array"), 'passing in an object should return false' );
+	ok( !Simples.isConstructor( null, "Array" ), 'passing in null should return false' );
+	ok( !Simples.isConstructor( 1, "Array" ), 'passing in a number should return false' );
+	ok( !Simples.isConstructor( 'string', "Array" ), 'passing in a string should return false' );
+	ok( !Simples.isConstructor( true, "Array" ), 'passing in a booelan should return false' );
+	ok( !Simples.isConstructor( function(){}, "Array" ), 'passing in a function should return false' );
+	ok( Simples.isConstructor( ['simples'], "Array" ), 'passing in an array should return true' );
 }); 
 // sense check to ensure no browser incorrectly returns bad values
 test("isObject", 8, function() {
-	ok( !isClass( undefined, ObjectClass ), 'empty arguments should return false' );
-	ok( !isClass(['simples'], ObjectClass), 'passing in an array should return false' );
-	ok( !isClass( null, ObjectClass ), 'passing in null should return false' );
-	ok( !isClass( 1, ObjectClass ), 'passing in a number should return false' );
-	ok( !isClass( 'string', ObjectClass ), 'passing in a string should return false' );
-	ok( !isClass( true, ObjectClass ), 'passing in a booelan should return false' );
-	ok( !isClass( function(){}, ObjectClass ), 'passing in a function should return false' );
-	ok( isClass({simples:true}, ObjectClass), 'passing in an object should return true' );
+	ok( !Simples.isConstructor( undefined, "Object" ), 'empty arguments should return false' );
+	ok( !Simples.isConstructor(['simples'], "Object"), 'passing in an array should return false' );
+	ok( !Simples.isConstructor( null, "Object" ), 'passing in null should return false' );
+	ok( !Simples.isConstructor( 1, "Object" ), 'passing in a number should return false' );
+	ok( !Simples.isConstructor( 'string', "Object" ), 'passing in a string should return false' );
+	ok( !Simples.isConstructor( true, "Object" ), 'passing in a booelan should return false' );
+	ok( !Simples.isConstructor( function(){}, "Object" ), 'passing in a function should return false' );
+	ok( Simples.isConstructor({simples:true}, "Object"), 'passing in an object should return true' );
 });
 // sense check to ensure no browser incorrectly returns bad values
 test("isFunction", 8, function() {
-	ok( !isClass( undefined, FunctionClass ), 'empty arguments should return false' );
-	ok( !isClass(['simples'], FunctionClass), 'passing in an array should return false' );
-	ok( !isClass( null, FunctionClass ), 'passing in null should return false' );
-	ok( !isClass( 1, FunctionClass ), 'passing in a number should return false' );
-	ok( !isClass( 'string', FunctionClass ), 'passing in a string should return false' );
-	ok( !isClass( true, FunctionClass ), 'passing in a booelan should return false' );
-	ok( !isClass({simples:true}, FunctionClass), 'passing in an object should return true' );
-	ok( isClass( function(){}, FunctionClass ), 'passing in a function should return false' );
+	ok( !Simples.isConstructor( undefined, "Function" ), 'empty arguments should return false' );
+	ok( !Simples.isConstructor(['simples'], "Function"), 'passing in an array should return false' );
+	ok( !Simples.isConstructor( null, "Function" ), 'passing in null should return false' );
+	ok( !Simples.isConstructor( 1, "Function" ), 'passing in a number should return false' );
+	ok( !Simples.isConstructor( 'string', "Function" ), 'passing in a string should return false' );
+	ok( !Simples.isConstructor( true, "Function" ), 'passing in a booelan should return false' );
+	ok( !Simples.isConstructor({simples:true}, "Function"), 'passing in an object should return true' );
+	ok( Simples.isConstructor( function(){}, "Function" ), 'passing in a function should return false' );
 });
 
 test("noop is a empty function", 1, function() {
@@ -288,7 +310,7 @@ test('Simples.find',function(){
 	Simples.Selector = oldSelector;
 });
 
-test('Simples.filter', 212, function(){ 
+test('Simples.filter', 215, function(){ 
 
 	var s_obj = Simples('div'), counter=0, length = s_obj.length, set = Simples('.row');
 

@@ -50,7 +50,7 @@ Simples.Animation = {
 	create : function( elem, setStyle, opts ){
 		opts = opts || {};
 		if ( !( elem && elem.nodeType ) || Simples.isEmptyObject( setStyle ) ) {
-			if (typeof opts.callback === FUNC) {
+			if (typeof opts.callback === "function") {
 				opts.callback.call(elem);
 			}
 			return null;
@@ -59,9 +59,9 @@ Simples.Animation = {
 		var anim = {
 			0 : elem,
 			id : Simples.guid++,
-			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
-			duration : ( typeof opts.duration === NUMBER && opts.duration > -1 ) ? opts.duration : 600,
-			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
+			callback : ( typeof opts.callback === "function" ) ? opts.callback : Simples.noop,
+			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
+			tween : ( typeof opts.tween === "function" ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
 			start : {},
 			finish : {}
 		};
@@ -72,8 +72,8 @@ Simples.Animation = {
 				opacity = ( cKey === OPACITY && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 			if( opacity || ALLOW_TYPES.test( cKey ) ){
-				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING ).replace(REGEX_PIXEL,EMPTY_STRING) * 1;
-				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING ).replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + "" ).replace(REGEX_PIXEL,"") * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + "" ).replace(REGEX_PIXEL,"") * 1;
 			}                                        
 		}
 
@@ -105,7 +105,7 @@ Simples.Animation = {
 			
 			if( !TIMER_ID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				TIMER_ID = window.setInterval(function(){ Simples.Animation._step(); }, this.interval );
+				TIMER_ID = WIN.setInterval(function(){ Simples.Animation._step(); }, this.interval );
 			}
 		}
 	},
@@ -173,7 +173,7 @@ Simples.Animation = {
 				}
 			}
 		} else if( TIMER_ID ){
-			window.clearInterval( TIMER_ID );
+			WIN.clearInterval( TIMER_ID );
 			TIMER_ID = null;
 		}
 	},

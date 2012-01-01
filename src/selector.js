@@ -12,14 +12,14 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	/** @private */
 	getElements = function(selector, context) {
 
-	    context = context || document;
+	    context = context || DOC;
 	    var tag = selector.substring(1),
 	    elems,
 	    nodes;
 
 	    if (selector.indexOf('#') === 0) {
 	        // Native function
-	        var id = (context && context.nodeType === 9 ? context: document).getElementById(tag);
+	        var id = (context && context.nodeType === 9 ? context: DOC).getElementById(tag);
 	        // test to make sure id is the own specified, because of name being read as id in some browsers
 	        return id && id.id === tag ? [id] : [];
 
@@ -41,8 +41,8 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	            return nodes;
 	        }
 	    } else if (selector.indexOf('[name=') === 0) {
-	        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
-	        context = context && context.nodeType === 9 ? context: document;
+	        var name = selector.substring(6).replace(/\].*/, "");
+	        context = context && context.nodeType === 9 ? context: DOC;
 	        if (context.getElementsByName) {
 	            return slice.call(context.getElementsByName(name));
 	        } else {
@@ -67,12 +67,12 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	/** @private */
 	createDOM = function( selector, results ){
 
-		results.context = document;
+		results.context = DOC;
 
 		if( COMPLEX_TAG.test( selector ) ){
             results.selector = "<"+COMPLEX_TAG.exec( selector )[1]+">";
 
-			var div = document.createElement('div');
+			var div = DOC.createElement('div');
             div.innerHTML = selector;
             results.push.apply( results, slice.call( div.childNodes, 0 ) );
 
@@ -80,7 +80,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
             var tag = SINGLE_TAG.exec( selector );
 
 			results.selector = tag[0];
-            results.push( document.createElement(tag[1]) );
+            results.push( DOC.createElement(tag[1]) );
 		}
 
 		return results;
@@ -95,14 +95,14 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 Simples.Selector = function(selector, context, results) {
     results = results || [];
 	results.selector = selector;
-	results.context = context || document;
+	results.context = context || DOC;
 
-    if (typeof(selector) === STRING) {
+    if (typeof(selector) === "string") {
         // check selector if structured to create element
 		if( selector.indexOf('<') > -1 && selector.indexOf('>') > 0 ){
 			return createDOM( selector, results );
         } else if ( QUERY_SELECTOR ) {
-            results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
+            results.push.apply(results, slice.call((context || DOC).querySelectorAll(selector), 0));
             return results;
         } else {
 	        // if it is a multi select split and short cut the process
@@ -116,12 +116,12 @@ Simples.Selector = function(selector, context, results) {
 	            return results;
 	        }
             // clean up selector
-            // selector = selector.replace(TAG_STRIP, EMPTY_STRING);
+            // selector = selector.replace(TAG_STRIP, "");
             // get last id in selector
             var index = selector.lastIndexOf(FIRST_ID);
             selector = selector.substring(index > 0 ? index: 0);
             // allow another document to be used for context where getting by id
-            results.context = context = (selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0) ? (context && context.nodeType === 9 ? context: document) : (context || document);
+            results.context = context = (selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0) ? (context && context.nodeType === 9 ? context: DOC) : (context || DOC);
             var split = selector.split(SPACE_WITH_BOUNDARY);
 
             for (var i = 0, l = split.length; i < l; i++) {

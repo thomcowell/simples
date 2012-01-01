@@ -1,7 +1,7 @@
 // OMG its another non-W3C standard browser 
 var REGEX_HTML_BODY = /^body|html$/i,
 /** @private */
-getWindow = function( elem ) {
+getWIN = function( elem ) {
 	return ("scrollTo" in elem && elem.document) ?
 		elem :
 		elem.nodeType === 9 ?
@@ -9,7 +9,7 @@ getWindow = function( elem ) {
 			false;
 };
 
-if( "getBoundingClientRect" in document.documentElement ){
+if( "getBoundingClientRect" in DOC.documentElement ){
 	/**
 	 * @description to get the top, left offset of an element
 	 * @param {Element} elem the element to get the offset of
@@ -26,7 +26,7 @@ if( "getBoundingClientRect" in document.documentElement ){
 		}
 
 		var box = elem.getBoundingClientRect(), doc = elem.ownerDocument, body = doc.body,
-			docElem = doc.documentElement, win = getWindow(doc),
+			docElem = doc.documentElement, win = getWIN(doc),
 			clientTop  = docElem.clientTop  || body.clientTop  || 0,
 			clientLeft = docElem.clientLeft || body.clientLeft || 0,
 			scrollTop  = (win.pageYOffset || Simples.support.boxModel && docElem.scrollTop  || body.scrollTop ),
@@ -99,7 +99,7 @@ if( "getBoundingClientRect" in document.documentElement ){
 }
 /** @private */
 Simples.offset.init = function(){
-	var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
+	var body = DOC.body, container = DOC.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
 		html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
 
 	Simples.merge( container.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" } );
@@ -118,7 +118,7 @@ Simples.offset.init = function(){
 
 	// safari subtracts parent border width here which is 5px
 	Simples.offset.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
-	checkDiv.style.position = checkDiv.style.top = EMPTY_STRING;
+	checkDiv.style.position = checkDiv.style.top = "";
 
 	innerDiv.style.overflow = "hidden";
 	innerDiv.style.position = "relative";
@@ -195,7 +195,7 @@ Simples.merge( /** @lends Simples */ {
 	 * @returns {Element}
 	 */
 	offsetParent : function( elem ) {
-		var offsetParent = elem.offsetParent || document.body;
+		var offsetParent = elem.offsetParent || DOC.body;
 		while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && Simples.currentCSS(offsetParent, "position") === "static") ) {
 			offsetParent = offsetParent.offsetParent;
 		}
@@ -239,7 +239,7 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {Number} value
 	 */
 	setScroll : function( elem, name, val ){
-		win = getWindow( elem );
+		win = getWIN( elem );
 
 		if ( win ) {
 			win.scrollTo(
@@ -261,7 +261,7 @@ Simples.merge( /** @lends Simples */ {
 	getScroll : function( elem, name ){
 		var isTop = name === TOP;
 		name = isTop ? "scrollTop" : "scrollLeft";
-		win = getWindow( elem );
+		win = getWIN( elem );
 
 		// Return the scroll offset
 		return win ? ( ("pageXOffset" in win) ? win[ isTop ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
@@ -303,7 +303,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @returns {Number|Simples} the value of the scrollTop / scrollLeft or Simples object
 	 */	
 	scroll : function( name, val ){
-		if( val !== undefined ){
+		if( val !== UNDEF ){
 			var len = this.length;
 			while( len ){
 				Simples.setScroll( this[ --len ], name, val );

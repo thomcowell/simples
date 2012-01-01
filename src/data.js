@@ -8,7 +8,7 @@ var accessID = 'simples'+ new Date().getTime(),
 	},
 	/** @private */
 	canDoData = function( elem ){
-		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
+		return elem && elem.nodeName && !( elem == WIN || noData[ elem.nodeName.toLowerCase() ] );
 	},
 	/** @private */
 	removeHTML5Data = function( elem, key ){
@@ -28,7 +28,7 @@ var accessID = 'simples'+ new Date().getTime(),
 		
 		if( key ){
 			var val = data ? data[ key ] : Simples.attr( elem, "data-" + key );
-			return ( val == null || val == "" ) ? undefined : val;
+			return ( val == null || val == "" ) ? UNDEF : val;
 		} else {
 			if (!data) {
 				data = {};
@@ -59,10 +59,10 @@ Simples.merge( /** @lends Simples */ {
 	 * @returns {Object|Null|All} returns dataset object for read where no key, returns value where read and null for eveything else
 	 */
 	data : function( elem, key, value ){
-		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
+		if ( canDoData( elem ) && ( key === UNDEF || typeof key === "string" ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
 
-			if( key && value !== undefined ){
+			if( key && value !== UNDEF ){
 				// To remove the existing data-* attribute as well as the data value
 				removeHTML5Data( elem, key );
 				if( value !== null ){
@@ -70,7 +70,7 @@ Simples.merge( /** @lends Simples */ {
 				} else {
 					delete data[ key ];
 				}      
-			} else if( value === undefined ){
+			} else if( value === UNDEF ){
 				if( !key ){
 					return Simples.merge( data, readHTML5Data( elem, null, data ) );
 				} else {
@@ -88,8 +88,9 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	cleanData : function( elem, andSelf ){
 		// Remove element nodes and prevent memory leaks
-		var canClean = canDoData( elem );
-		var elems = canClean ? slice.call( elem.getElementsByTagName("*"), 0 ) : [];
+		var canClean = canDoData( elem ),
+			elems = canClean ? slice.call( elem.getElementsByTagName("*"), 0 ) : [];
+			
 		if( canClean && andSelf !== false ){
 			elems.push( elem );
 		}
@@ -121,8 +122,8 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @returns {Simples|All} returns Simples object for write and delete and the value for read
 	 */	
 	data : function( key, value ){   
-		if( typeof key === STRING ){
-			if( value !== undefined ){
+		if( typeof key === "string" ){
+			if( value !== UNDEF ){
 				var l=this.length;
 				while( l ){
 					Simples.data( this[--l], key, value );

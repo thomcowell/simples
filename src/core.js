@@ -5,29 +5,23 @@ var toString = Object.prototype.toString,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf,
 	trim = String.prototype.trim,
-/* references to class outputs	 */
-	ArrayClass = '[object Array]',
-	ObjectClass = '[object Object]',
-	NodeListClass = '[object NodeList]', 
-	StringClass = "[object String]", 
-	NumberClass = "[object Number]",
-	FunctionClass = "[object Function]",
-	BooleanClass = "[object Boolean]",
-	HTMLCollectionClass = "[object HTMLCollection]",
-	WindowClass = "[object Window]",
+	UNDEF,
+	WIN = window,
+	DOC = document,
+	RCAPITALISE = /\b(\w)(\w+)\b/g,
+	/** @private */
+	fcapitalise = function( all, first, rest ){
+		return first.toUpperCase() + rest.toLowerCase();
+	},
 	FIRST_SPACES = /^\s*/,
 	LAST_SPACES = /\s*$/,
-	STRING = 'string',
-	NUMBER = "number",
 	DOMLOADED = "DOMContentLoaded",
 	READYSTATE = "onreadystatechange",
-	FUNC = "function",
 	SCRIPT = "script",
 	OPACITY = "opacity",
 	TOP = "top",
 	LEFT = "left",
 	COMPLETE = "complete",
-	EMPTY_STRING = "",
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -50,26 +44,46 @@ function Simples( selector, context ) {
  **/
 Simples.merge = function(first /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
-    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first : {};
+    var target = (arguments.length === 1 && !(this === WIN || this === DOC)) ? this: Simples.isConstructor( first, "Object" ) ? first : {};
     // set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1: 0;
     // Loop over arguments
     for (var l = arguments.length; i < l; i++) {
         // if object apply directly to target with same keys
-        var isWhat = toString.call(arguments[i]);
-        if (isWhat === ObjectClass) {
+        var klass = Simples.getConstructor( arguments[i] );
+        if ( klass === "Object" ) {
             for (var key in arguments[i]) {
                 if (hasOwn.call(arguments[i], key)) {
                     target[key] = arguments[i][key];
                 }
             }
-        } else if (isWhat === ArrayClass) {
+        } else if ( klass === "Array" ) {
             // if array apply directly to target with numerical keys
             push.apply(target, arguments[i]);
         }
     }
 
     return target;
+};
+
+/**
+ * @description used to test the Constructor / Class of an object
+ * @param {Object} the object to test
+ * @param {String} the class name to test
+ * @param {Boolean} if you don't want to capitalise the test
+ **/
+Simples.isConstructor = function( obj, className, mustCapitalise ){
+	if( obj !== null && obj !== UNDEF ){
+		return toString.call( obj ) === "[object "+( mustCapitalise ? className.replace(RCAPITALISE,fcapitalise) : className )+"]";
+	}
+	return false;
+};
+
+Simples.getConstructor = function( obj ){
+	if( obj !== null && obj !== UNDEF ){
+		return toString.call( obj ).replace("[object ","").replace("]","");
+	}
+	return false;
 };
 
 Simples.merge( /** @lends Simples */ {
@@ -79,14 +93,14 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		var klass = toString.call( addMethods );
-		if( klass === ObjectClass ){
+		var klass = Simples.getConstructor( addMethods );
+		if( klass === "Object" ){
 			for (var key in addMethods) {
 		        if ( hasOwn.call( addMethods, key ) ) {
 		            Simples.fn[key] = addMethods[key];
 		        }
 		    }
-		} else if( klass === StringClass && typeof arguments[1] === FUNC ){
+		} else if( klass === "String" && typeof arguments[1] === "function" ){
 			Simples.fn[ arguments[0] ]= arguments[1];
 		}
 	},
@@ -113,7 +127,7 @@ Simples.merge( /** @lends Simples */ {
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			callback.call( document, Simples.Event( 'ready' ) );
+			callback.call( DOC, Simples.Event( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
@@ -126,8 +140,8 @@ Simples.merge( /** @lends Simples */ {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
 			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-			if ( !document.body ) {
-				return window.setTimeout( Simples.readyHandler, 13 );
+			if ( !DOC.body ) {
+				return WIN.setTimeout( Simples.readyHandler, 13 );
 			}
 
 			// Remember that the DOM is ready
@@ -138,7 +152,7 @@ Simples.merge( /** @lends Simples */ {
 				// Execute all of them
 				var fn, i = 0;
 				while ( (fn = readyList[ i++ ]) ) {
-					fn.call( document, Simples );
+					fn.call( DOC, Simples );
 				}
 
 				// Reset the list of functions
@@ -152,38 +166,38 @@ Simples.merge( /** @lends Simples */ {
 
 		readyBound = true;
 
-		// Catch cases where $(document).ready() is called after the
+		// Catch cases where $(DOC).ready() is called after the
 		// browser event has already occurred.
-		if ( document.readyState === COMPLETE ) {
+		if ( DOC.readyState === COMPLETE ) {
 			return Simples.readyHandler();
 		}
 
 		// Mozilla, Opera and webkit nightlies currently support this event
-		if ( document.addEventListener ) {
+		if ( DOC.addEventListener ) {
 			// Use the handy event callback
-			document.addEventListener( DOMLOADED, DOMContentLoaded, false );
+			DOC.addEventListener( DOMLOADED, DOMContentLoaded, false );
 
-			// A fallback to window.onload, that will always work
-			window.addEventListener( "load", Simples.readyHandler, false );
+			// A fallback to WIN.onload, that will always work
+			WIN.addEventListener( "load", Simples.readyHandler, false );
 
 		// If IE event model is used
-		} else if ( document.attachEvent ) {
+		} else if ( DOC.attachEvent ) {
 			// ensure firing before onload,
 			// maybe late but safe also for iframes
-			document.attachEvent( READYSTATE, DOMContentLoaded);
+			DOC.attachEvent( READYSTATE, DOMContentLoaded);
 
-			// A fallback to window.onload, that will always work
-			window.attachEvent( "onload", Simples.readyHandler );
+			// A fallback to WIN.onload, that will always work
+			WIN.attachEvent( "onload", Simples.readyHandler );
 
 			// If IE and not a frame
-			// continually check to see if the document is ready
+			// continually check to see if the DOC is ready
 			var toplevel = false;
 
 			try {
-				toplevel = window.frameElement == null;
+				toplevel = WIN.frameElement == null;
 			} catch(e) {}
 
-			if ( document.documentElement.doScroll && toplevel ) {
+			if ( DOC.documentElement.doScroll && toplevel ) {
 				doScrollCheck();
 			}
 		}
@@ -203,8 +217,8 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {String} text String to trim
 	 */
 	trim : function( text ) {
-		text = text == null ? EMPTY_STRING : text;
-		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
+		text = text == null ? "" : text;
+		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, "" ).replace( LAST_SPACES, "" );
 	},
 	/**
 	 * @description an empty function to use as noop function
@@ -212,21 +226,21 @@ Simples.merge( /** @lends Simples */ {
 	noop : function(){}
 });
 
-// Cleanup functions for the document ready method
+// Cleanup functions for the DOC ready method
 /** @private */
-if ( document.addEventListener ) {
+if ( DOC.addEventListener ) {
 	/** @private */
 	DOMContentLoaded = function() {
-		document.removeEventListener( DOMLOADED, DOMContentLoaded, false );
+		DOC.removeEventListener( DOMLOADED, DOMContentLoaded, false );
 		Simples.readyHandler();
 	};
 
-} else if ( document.attachEvent ) {
+} else if ( DOC.attachEvent ) {
 	/** @private */
 	DOMContentLoaded = function() {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-		if ( document.readyState === COMPLETE ) {
-			document.detachEvent( READYSTATE, DOMContentLoaded );
+		if ( DOC.readyState === COMPLETE ) {
+			DOC.detachEvent( READYSTATE, DOMContentLoaded );
 			Simples.readyHandler();
 		}
 	};
@@ -241,9 +255,9 @@ function doScrollCheck() {
 	try {
 		// If IE is used, use the trick by Diego Perini
 		// http://javascript.nwbox.com/IEContentLoaded/
-		document.documentElement.doScroll(LEFT);
+		DOC.documentElement.doScroll(LEFT);
 	} catch(e) {
-		window.setTimeout( doScrollCheck, 1 );
+		WIN.setTimeout( doScrollCheck, 1 );
 		return;
 	}
 
@@ -265,10 +279,10 @@ Simples.fn = Simples.prototype = {
 	 */
 	init : function( selector, context ){
 
-		// Handle $(EMPTY_STRING), $(null), or $(undefined)
+		// Handle $(""), $(null), or $(UNDEF)
 		if ( !selector ){
 			return this;
-		} else if( selector.selector !== undefined ){
+		} else if( selector.selector !== UNDEF ){
 			return selector;
 		}
 
@@ -281,24 +295,24 @@ Simples.fn = Simples.prototype = {
 		
 		// The body element only exists once, optimize finding it
 		if ( selector === "body" && !context ) {
-			this.context = document;
-			this[0] = document.body;
+			this.context = DOC;
+			this[0] = DOC.body;
 			this.selector = "body";
 			this.length = 1;
 			return this;
 		}
-	  
-		var objClass = toString.call( selector );
-		if( objClass === StringClass ){
+
+		var klass = Simples.getConstructor( selector );
+		if( klass === "String" ){
 			this.context = context;
 			this.selector = selector;
 		
 			return Simples.Selector( selector, context, this );
 
-		} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
+		} else if( klass === "HTMLCollection" || klass === "NodeList" ){
 
 			this.push.apply( this, slice.call( selector, 0 ) );
-	    } else if( objClass === ArrayClass ){
+	    } else if( klass === "Array" ){
 	        if( context === true ){
 				// shortcut to use native push
 		        this.push.apply( this, selector );
@@ -321,7 +335,7 @@ Simples.fn = Simples.prototype = {
 	 * @name Simples.fn.selector	
 	 * @description The selector used to create the Simples object
 	 */
-	selector : EMPTY_STRING,
+	selector : "",
 	/**
 	 * @name Simples.fn.version	
 	 * @description The version of the Simples library

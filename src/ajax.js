@@ -26,14 +26,14 @@ ActiveAjaxRequests = 0,
 /** @private method used by Simples.params to build data for request */
 formatData = function(name, value) {
 
-    var str = EMPTY_STRING;
+    var str = "";
 
-    if (typeof name === STRING) {
-        var objClass = toString.call(value);
-		if (objClass === FunctionClass) {
+    if (typeof name === "string") {
+    	var klass = Simples.getConstructor( value );
+		if ( klass === "Function" ) {
 
             str = formatData(name, value());
-        } else if (objClass === ObjectClass) {
+        } else if ( klass === "Object" ) {
             var arr = [];
 
             for (var key in value) {
@@ -45,7 +45,7 @@ formatData = function(name, value) {
             }
 
             str = arr.join('&');
-        } else if (objClass === ArrayClass) {
+        } else if ( klass === "Array" ) {
             str = formatData(name, value.join(','));
         } else if( value != null ){
             str = ( encodeURIComponent(name) + '=' + encodeURIComponent(value) );
@@ -76,7 +76,7 @@ httpSuccess = function(xhr) {
 /** @private method for httpData parsing is from jQuery 1.4 */
 httpData = function(xhr, type, dataFilter) {
 
-    var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
+    var ct = xhr.getResponseHeader("content-type") || "",
     xml = type === XML || !type && ct.indexOf(XML) >= 0,
     data = xml ? xhr.responseXML: xhr.responseText;
 
@@ -84,21 +84,21 @@ httpData = function(xhr, type, dataFilter) {
         throw PARSEERROR;
     }
 
-    if (typeof dataFilter === FUNC) {
+    if (typeof dataFilter === "function") {
         data = dataFilter(data, type);
     }
 
     // The filter can actually parse the response
-    if (typeof data === STRING) {
+    if (typeof data === "string") {
         // Get the JavaScript object, if JSON is used.
         if (type === JSON || !type && ct.indexOf(JSON) >= 0) {
             // Make sure the incoming data is actual JSON
             // Logic borrowed from http://json.org/json2.js
-            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, EMPTY_STRING))) {
+            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
 
                 // Try to use the native JSON parser first
-                if (window.JSON && window.JSON.parse) {
-                    data = window.JSON.parse(data);
+                if (WIN.JSON && WIN.JSON.parse) {
+                    data = WIN.JSON.parse(data);
 
                 } else {
                     data = ( new Function("return " + data) )();
@@ -111,7 +111,7 @@ httpData = function(xhr, type, dataFilter) {
             // If the type is SCRIPT, eval it in global context
         } else if (type === SCRIPT || !type && ct.indexOf("javascript") >= 0) {
 
-            eval.call(window, data);
+            eval.call(WIN, data);
         }
     }
 
@@ -161,13 +161,13 @@ Simples.merge( /** @lends Simples */ {
 		/**
 		 * @description helper to return the correct XHR object for your platform
 		 */
-		xhr: window.XMLHttpRequest && (window.location.protocol !== FILE || !window.ActiveXObject) ?
+		xhr: WIN.XMLHttpRequest && (WIN.location.protocol !== FILE || !WIN.ActiveXObject) ?
 			function() {
-				return new window.XMLHttpRequest();
+				return new WIN.XMLHttpRequest();
 			} :
 			function() {
 				try {
-					return new window.ActiveXObject("Microsoft.XMLHTTP");
+					return new WIN.ActiveXObject("Microsoft.XMLHTTP");
 				} catch(e) {}
 			},
 		/**
@@ -177,7 +177,7 @@ Simples.merge( /** @lends Simples */ {
 		/**
 		 * Simples.ajaxDefaults.context: context in which the callback is to be executed
 		 */
-		context : window
+		context : WIN
 	},
 	/**
 	 * @description used to send an ajax requests
@@ -291,22 +291,22 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	scriptLoader : function( src, callback ){
 
-		var script = document.createElement(SCRIPT),
-			head = document.getElementsByTagName("head")[0] || document.documentElement;
+		var script = DOC.createElement(SCRIPT),
+			head = DOC.getElementsByTagName("head")[0] || DOC.documentElement;
 		
 	    if (script.readyState) {
 			/** @private */
 	        script.onreadystatechange = function() {
 	            if (script.readyState === "loaded" || script.readyState === "complete") {
 	                script.onreadystatechange = null;
-	                ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+	                ( ( typeof callback === "function" ) ? callback : Simples.noop ).call( this, src, this );
 					this.parentNode.removeChild( this );
 	            }
 	        };
 	    } else {
 			/** @private */
 	        script.onload = function() {
-	            ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+	            ( ( typeof callback === "function" ) ? callback : Simples.noop ).call( this, src, this );
 				this.parentNode.removeChild( this );
 	        };
 		}
@@ -331,20 +331,20 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {Object|Array|String} name : value OR [{name:'',value:''}] OR "name" 
 	 * @param {String} value 
 	 */
-    params: function(obj) {
+    params: function(obj,value) {
 
 	    if( arguments.length === 1 ){ 
-			var arr = [];
-			var objClass = toString.call( obj );	
-		    if ( objClass === ObjectClass ) {
+			var arr = [],
+				klass = Simples.getConstructor( obj );
+		    if ( klass === "Object" ) {
 		        for (var key in obj) {
 
 		            arr[ arr.length ] = formatData( key, obj[key] );
 				}
-		    } else if ( objClass === ArrayClass ) {
+		    } else if ( klass === "Array" ) {
 		        for (var i = 0, l = obj.length; i < l; i++) {
 
-		            if ( toString.call( obj[i] ) === ObjectClass ) {
+		            if ( Simples.isConstructor( obj[i], "Object" ) ) {
 
 		                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
 		            }

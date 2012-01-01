@@ -1,7 +1,7 @@
 // Inside closure to prevent any collisions or leaks
-(function( Simples ){
+(function( Simples, DOC ){
 
-var root = document.documentElement, div = document.createElement("div"), script = document.createElement(SCRIPT), id = SCRIPT + new Date().getTime();
+var root = DOC.documentElement, div = DOC.createElement("div"), script = DOC.createElement(SCRIPT), id = SCRIPT + new Date().getTime();
 
 div.style.display = "none";
 div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
@@ -12,20 +12,20 @@ var all = div.getElementsByTagName("*"), a = div.getElementsByTagName("a")[0];
 if ( !all || !all.length || !a ) {
 	return;
 }
-var fragment = document.createDocumentFragment(), testDiv = document.createElement("div");
+var fragment = DOC.createDocumentFragment(), testDiv = DOC.createElement("div");
 testDiv.innerHTML = "<input type='radio' name='radiotest' checked='checked'/>";
 fragment.appendChild( testDiv.firstChild );
 
 // Technique from Juriy Zaytsev
 // http://thinkweb2.com/projects/prototype/detecting-event-support-without-browser-sniffing/
 var eventSupported = function( eventName ) { 
-	var el = document.createElement("div"); 
+	var el = DOC.createElement("div"); 
 	eventName = "on" + eventName; 
 
 	var isSupported = (eventName in el); 
 	if ( !isSupported ) { 
 		el.setAttribute(eventName, "return;"); 
-		isSupported = typeof el[eventName] === FUNC; 
+		isSupported = typeof el[eventName] === "function"; 
 	} 
 	el = null; 
 
@@ -35,7 +35,7 @@ var eventSupported = function( eventName ) {
 Simples.merge( /** @lends Simples */ {
 	support : { 
 		// to determine whether querySelector is avaliable
-		useQuerySelector : typeof document.querySelectorAll === FUNC,
+		useQuerySelector : typeof DOC.querySelectorAll === "function",
 		// Make sure that element opacity exists
 		// (IE uses filter instead)
 		// Use a regex to work around a WebKit issue. See jQuery #5145
@@ -47,7 +47,7 @@ Simples.merge( /** @lends Simples */ {
 		leadingWhitespace: div.firstChild.nodeType === 3,
 		// Make sure that if no value is specified for a checkbox
 		// that it defaults to "on".
-		// (WebKit defaults to EMPTY_STRING instead)
+		// (WebKit defaults to "" instead)
 		checkOn: div.getElementsByTagName("input")[0].value === "on",
 		// WebKit doesn't clone checked state correctly in fragments   
 		checkClone : fragment.cloneNode(true).cloneNode(true).lastChild.checked, 
@@ -77,7 +77,7 @@ Simples.merge( /** @lends Simples */ {
 			!/compatible/.test( ua ) && /(mozilla)(?:.*? rv:([\w.]+))?/.exec( ua ) ||
 			[];
 
-		return { browser: match[1] || EMPTY_STRING, version: match[2] || "0" };
+		return { browser: match[1] || "", version: match[2] || "0" };
 	},
 	browser : {}
 }); 
@@ -92,9 +92,9 @@ root.insertBefore( script, root.firstChild );
 // Make sure that the execution of code works by injecting a script
 // tag with appendChild/createTextNode
 // (IE doesn't support this, fails, and uses .text instead)
-if ( window[ id ] ) {
+if ( WIN[ id ] ) {
 	Simples.support.scriptEval = true;
-	delete window[ id ];
+	delete WIN[ id ];
 }
 
 root.removeChild( script );
@@ -116,15 +116,15 @@ if ( browserMatch.browser ) {
 }
 
 Simples.ready(function(){
-	var div = document.createElement("div");
+	var div = DOC.createElement("div");
 	div.style.width = div.style.paddingLeft = "1px";
 
-	document.body.appendChild( div );
+	DOC.body.appendChild( div );
 	Simples.support.isBoxModel = div.offsetWidth === 2;
-	document.body.removeChild( div ).style.display = 'none';
+	DOC.body.removeChild( div ).style.display = 'none';
 	div = null;	
 });
 // nulling out support varaibles as finished
 root = div = script = id = testDiv = null;
 
-})( Simples );
+})( Simples, document );

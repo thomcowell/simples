@@ -128,11 +128,11 @@ Simples.merge( /** @lends Simples */ {
 		}
 		// For whatever reason, IE has trouble passing the window object
 		// around, causing it to be cloned in the process
-		if ( elem.setInterval && ( elem !== window && !elem.frameElement ) ) {
-			elem = window;
+		if ( elem.setInterval && ( elem !== WIN && !elem.frameElement ) ) {
+			elem = WIN;
 		}
         
-		if( toString.call( callback ) === FunctionClass && canDoData( elem ) ){ 
+		if( Simples.isConstructor( callback, "Function" ) && canDoData( elem ) ){ 
 			
 			var data = Simples.data( elem ),
 				events = data.events ? data.events : data.events = {},
@@ -143,7 +143,7 @@ Simples.merge( /** @lends Simples */ {
 				
 			if( !handler ){
 				handler = handlers[ type ] = function( evt ){
-					return Simples !== undefined ? Simples._eventHandler.apply( handler.elem, arguments ) : undefined;
+					return Simples !== UNDEF ? Simples._eventHandler.apply( handler.elem, arguments ) : UNDEF;
 				};
 				handler.elem = elem;
 				// Attach to the element
@@ -184,7 +184,7 @@ Simples.merge( /** @lends Simples */ {
 			events = elemData.events,
 			handlers = elemData.handlers;
 		
-		if( type === undefined ){
+		if( type === UNDEF ){
 			for( var eventType in events ){
 				clearEvents( elem, eventType, events, handlers );
 			}
@@ -192,7 +192,7 @@ Simples.merge( /** @lends Simples */ {
 			var event = events[ type ];
 
 			for(var i=0;i<event.length;i++){
-				if( callback === undefined || callback.guid === event[i].guid ){
+				if( callback === UNDEF || callback.guid === event[i].guid ){
 					event.splice( i--, 1 );
 				}
 			}
@@ -217,13 +217,13 @@ Simples.merge( /** @lends Simples */ {
 			var e;
 			if( elem.dispatchEvent ){
 				// Build Event
-				e = document.createEvent("HTMLEvents");
+				e = DOC.createEvent("HTMLEvents");
 				e.initEvent(type, true, true); 
 				if( data ){ e.data = data; }
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
-				e = document.createEventObject();
+				e = DOC.createEventObject();
 				if( data ){ e.data = data; }
 				e.target = elem;
 				e.eventType = "on"+type;
@@ -251,7 +251,7 @@ Simples.merge( /** @lends Simples */ {
 
 		// Fix target property, if necessary
 		if ( !event.target ) {
-			event.target = event.srcElement || document; // Fixes #1925 where srcElement might not be defined either
+			event.target = event.srcElement || DOC; // Fixes #1925 where srcElement might not be defined either
 		}
 
 		// check if target is a textnode (safari)
@@ -266,7 +266,7 @@ Simples.merge( /** @lends Simples */ {
 
 		// Calculate pageX/Y if missing and clientX/Y available
 		if ( event.pageX == null && event.clientX != null ) {
-			var doc = document.documentElement, body = document.body;
+			var doc = DOC.documentElement, body = DOC.body;
 			event.pageX = event.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
 			event.pageY = event.clientY + (doc && doc.scrollTop  || body && body.scrollTop  || 0) - (doc && doc.clientTop  || body && body.clientTop  || 0);
 		}
@@ -283,7 +283,7 @@ Simples.merge( /** @lends Simples */ {
 
 		// Add which for click: 1 === left; 2 === middle; 3 === right
 		// Note: button is not normalized, so don't use it
-		if ( !event.which && event.button !== undefined ) {
+		if ( !event.which && event.button !== UNDEF ) {
 			event.which = (event.button & 1 ? 1 : ( event.button & 2 ? 3 : ( event.button & 4 ? 2 : 0 ) ));
 		}
 
@@ -295,7 +295,7 @@ Simples.merge( /** @lends Simples */ {
 	_eventHandler : function( event ){ 
 		var events, callbacks;
 		var args = slice.call( arguments );
-		event = args[0] = Simples._eventFix( event || window.event );
+		event = args[0] = Simples._eventFix( event || WIN.event );
         event.currentTarget = this;
 
 		events = Simples.data( this, "events" );
@@ -309,7 +309,7 @@ Simples.merge( /** @lends Simples */ {
 				event.handler = callback.callback;
 				
 				var ret = event.handler.apply( this, args );
-				if( ret !== undefined ){
+				if( ret !== UNDEF ){
 					event.result = ret;
 					if ( ret === false ) { 
 						event.preventDefault();
@@ -333,7 +333,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
 	 */
 	bind : function( type, callback ){
-		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
+		if( typeof type === "string" && ( callback === false || Simples.isConstructor( callback, "Function" ) ) ){
 			// Loop over elements    
 			var i=0,l=this.length;
 			while(i<l){
@@ -363,7 +363,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {Any} data the data to attach to the event
 	 */
 	trigger : function( type, data ){
-		if( typeof type === STRING){ 
+		if( typeof type === "string"){ 
 			// Loop over elements
 			var i=0,l=this.length;
 			while(i<l){

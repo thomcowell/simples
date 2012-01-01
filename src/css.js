@@ -5,20 +5,15 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	RFLOAT = /float/i,
 	RDASH_ALPHA = /-([a-z])/ig,
 	RUPPER = /([A-Z])/g,
-	RCAPITALISE = /\b(\w)(\w)\b/g,
 	RNUMPX = /^-?d+(?:px)?$/i,
 	RNUM = /^-?d/,
 	WIDTH = "width",
 	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
-	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
+	getComputedStyle = DOC.defaultView && DOC.defaultView.getComputedStyle,
 	/** @private normalize float css property */
 	fcamelCase = function( all, letter ) {
 		return letter.toUpperCase();
-	},
-	/** @private */
-	fcapitalise = function( all, first, rest ){
-		return first.toUpperCase() + rest.toLowerCase();
 	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
@@ -148,8 +143,8 @@ Simples.merge( /** @lends Simples */ {
 	    // IE uses filters for opacity
 	    if (!Simples.support.opacity && name === OPACITY && elem.currentStyle) {
 
-	        ret = ROPACITY.test(elem.currentStyle.filter || EMPTY_STRING) ? (parseFloat(RegExp.$1) / 100) + EMPTY_STRING: EMPTY_STRING;
-	        return ret === EMPTY_STRING ? "1": ret;
+	        ret = ROPACITY.test(elem.currentStyle.filter || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
+	        return ret === "" ? "1": ret;
 	    }
 
 	    // Make sure we're using the right name for getting the float value
@@ -182,7 +177,7 @@ Simples.merge( /** @lends Simples */ {
 	        }
 
 	        // We should always get a number back from opacity
-	        if (name === OPACITY && ret === EMPTY_STRING) {
+	        if (name === OPACITY && ret === "") {
 	            ret = "1";
 	        }
 
@@ -223,19 +218,19 @@ Simples.merge( /** @lends Simples */ {
 	setStyle : function( elem, name, value ){                       
 		// don't set styles on text and comment nodes
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
-			return undefined;
+			return UNDEF;
 		}
 
 		// ignore negative width and height values #1599
 		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
-			value = undefined;
+			value = UNDEF;
 		}
 
-		if ( typeof value === NUMBER && !REXCLUDE.test(name) ) {
+		if ( typeof value === "number" && !REXCLUDE.test(name) ) {
 			value += "px";
 		}
 
-		var style = elem.style || elem, set = value !== undefined;
+		var style = elem.style || elem, set = value !== UNDEF;
 
 		// IE uses filters for opacity
 		if ( !Simples.support.opacity && name === OPACITY ) {
@@ -245,12 +240,12 @@ Simples.merge( /** @lends Simples */ {
 				style.zoom = 1;
 
 				// Set the alpha filter to set the opacity
-				var opacity = parseInt( value, 10 ) + EMPTY_STRING === "NaN" ? EMPTY_STRING : "alpha(opacity=" + value * 100 + ")";
-				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || EMPTY_STRING;
+				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + value * 100 + ")";
+				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || "";
 				style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
 			}
 
-			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + EMPTY_STRING:EMPTY_STRING;
+			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + "":"";
 		}
 
 		// Make sure we're using the right name for getting the float value
@@ -287,22 +282,22 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
 	 */	
 	css : function( name, value ){ 
-		if( value === undefined && typeof name === STRING ){
+		if( value === UNDEF && typeof name === "string" ){
 			return Simples.currentCSS( this[0], name );  
 		}
 
 		// ignore negative width and height values #1599
 		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
-			value = undefined;
+			value = UNDEF;
 		}
 		
-		var nameClass = toString.call( name );
-		if( nameClass === StringClass && value !== undefined ){
+		var klass = Simples.getConstructor( name );
+		if( klass === "String" && value !== UNDEF ){
 			var i=0,l=this.length;
 			while( i<l ){
 				Simples.setStyle( this[i++], name, value );
 			}
-		} else if( nameClass === ObjectClass ) {
+		} else if( klass === "Object" ) {
 			for( var key in name ){
 				this.css( key, name[ key ] );
 			}

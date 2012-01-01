@@ -31,7 +31,7 @@ Simples.OO = {
 		var F = function() {};
 
 		F.prototype = superClass.prototype;
-		subClass = (typeof subClass === FUNC) ? subClass: function() {
+		subClass = (typeof subClass === "function") ? subClass: function() {
 			this.constructor.apply(this, arguments);
 			return this;
 		};
@@ -71,7 +71,7 @@ Simples.OO = {
 		}
 		return newObj;
 	},
-	Interface: (function(undefined) {
+	Interface: (function(UNDEF) {
 		/**
 		 * @name Interface
 		 * @constructor
@@ -114,7 +114,7 @@ Simples.OO = {
 				var len = this.methods.length;
 				while (len) {
 					var method = this.methods[--len];
-					if (! (object[method] && typeof object[method] === FUNC)) {
+					if (! (object[method] && typeof object[method] === "function")) {
 						throw new Error("object does not implement this " + this.name + " interface. Method " + method + " was not found.");
 					}
 				}
