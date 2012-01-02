@@ -316,6 +316,8 @@ function doScrollCheck() {
  * @description the instance of a Simples object functions / instance methods
  */
 Simples.fn = Simples.prototype = {
+	/**  @private */	 
+	constructor : Simples,
 	/**
 	 * @constructs
 	 * @description to initialize the Simples constructor
@@ -433,6 +435,15 @@ Simples.fn = Simples.prototype = {
 	add : function( elems ){
 		Simples.makeArray( Simples( elems ), this );
 		return this;
+	},
+	/**
+	 * @memberof Simples.fn
+	 * @name makeArray
+	 * @function
+	 * @description convert the current Simples object into an Array
+	 */	
+	makeArray : function(){
+		return Simples.makeArray( this );
 	},
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
