@@ -440,7 +440,7 @@ Simples.fn = Simples.prototype = {
 	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
 	 */
 	add : function( elems ){
-		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
+		Simples.makeArray( Simples( elems ), this );
 		return this;
 	},
 	// For internal use only.
