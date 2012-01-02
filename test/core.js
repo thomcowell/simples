@@ -301,8 +301,11 @@ test('Simples.find',function(){
 
 test('Simples.filter', 215, function(){ 
 
-	var s_obj = Simples('div'), counter=0, length = s_obj.length, set = Simples('.row');
-
+	var s_obj = Simples('div'), 
+		counter=0, 
+		length = s_obj.length, 
+		set = Simples('.row');
+	
 	s_obj.filter(function(item,index,object){
 		equal( item, s_obj[ counter + s_obj.length - length ], "should have the same item" );
 		same( counter, index, "should have the same counter");

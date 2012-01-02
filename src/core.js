@@ -197,7 +197,7 @@ Simples.merge( /** @lends Simples */ {
 			var toplevel = false;
 
 			try {
-				toplevel = WIN.frameElement == null;
+				toplevel = WIN.frameElement === null || WIN.frameElement === UNDEF;
 			} catch(e) {}
 
 			if ( DOC.documentElement.doScroll && toplevel ) {
@@ -220,7 +220,7 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {String} text String to trim
 	 */
 	trim : function( text ) {
-		text = text == null ? "" : text;
+		text = text === null || text === UNDEF ? "" : text;
 		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, "" ).replace( LAST_SPACES, "" );
 	},
 	/**
