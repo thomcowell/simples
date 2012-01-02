@@ -255,7 +255,7 @@ try {
 			ret = results || [];
 
 		if( Simples.isConstructor(array,"Object") ){
-			for( var d in array ){
+			for( var key in array ){
 				ret.push( array[key] );
 			}
 		} else if ( typeof array.length === "number" ) {
@@ -354,22 +354,14 @@ Simples.fn = Simples.prototype = {
 			this.context = context;
 			this.selector = selector;
 		
-			return Simples.Selector( selector, context, this );
+			Simples.Selector( selector, context, this );
 
-		} else if( klass === "HTMLCollection" || klass === "NodeList" ){
+		} else if( klass === "HTMLCollection" || klass === "NodeList" || ( klass === "Array" && context === true ) ){
 
-			this.push.apply( this, slice.call( selector, 0 ) );
-	    } else if( klass === "Array" ){
-	        if( context === true ){
-				// shortcut to use native push
-		        this.push.apply( this, selector );
-			} else {
-				for(var d=0,e=selector.length;d<e;d++){
-					if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
-						this.push.call( this, selector[d] );
-					}
-				}
-			}
+			Simples.makeArray( selector, this );
+		} else {
+			Simples.makeArray( selector, this );
+			this.filter(function(){ return !!this.nodeType || !!this.document });
 		}
 		return this;		
 	},
