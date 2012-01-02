@@ -315,13 +315,16 @@ test('Simples.find',function(){
 	Simples.Selector = oldSelector;
 });
 
-test('Simples.filter', 215, function(){ 
+test('Simples.filter', 158, function(){ 
 
-	var s_obj = Simples('div'), 
+	var s_obj = Simples('.cell'),
 		counter=0, 
 		length = s_obj.length, 
 		set = Simples('.row');
-	
+
+	s_obj.push.apply( s_obj, slice.call( set, 0 ) );
+	length = s_obj.length;
+
 	s_obj.filter(function(item,index,object){
 		equal( item, s_obj[ counter + s_obj.length - length ], "should have the same item" );
 		same( counter, index, "should have the same counter");
@@ -335,8 +338,8 @@ test('Simples.filter', 215, function(){
 	for(var i=0,l=set.length;i<l;i++){
 		same( s_obj[i], set[i], "should return an instance of Simples");	
 	}
-	same( s_obj.selector, 'div', "node list of .row -- should have empty selector");	              
-	same( s_obj.context, document, "node list of .row -- should have empty context");
+	same( s_obj.selector, '.cell', "node list of .cell -- should have correct selector");	              
+	same( s_obj.context, document, "node list of .cell -- should have [Document] context");
 	equal( s_obj.length, 8, "should return an instance of Simples");
 	
 	s_obj = Simples('div');
