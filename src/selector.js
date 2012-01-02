@@ -24,12 +24,12 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	        return id && id.id === tag ? [id] : [];
 
 	    } else if (selector.indexOf('.') === 0) {
-	        if (context.getElementsByClassName) {
+	        if (typeof context.getElementsByClassName === "function" ) {
 	            // Native function
 	            return Simples.makeArray( context.getElementsByClassName(tag) );
 	        } else {
 	            // For IE which doesn't support getElementsByClassName
-	            elems = context.getElementsByTagName('*');
+	            elems = Simples.makeArray( context.getElementsByTagName('*') );
 	            nodes = [];
 	            // Loop over elements to test for correct class
 	            for (var i = 0, l = elems.length; i < l; i++) {
