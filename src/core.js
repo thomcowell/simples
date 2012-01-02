@@ -108,6 +108,16 @@ Simples.merge( /** @lends Simples */ {
 		}
 	},
 	/**
+	 * @description used to coerce a NodeList, HTMLElementCollection or Object into Array
+	 * @param {NodeList|HTMLElementCollection|Object} object to be coerced
+	 * @param {Array|Object} output object to have coerced object added to
+	 */
+	makeArray : function( array, results ) {
+		results = results || [];
+		push.apply( results, slice.call( array || [], 0 ) );
+		return results;
+	},
+	/**
 	 * @description used to check an object to see whether it is empty
 	 * @param {Object} obj object to check whether is empty
 	 */
@@ -228,6 +238,40 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	noop : function(){}
 });
+
+// Perform a simple check to determine if the browser is capable of
+// converting a NodeList to an array using builtin methods.
+// Also verifies that the returned array holds DOM nodes
+// (which is not the case in the Blackberry browser)
+try {
+	Array.prototype.slice.call( document.documentElement.childNodes, 0 )[0].nodeType;
+
+// Provide a fallback method if it does not work
+} catch( e ) {
+	/** @private */
+	Simples.makeArray = function( array, results ) {
+		array = array || [];
+		var i = 0,
+			ret = results || [];
+
+		if( Simples.isConstructor(array,"Object") ){
+			for( var d in array ){
+				ret.push( array[key] );
+			}
+		} else if ( typeof array.length === "number" ) {
+			for ( var l = array.length; i < l; i++ ) {
+				ret.push( array[i] );
+			}
+
+		} else {
+			for ( ; array[i]; i++ ) {
+				ret.push( array[i] );
+			}
+		}
+
+		return ret;
+	};
+};
 
 // Cleanup functions for the DOC ready method
 /** @private */

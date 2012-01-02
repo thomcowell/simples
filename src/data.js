@@ -89,8 +89,8 @@ Simples.merge( /** @lends Simples */ {
 	cleanData : function( elem, andSelf ){
 		// Remove element nodes and prevent memory leaks
 		var canClean = canDoData( elem ),
-			elems = canClean ? slice.call( elem.getElementsByTagName("*"), 0 ) : [];
-			
+			elems = canClean ? Simples.makeArray( elem.getElementsByTagName("*") ) : [];
+
 		if( canClean && andSelf !== false ){
 			elems.push( elem );
 		}
