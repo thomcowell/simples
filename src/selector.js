@@ -26,7 +26,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	    } else if (selector.indexOf('.') === 0) {
 	        if (context.getElementsByClassName) {
 	            // Native function
-	            return slice.call(context.getElementsByClassName(tag), 0);
+	            return Simples.makeArray( context.getElementsByClassName(tag) );
 	        } else {
 	            // For IE which doesn't support getElementsByClassName
 	            elems = context.getElementsByTagName('*');
@@ -44,7 +44,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	        var name = selector.substring(6).replace(/\].*/, "");
 	        context = context && context.nodeType === 9 ? context: DOC;
 	        if (context.getElementsByName) {
-	            return slice.call(context.getElementsByName(name));
+	            return Simples.makeArray( context.getElementsByName(name) );
 	        } else {
 	            // For IE which doesn't support getElementsByClassName
 	            elems = context.getElementsByName('*');
@@ -60,8 +60,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	        }
 	    } else {
 	        // assume that if not id or class must be tag
-	        var find = context.getElementsByTagName(selector);
-	        return find ? slice.call(find, 0) : [];
+	        return Simples.makeArray( context.getElementsByTagName(selector) );
 	    }
 	},
 	/** @private */
@@ -74,7 +73,7 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 
 			var div = DOC.createElement('div');
             div.innerHTML = selector;
-            results.push.apply( results, slice.call( div.childNodes, 0 ) );
+            Simples.makeArray( div.childNodes, results );
 
         } else if( SINGLE_TAG.test( selector ) ) {
             var tag = SINGLE_TAG.exec( selector );
@@ -102,16 +101,14 @@ Simples.Selector = function(selector, context, results) {
 		if( selector.indexOf('<') > -1 && selector.indexOf('>') > 0 ){
 			return createDOM( selector, results );
         } else if ( QUERY_SELECTOR ) {
-            results.push.apply(results, slice.call((context || DOC).querySelectorAll(selector), 0));
-            return results;
+            return Simples.makeArray( (context || DOC).querySelectorAll(selector), results );
         } else {
 	        // if it is a multi select split and short cut the process
 	        if (COMMA_WITH_BOUNDARY.test(selector)) {
 	            var get = selector.split(COMMA_WITH_BOUNDARY);
 
 	            for (var x = 0, y = get.length; x < y; x++) {
-
-	                results.push.apply(results, slice.call(Simples.Selector(get[x], context), 0));
+	            	Simples.makeArray( Simples.Selector(get[x], context), results );
 	            }
 	            return results;
 	        }
