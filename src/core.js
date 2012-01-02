@@ -254,18 +254,17 @@ try {
 		var i = 0,
 			ret = results || [];
 
-		if( Simples.isConstructor(array,"Object") ){
-			for( var key in array ){
-				ret.push( array[key] );
-			}
-		} else if ( typeof array.length === "number" ) {
-			for ( var l = array.length; i < l; i++ ) {
-				ret.push( array[i] );
-			}
-
+		if( Simples.isConstructor(array,"Array") ){
+			push.apply( ret, array );
 		} else {
-			for ( ; array[i]; i++ ) {
-				ret.push( array[i] );
+			if ( typeof array.length === "number" ) {
+				for ( var l = array.length; i < l; i++ ) {
+					ret.push( array[i] );
+				}
+			} else {
+				for ( ; array[i]; i++ ) {
+					ret.push( array[i] );
+				}
 			}
 		}
 

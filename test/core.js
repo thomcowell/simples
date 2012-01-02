@@ -206,12 +206,16 @@ test("Simples constructor when instantiated with the selector as 'body'", 5, fun
 });
 
 test('Simples constructor when instantiated with NodeList passed as selector', 4, function(){ 
-	var rows = document.getElementsByClassName ? document.getElementsByClassName('row') : document.getElementsByTagName("div");
+	var rows = typeof document.getElementsByClassName === "function" ? document.getElementsByClassName('row') : document.getElementsByTagName("div");
 	var s_obj = Simples( rows );
 	same( s_obj.selector, '', "node list of .row -- should have empty selector");	              
 	same( s_obj.context, undefined, "node list of .row -- should have empty context");
 	same( s_obj.length, rows.length, "node list of .row -- should have the same length as the supplied nodeList" );
-	same( slice.call( s_obj, 0), slice.call( rows ), "node list of .row -- should have the same as nodeList elems");
+	var out = [];
+	for(var i=0,l=s_obj.length;i<l;i++){
+		out.push( s_obj[i] );
+	}
+	same( out, Simples.makeArray( rows, [] ), "node list of .row -- should have the same as nodeList elems");
 });
 
 test('Simples constructor when instantiated with Array passed as selector', 4, function(){
