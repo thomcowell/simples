@@ -38,6 +38,29 @@ function Simples( selector, context ) {
 }      
 
 /**
+ * @description used to test the Constructor / Class of an object
+ * @param {Object} the object to test
+ * @param {String} the class name to test
+ * @param {Boolean} if you don't want to force the capitalisation of the className
+ **/
+Simples.isConstructor = function( obj, className, mustCapitalise ){
+	if( obj !== null && obj !== UNDEF ){
+		return toString.call( obj ) === "[object "+( mustCapitalise ? className.replace(RCAPITALISE,fcapitalise) : className )+"]";
+	}
+	return false;
+};
+/**
+ * @description used to test the Constructor / Class of an object
+ * @param {Object} the object to test
+ **/
+Simples.getConstructor = function( obj ){
+	if( obj !== null && obj !== UNDEF ){
+		return toString.call( obj ).replace("[object ","").replace("]","");
+	}
+	return false;
+};
+
+/**
  * @description used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj1, obj2.... native javascript object or array to be merged onto first
@@ -64,26 +87,6 @@ Simples.merge = function(first /* obj1, obj2..... */ ) {
     }
 
     return target;
-};
-
-/**
- * @description used to test the Constructor / Class of an object
- * @param {Object} the object to test
- * @param {String} the class name to test
- * @param {Boolean} if you don't want to capitalise the test
- **/
-Simples.isConstructor = function( obj, className, mustCapitalise ){
-	if( obj !== null && obj !== UNDEF ){
-		return toString.call( obj ) === "[object "+( mustCapitalise ? className.replace(RCAPITALISE,fcapitalise) : className )+"]";
-	}
-	return false;
-};
-
-Simples.getConstructor = function( obj ){
-	if( obj !== null && obj !== UNDEF ){
-		return toString.call( obj ).replace("[object ","").replace("]","");
-	}
-	return false;
 };
 
 Simples.merge( /** @lends Simples */ {
