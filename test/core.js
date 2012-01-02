@@ -62,6 +62,18 @@ test("isFunction", 8, function() {
 	ok( Simples.isConstructor( function(){}, "Function" ), 'passing in a function should return false' );
 });
 
+test("Simples#makeArray", 3, function(){
+	same( Simples.makeArray({a:1,b:2,3:"nope"}), [], "should produce an array from an object");
+	var elems = Simples("#qunit-header, #qunit-banner, #qunit-userAgent");
+	same( Simples.makeArray(elems), [elems[0],elems[1],elems[2]], "should produce an array from an object");
+	elems = document.getElementsByTagName("input"),
+	out = [];
+	for(var i=0,l=43;i<l;i++){
+		out.push(elems[i]);
+	}
+	same( Simples.makeArray(elems), out, "should produce an array from an object");
+});
+
 test("noop is a empty function", 1, function() {
 	strictEqual( Simples.noop(), undefined, 'noop should return undefined' );
 });
