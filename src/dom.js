@@ -1,4 +1,4 @@
-var STRIP_TAB_NEW_LINE = /\n|\t/g,
+var STRIP_TAB_NEW_LINE = /\n|\t|\r/g,
 	SINGLE_ARG_READ = /^outer$|^inner$|^text$/,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
@@ -12,10 +12,10 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	 */
 	wrapHelper = function(xhtml, el) {
 		// insert into documentFragment to ensure insert occurs without messing up order
-		if( xhtml.toString().indexOf("[object ") > -1 ){
+		if( xhtml.toString === UNDEF || xhtml.toString().indexOf("[object ") > -1 || ( xhtml && !!xhtml.nodeType ) ){
 			if( xhtml && xhtml.length !== UNDEF ){
 				var docFrag = DOC.createDocumentFragment();
-				xhtml = slice.call( xhtml, 0 );
+				xhtml = Simples.makeArray( xhtml, 0 );
 				for(var p=0,r=xhtml.length;p<r;p++){
 					docFrag.appendChild( xhtml[p] );
 				}
@@ -131,7 +131,7 @@ Simples.merge( /** @lends Simples */ {
 					        parent.replaceChild( el, elem );						
 						}
 						break;
-					case TOP :
+					case 'top' :
 						elem.insertBefore( wrapHelper(html, elem), elem.firstChild);
 						break;
 					case 'bottom' : 
@@ -173,7 +173,7 @@ Simples.merge( /** @lends Simples */ {
 					default :  
 						Simples.cleanData( this, false );
 						html = html != null ? html : location;
-						var list, len, i = 0, testStringIndex = html.toString().indexOf("[object ");
+						var list, len, i = 0, testStringIndex = html.toString().indexOf("[object");
 						if ( testStringIndex === -1 ) {
 							elem.innerHTML = ""+html;
 							list = elem.getElementsByTagName('SCRIPT');
