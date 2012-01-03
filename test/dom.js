@@ -85,9 +85,9 @@ test("attr(String)",function(){
 	ok( Simples('#form').attr('action').indexOf("formaction") >= 0, 'Check for action attribute' );
 	// Temporarily disabled. See: #4299
 	// ok( Simples('#form').attr('action','newformaction').attr('action').indexOf("newformaction") >= 0, 'Check that action attribute was changed' );
-	equals( Simples('#text1').attr('maxlength'), '30', 'Check for maxlength attribute' );
-	equals( Simples('#text1').attr('maxLength'), '30', 'Check for maxLength attribute' );
-	equals( Simples('#area1').attr('maxLength'), '30', 'Check for maxLength attribute' );
+	equals( Simples('#text1').attr('maxlength'), 30, 'Check for maxlength attribute' );
+	equals( Simples('#text1').attr('maxLength'), 30, 'Check for maxLength attribute' );
+	equals( Simples('#area1').attr('maxLength'), 30, 'Check for maxLength attribute' );
 	equals( Simples('#select2').attr('selectedIndex'), 3, 'Check for selectedIndex attribute' );
 	equals( Simples('#foo').attr('nodeName').toUpperCase(), 'DIV', 'Check for nodeName attribute' );
 	equals( Simples('#foo').attr('tagName').toUpperCase(), 'DIV', 'Check for tagName attribute' );	
@@ -169,15 +169,24 @@ test("attr('tabindex', value)", function() {
 
 function lowerCaseTags( html ){
 	// This is for IE which produces innerHTML with capitalised tags
-	return html.replace(/<([A-Z][A-Z0-9]*)([^>]*)>.*<\/\1>/gi,function(match,tag,attributes,index,all){
+	var tagMatch = /<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/gi;
+	return html.replace(/\n|\t|\r/g,"").replace(tagMatch,function(match,tag,attributes,inside,index,all){
 		if( attributes ){
 			match = match.replace(/(([A-Z\-\_]*)\s*=\s*['|"]?([A-Z0-9\-_:;#\s]*)['|"]?)/gi, function(attr, all, name, value){
 				return name+"=\""+value+"\"";
 			});
 		}
-		return Simples.trim( match.replace(new RegExp("\\b"+tag+"\\b","gi"),tag.toLowerCase()) );
-	});
+		if( inside.indexOf("<") > -1 && tagMatch.test(inside) ){
+			match = match.replace(inside, lowerCaseTags( inside ) );
+		} else if( new RegExp("<"+tag+"([^>]*)>").test(match) ){
+			match = match.replace(/(([A-Z\-\_]*)\s*=\s*['|"]?([A-Z0-9\-_:;#\s]*)['|"]?)/gi, function(attr, all, name, value){
+				return name+"=\""+value+"\"";
+			});
+		}
+		return match.replace(new RegExp("\\b"+tag+"\\b","gi"),tag.toLowerCase());
+	}).replace(/^\s+/,"").replace(/\s+$/,"");
 }
+
 test("html('inner')", 8, function(){
     
 	var div = Simples('<div/>');	
@@ -197,8 +206,10 @@ test("html('inner')", 8, function(){
 
 	var p = document.createElement('p');
 	p.innerHTML = "DOM Element";
-		
 	testInner( p, undefined, "<p>DOM Element</p>");
+	// Reset as consistency of p can't be determined
+	p = document.createElement('p');
+	p.innerHTML = "DOM Element";
 	testInner( "inner", p, "<p>DOM Element</p>");
     
     testInner( "inner", 1, "1"); 
@@ -321,8 +332,8 @@ test("html('before')", 3, function(){
 		endHTML = endHTML || html;
 		parent = Simples('#test-area').html( content );
 		div = Simples('#war-hammer');
-		div.html("before", html )
-		equal( lowerCaseTags(parent.html()), endHTML + content, "should insert before "+ endHTML );
+		div.html("before", html );
+		equal( lowerCaseTags( parent[0].innerHTML ), endHTML + content, "should insert before "+ endHTML );
 	}
 
 	var p = document.createElement('p');
@@ -358,15 +369,14 @@ test("html('after')", 3, function(){
 
 test("html('empty')", 4, function(){
 	
-	ok( Simples("#ap").html().length > 0, "ensure test is valid" );
+	ok( Simples("#ap")[0].innerHTML.length > 0, "ensure test is valid" );
 	Simples("#ap").html("empty")
-	equals( Simples("#ap").html().length, 0, "Check text is removed" );
+	equals( Simples("#ap")[0].innerHTML.length, 0, "Check text is removed" );
 	equals( Simples("#ap").length, 1, "Check elements are not removed" );
-
 	// using contents will get comments regular, text, and comment nodes
 	var j = Simples("#nonnodes").traverse('childNodes');
 	j.html("empty");
-	equals( lowerCaseTags( j.html() ), "", "Check node,textnode,comment empty works" );	
+	equals( lowerCaseTags( j[0].innerHTML ), "", "Check node,textnode,comment empty works" );	
 });
 
 test("html('wrap')", 3, function(){
@@ -377,8 +387,8 @@ test("html('wrap')", 3, function(){
 		var wrapper = endHTML.split('</');
 		parent.html( content );
 		div = Simples('#war-hammer');
-		div.html("wrap", html )
-		equal( lowerCaseTags( parent.html() ), lowerCaseTags( wrapper.shift()+content+'</'+wrapper.join('</') ), "should wrap after "+ endHTML );
+		div.html("wrap", html );
+		equal( lowerCaseTags( parent[0].innerHTML, true ), wrapper.shift()+content+'</'+wrapper.join('</'), "should wrap after "+ endHTML );
 	}
 
 	var p = document.createElement('p');
@@ -396,9 +406,9 @@ test("html('unwrap')", 2, function(){
 	
 	var parent = Simples('#test-area').html( content );
 	var div = Simples('#war-hammer').html( contents );
-	equal( lowerCaseTags(parent.html()), content.replace('></', '>'+contents+'</'), "ensure test is correctly set up" );
+	equal( lowerCaseTags( parent[0].innerHTML ), content.replace('></', '>'+contents+'</'), "ensure test is correctly set up" );
 	div.html( "unwrap" )
-	equal( lowerCaseTags(parent.html()), contents, "should remove div Element, but not children" );
+	equal( lowerCaseTags( parent[0].innerHTML ), contents, "should remove div Element, but not children" );
 
 });
 
