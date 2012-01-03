@@ -65,7 +65,9 @@ test("attr", 4, function() {
 }); 
 
 test("attr(String)",function(){
-	// This one sometimes fails randomly ?!
+	// This one sometimes fails randomly - setup to emnsure clean start
+	document.getElementById("text1").setAttribute('value',"Test");
+	// Start test
 	equals( Simples('#text1').attr('value'), "Test", 'Check for value attribute' );
 
 	equals( Simples('#text1').attr('value', "Test2").attr('defaultValue'), "Test", 'Check for defaultValue attribute' );
@@ -90,8 +92,11 @@ test("attr(String)",function(){
 	equals( Simples('#foo').attr('nodeName').toUpperCase(), 'DIV', 'Check for nodeName attribute' );
 	equals( Simples('#foo').attr('tagName').toUpperCase(), 'DIV', 'Check for tagName attribute' );	
 
-	Simples('#main').html( 'bottom', "<a href='#5' id='tAnchor5'></a>" );
-	equals( Simples('#tAnchor5').attr('href'), "#5", 'Check for non-absolute href (an anchor)' );
+	var a = document.createElement("a");
+	a.href = "#5";
+	a.id = "tanchor5";
+	document.getElementById("main").appendChild( a );
+	equals( Simples('#tanchor5').attr('href'), "#5", 'Check for non-absolute href (an anchor)' );
 
 	equals( Simples("<option/>").attr("selected"), false, "Check selected attribute on disconnected element." );
 });
