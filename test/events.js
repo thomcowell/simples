@@ -1,8 +1,6 @@
 module("Events",{
 	setup : function(){
-		var elem = document.getElementById("firstp");
-		elem.onclick = null;
-		Simples.detach( elem );
+		Simples.detach( document.getElementById("firstp") );
 	}
 });
 
