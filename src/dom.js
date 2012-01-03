@@ -3,7 +3,7 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
 	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
-	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i,
+	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"]?[A-Z0-9:;#\s]*['|"]?)/i,
 	TAG_LIST = {'UL':'LI','DL':'DT','TR':'TD'},
 	QUOTE_MATCHER = /(["']?)/g,
 	/**
@@ -333,8 +333,8 @@ Simples.extend( /** @lends Simples.fn */ {
 				}
 			}
 		} else if( klass === "String" ){
-			if( value === undefined ){
-				return Simples.attr( this[0], name, value );
+			if( value === UNDEF ){
+				return Simples.attr( this[0], name );
 			} else { 
 				for(var m=0,n=this.length;m<n;m++){
 					Simples.attr( this[m], name, value );

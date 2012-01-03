@@ -167,6 +167,17 @@ test("attr('tabindex', value)", function() {
 	equals(element.attr('tabindex'), -1, 'set negative tabindex');
 });
 
+function lowerCaseTags( html ){
+	// This is for IE which produces innerHTML with capitalised tags
+	return html.replace(/<([A-Z][A-Z0-9]*)([^>]*)>.*<\/\1>/gi,function(match,tag,attributes,index,all){
+		if( attributes ){
+			match = match.replace(/(([A-Z\-\_]*)\s*=\s*['|"]?([A-Z0-9\-_:;#\s]*)['|"]?)/gi, function(attr, all, name, value){
+				return name+"=\""+value+"\"";
+			});
+		}
+		return Simples.trim( match.replace(new RegExp("\\b"+tag+"\\b","gi"),tag.toLowerCase()) );
+	});
+}
 test("html('inner')", 8, function(){
     
 	var div = Simples('<div/>');	
@@ -178,7 +189,7 @@ test("html('inner')", 8, function(){
 		} else {
 			div.html( location );
 		}
-		equal( endHTML, div[0].innerHTML, "location:"+location +" and html:"+html );
+		equal( endHTML, lowerCaseTags(div[0].innerHTML), "location:"+location +" and html:"+html );
 	}
 	
 	testInner( "<p>No Location</p>", undefined, "<p>No Location</p>");
@@ -212,7 +223,7 @@ test("html('text')", 4, function(){
 			endText = endText || text;
 			p[0].innerHTML = "";
 			p.html( "text", text );
-			equal( p[0].innerHTML, endText, "location:text and html:"+text );
+			equal( lowerCaseTags( p[0].innerHTML ), endText, "location:text and html:"+text );
 		}
 	}
 
@@ -225,14 +236,14 @@ test("html('text')", 4, function(){
 
 test("html('outer')", 4, function(){
 	var div = Simples('<div/>'), parent;
-	equal( div.html("outer"), "<div></div>", "Should return the html for the selected element" );
+	equal( lowerCaseTags( div.html("outer") ), "<div></div>", "Should return the html for the selected element" );
 	
 	function testOuter( html, endHTML ){     
 		endHTML = endHTML || html;
 		parent = Simples('#test-area').html('<p id="war-hammer">This should not be here</p>');
 		div = Simples('#war-hammer');
 		div.html("outer", html )
-		equal( parent.html(), endHTML, "should have "+ endHTML );
+		equal( lowerCaseTags( parent.html() ), endHTML, "should have "+ endHTML );
 	}
 
 	var p = document.createElement('p');
@@ -252,7 +263,7 @@ test("html('top')", 3, function(){
 		endHTML = endHTML || html;
 		div[0].innerHTML = contents;
 		div.html( 'top', html );
-		equal( div[0].innerHTML, endHTML+contents, "should insert at the top "+endHTML );
+		equal( lowerCaseTags( div[0].innerHTML ), endHTML+contents, "should insert at the top "+endHTML );
 	}
 
 	testTop( "<p>I am Top</p>" );
@@ -271,7 +282,7 @@ test("html('bottom')", 3, function(){
 		endHTML = endHTML || html;
 		div[0].innerHTML = contents;
 		div.html( 'bottom', html );
-		equal( div[0].innerHTML, contents+endHTML, "should insert at the bottom "+endHTML );
+		equal( lowerCaseTags( div[0].innerHTML ), contents+endHTML, "should insert at the bottom "+endHTML );
 	}
 
 	testBottom( "<p>I am Bottom</p>" ); 
@@ -287,20 +298,20 @@ test("html('remove')",function(){
 	var contents = '<span>1</span><span>2</span><span>3</span><span>4</span>', parent = Simples('#test-area');
 	
 	parent[0].innerHTML = contents;
-	equal( parent.html(), contents, "ensure setup correct");
+	equal( lowerCaseTags(parent.html()), contents, "ensure setup correct");
 	span = Simples('span', parent );
 	span.html( 'remove' );
-	equal( parent[0].innerHTML, "", "should remove all children of parent" );
+	equal( lowerCaseTags(parent[0].innerHTML), "", "should remove all children of parent" );
 	
 	parent[0].innerHTML = contents;
-	equal( parent.html(), contents, "ensure setup correct");
+	equal( lowerCaseTags(parent.html()), contents, "ensure setup correct");
 	
 	span = Simples('span', parent );
 	span.slice( -1 ).html( 'remove' );
-	equal( parent[0].innerHTML, '<span>1</span><span>2</span><span>3</span>', "should remove all children of parent" );
+	equal( lowerCaseTags(parent[0].innerHTML), '<span>1</span><span>2</span><span>3</span>', "should remove all children of parent" );
 	
 	span.slice( 1 ).html( 'remove' );
-	equal( parent[0].innerHTML, '<span>1</span><span>3</span>', "should remove all children of parent" );
+	equal( lowerCaseTags(parent[0].innerHTML), '<span>1</span><span>3</span>', "should remove all children of parent" );
 });
    
 test("html('before')", 3, function(){
@@ -311,7 +322,7 @@ test("html('before')", 3, function(){
 		parent = Simples('#test-area').html( content );
 		div = Simples('#war-hammer');
 		div.html("before", html )
-		equal( parent.html(), endHTML + content, "should insert before "+ endHTML );
+		equal( lowerCaseTags(parent.html()), endHTML + content, "should insert before "+ endHTML );
 	}
 
 	var p = document.createElement('p');
@@ -332,7 +343,7 @@ test("html('after')", 3, function(){
 		parent = Simples('#test-area').html( content );
 		div = Simples('#war-hammer');
 		div.html("after", html )
-		equal( parent.html(), content + endHTML, "should insert after "+ endHTML );
+		equal( lowerCaseTags(parent.html()), content + endHTML, "should insert after "+ endHTML );
 	}
 
 	var p = document.createElement('p');
@@ -355,7 +366,7 @@ test("html('empty')", 4, function(){
 	// using contents will get comments regular, text, and comment nodes
 	var j = Simples("#nonnodes").traverse('childNodes');
 	j.html("empty");
-	equals( j.html(), "", "Check node,textnode,comment empty works" );	
+	equals( lowerCaseTags( j.html() ), "", "Check node,textnode,comment empty works" );	
 });
 
 test("html('wrap')", 3, function(){
@@ -367,7 +378,7 @@ test("html('wrap')", 3, function(){
 		parent.html( content );
 		div = Simples('#war-hammer');
 		div.html("wrap", html )
-		equal( parent.html(), wrapper.shift()+content+'</'+wrapper.join('</'), "should wrap after "+ endHTML );
+		equal( lowerCaseTags( parent.html() ), lowerCaseTags( wrapper.shift()+content+'</'+wrapper.join('</') ), "should wrap after "+ endHTML );
 	}
 
 	var p = document.createElement('p');
@@ -385,9 +396,9 @@ test("html('unwrap')", 2, function(){
 	
 	var parent = Simples('#test-area').html( content );
 	var div = Simples('#war-hammer').html( contents );
-	equal( parent.html(), content.replace('></', '>'+contents+'</'), "ensure test is correctly set up" );
+	equal( lowerCaseTags(parent.html()), content.replace('></', '>'+contents+'</'), "ensure test is correctly set up" );
 	div.html( "unwrap" )
-	equal( parent.html(), contents, "should remove div Element, but not children" );
+	equal( lowerCaseTags(parent.html()), contents, "should remove div Element, but not children" );
 
 });
 
