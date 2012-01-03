@@ -353,7 +353,7 @@ Simples.extend( /** @lends Simples.fn */ {
 		while( i<l ){
 			var current = this[i++], elem = ( isWhat === "String" ) ? current[ name ] : ( isWhat === "Function" ) ? name.call( current, current ) : null;
 			if( elem ){
-				results.push.apply( results, elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ] );
+				results.push.apply( results, ( elem.item || elem.length ) ? Simples.makeArray( elem ) : [ elem ] );
 			}
 		}
 		
