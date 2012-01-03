@@ -5,8 +5,8 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	RFLOAT = /float/i,
 	RDASH_ALPHA = /-([a-z])/ig,
 	RUPPER = /([A-Z])/g,
-	RNUMPX = /^-?d+(?:px)?$/i,
-	RNUM = /^-?d/,
+	RNUMPX = /^-?\d+(?:px)?$/i,
+	RNUM = /^-?\d/,
 	WIDTH = "width",
 	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
@@ -183,12 +183,11 @@ Simples.merge( /** @lends Simples */ {
 
 	    } else if (isCurrentStyle) {
 
-	        var uncomputed;
 	        name = name.replace(RDASH_ALPHA, fcamelCase );
 	        ret = elem.currentStyle && elem.currentStyle[name];
 
-			if ( ret === null && style && (uncomputed = style[ name ]) ) {
-				ret = uncomputed;
+			if ( ret === null && style && style[ name ] ) {
+				ret = style[ name ];
 			}
 	        // From the awesome hack by Dean Edwards
 	        // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291

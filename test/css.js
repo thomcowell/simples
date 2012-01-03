@@ -55,14 +55,14 @@ test("css(String|Hash)", 30, function() {
 	equals( parseInt(child.css("fontSize"),10), 16, "Verify fontSize px set." );
 	equals( parseInt(child.css("font-size"),10), 16, "Verify fontSize px set." );
 
-	equals( parseInt(child.css("fontSize")), 32, "Verify fontSize em set." );
 	// Check em font size translates into pixels
 	child.attr("className","em");
+	equals( parseInt(child.css("fontSize")), 32, "Verify fontSize em set." );
 
 	// Have to verify this as the result depends upon the browser's CSS
 	// support for font-size percentages
-	var prctval = parseInt(child.css("fontSize")), checkval = 0;
 	child.attr("className","prct");
+	var prctval = parseInt( child.css("fontSize") ), checkval = 0;
 	if ( prctval === 16 || prctval === 24 ) {
 		checkval = prctval;
 	}
