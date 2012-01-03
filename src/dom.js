@@ -173,15 +173,15 @@ Simples.merge( /** @lends Simples */ {
 					default :  
 						Simples.cleanData( this, false );
 						html = html != null ? html : location;
-						var list, len, i = 0, testString = html.toString();
-						if ( testString.indexOf("[object ") === -1 ) {
+						var list, len, i = 0, testStringIndex = html.toString().indexOf("[object ");
+						if ( testStringIndex === -1 ) {
 							elem.innerHTML = ""+html;
 							list = elem.getElementsByTagName('SCRIPT');
 							len = list.length;
 							for (; i < len; i++) {
 								eval(list[i].text);
 							}
-						} else if( testString.indexOf("[object ") > -1 ) {
+						} else if( testStringIndex > -1 ) {
 							elem.innerHTML = "";
 							elem.appendChild( wrapHelper( html, elem ) );
 						}					
