@@ -5,7 +5,7 @@ test("bind() and unbind() setup data correctly", 5, function() {
 	var callback = function(event) {
 		ok(false, "this callback shouldn't be called");
 	};
-	
+	Simples.detach( Simples("#firstp")[0] );
 	Simples("#firstp").bind( "click", callback );
     same( callback.guid, Simples.guid - 1, "should have the guid set" );
 	ok( !!Simples.data( Simples("#firstp")[0], "handlers").click, 'should attach handler function to function' );
