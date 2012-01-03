@@ -10,7 +10,8 @@ var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
 	WIDTH = "width",
 	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
-	getComputedStyle = DOC.defaultView && DOC.defaultView.getComputedStyle,
+	isGetComputedStyle = !!DOC.defaultView && !!DOC.defaultView.getComputedStyle,
+	isCurrentStyle = !!document.documentElement.currentStyle,
 	/** @private normalize float css property */
 	fcamelCase = function( all, letter ) {
 		return letter.toUpperCase();
@@ -155,7 +156,7 @@ Simples.merge( /** @lends Simples */ {
 	    if (style && style[name]) {
 	        ret = style[name];
 
-	    } else if (getComputedStyle) {
+	    } else if (isGetComputedStyle) {
 
 	        // Only "float" is needed here
 	        if (RFLOAT.test(name)) {
@@ -181,12 +182,15 @@ Simples.merge( /** @lends Simples */ {
 	            ret = "1";
 	        }
 
-	    } else if (elem.currentStyle) {
+	    } else if (isCurrentStyle) {
 
-	        var camelCase = name.replace(RDASH_ALPHA, fcamelCase );
+	        var uncomputed;
+	        name = name.replace(RDASH_ALPHA, fcamelCase );
+	        ret = elem.currentStyle && elem.currentStyle[name];
 
-	        ret = elem.currentStyle[name] || elem.currentStyle[camelCase];
-
+			if ( ret === null && style && (uncomputed = style[ name ]) ) {
+				ret = uncomputed;
+			}
 	        // From the awesome hack by Dean Edwards
 	        // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 	        // If we're not dealing with a regular pixel number
@@ -194,20 +198,24 @@ Simples.merge( /** @lends Simples */ {
 	        if (!RNUMPX.test(ret) && RNUM.test(ret)) {
 	            // Remember the original values
 	            var left = style.left,
-	            rsLeft = elem.runtimeStyle.left;
+	            rsLeft = elem.runtimeStyle && elem.runtimeStyle.left;
 
 	            // Put in the new values to get a computed value out
-	            elem.runtimeStyle.left = elem.currentStyle.left;
-	            style.left = camelCase === "fontSize" ? "1em": (ret || 0);
+	            if( rsLeft ){
+	            	elem.runtimeStyle.left = elem.currentStyle.left;
+	            }
+	            style.left = name === "fontSize" ? "1em": (ret || 0);
 	            ret = style.pixelLeft + "px";
 
 	            // Revert the changed values
 	            style.left = left;
-	            elem.runtimeStyle.left = rsLeft;
+	            if ( rsLeft ) {
+	            	elem.runtimeStyle.left = rsLeft;
+	            }
 	        }
 	    }
 
-	    return ret;
+	    return ret === "" ? "auto" : ret;
 	},
 	/**
 	 * @description use to set the supplied elements style attribute 
@@ -256,7 +264,8 @@ Simples.merge( /** @lends Simples */ {
 		name = name.replace( RDASH_ALPHA, fcamelCase); 
 
 		if ( set ) {
-			style[ name ] = value;
+			// set value to empty string when null to prevent IE issue
+			style[ name ] = value === null ? "" : value;
 		}
 
 		return style[ name ];
@@ -265,7 +274,7 @@ Simples.merge( /** @lends Simples */ {
 
 Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * @description Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+	 * @description Used to read the current computed style of the first element or write through this.css the style atttribute, see Simples.getStyle
 	 * @param {String} type the computed style attribute to read
 	 * @param {Boolean} extra whether to include extra
 	 */	
