@@ -79,7 +79,7 @@ test('create complex selector', 10, function(){
 
 	same( div.context, document, "should have a context of document");
 	same( div.selector, "<div>", text + " -- should have a selector of <div/>");
-	same( Simples( div[0] ).html("outer"), text, "should have the same as supplied html" );
+	same( Simples.trim( Simples( div[0] ).html("outer") ).replace(/DIV/g,"div"), text, "should have the same as supplied html" );
 
 	text = '<form action="/some/url" method="POST"><input name="name" type="text"/><input type="password" name="password"/><input type="submit" name="submit"/></form>';
 	div = Simples.Selector( text );
