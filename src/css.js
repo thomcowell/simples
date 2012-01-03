@@ -1,6 +1,6 @@
 // exclude the following css properties to add px
 var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
-	RALPHA = /alpha([^)]*)/,
+	RALPHA = /alpha\([^)]*\)/,
 	ROPACITY = /opacity=([^)]*)/,
 	RFLOAT = /float/i,
 	RDASH_ALPHA = /-([a-z])/ig,
@@ -143,8 +143,7 @@ Simples.merge( /** @lends Simples */ {
 
 	    // IE uses filters for opacity
 	    if (!Simples.support.opacity && name === OPACITY && elem.currentStyle) {
-
-	        ret = ROPACITY.test(elem.currentStyle.filter || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
+	        ret = ROPACITY.test( (elem.currentStyle ? elem.currentStyle.filter : elem.style.filter ) || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
 	        return ret === "" ? "1": ret;
 	    }
 
@@ -248,7 +247,7 @@ Simples.merge( /** @lends Simples */ {
 				style.zoom = 1;
 
 				// Set the alpha filter to set the opacity
-				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + value * 100 + ")";
+				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + (value * 100) + ")";
 				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || "";
 				style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
 			}

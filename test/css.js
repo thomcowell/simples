@@ -6,8 +6,7 @@ Simples.extend({
 	}
 });
 
-test("css(String|Hash)", function() {
-	expect(30);
+test("css(String|Hash)", 30, function() {
 
 	equals( Simples('#main').css("display"), 'none', 'Check for css property "display"');
 
@@ -51,21 +50,23 @@ test("css(String|Hash)", function() {
 
 	var div = Simples('#nothiddendiv'), child = Simples('#nothiddendivchild');
 
-	equals( parseInt(div.css("fontSize")), 16, "Verify fontSize px set." );
-	equals( parseInt(div.css("font-size")), 16, "Verify fontSize px set." );
-	equals( parseInt(child.css("fontSize")), 16, "Verify fontSize px set." );
-	equals( parseInt(child.css("font-size")), 16, "Verify fontSize px set." );
+	equals( parseInt(div.css("fontSize"),10), 16, "Verify fontSize px set." );
+	equals( parseInt(div.css("font-size"),10), 16, "Verify fontSize px set." );
+	equals( parseInt(child.css("fontSize"),10), 16, "Verify fontSize px set." );
+	equals( parseInt(child.css("font-size"),10), 16, "Verify fontSize px set." );
 
-	child[0].className = "em";
 	equals( parseInt(child.css("fontSize")), 32, "Verify fontSize em set." );
+	// Check em font size translates into pixels
+	child.attr("className","em");
 
 	// Have to verify this as the result depends upon the browser's CSS
 	// support for font-size percentages
-	child[0].className = "prct";
 	var prctval = parseInt(child.css("fontSize")), checkval = 0;
+	child.attr("className","prct");
 	if ( prctval === 16 || prctval === 24 ) {
 		checkval = prctval;
 	}
+	console.log(Simples('#nothiddendivchild').style("fontSize"), Simples('#nothiddendivchild').css("fontSize") )
 
 	equals( prctval, checkval, "Verify fontSize % set." );
 
@@ -122,15 +123,16 @@ if(Simples.browser.msie) {
     var filterVal = "progid:DXImageTransform.Microsoft.alpha(opacity=30) progid:DXImageTransform.Microsoft.Blur(pixelradius=5)";
     var filterVal2 = "progid:DXImageTransform.Microsoft.alpha(opacity=100) progid:DXImageTransform.Microsoft.Blur(pixelradius=5)";
     Simples('#foo').css("filter", filterVal);
-    equals( Simples('#foo').css("filter"), filterVal, "css('filter', val) works" );
-    Simples('#foo').css("opacity", 1)
-    equals( Simples('#foo').css("filter"), filterVal2, "Setting opacity in IE doesn't clobber other filters" );
-    equals( Simples('#foo').css("opacity"), 1, "Setting opacity in IE with other filters works" )
+    equals( Simples('#foo').css("filter").replace(/\t|\r|\n/g,""), filterVal, "css('filter', val) works" );
+    equals( Simples('#foo').css("opacity"), 0.3, "Setting opacity in IE with other filters works" );
+    Simples('#foo').css("opacity", 1); //.replace(/\t|\r|\n/g,"")
+    equals( Simples('#foo').css("filter").replace(/\t|\r|\n/g,""), filterVal2, "Setting opacity in IE doesn't clobber other filters" );
+    equals( Simples('#foo').css("opacity"), 1, "Setting opacity in IE with other filters works" );
   });
 }   
 
-test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", function () {
-	expect(4);
+test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", 4, function () {
+
     var checkedtest = getElements("#checkedtest")[0];
 	var radio = Simples('input', checkedtest).filter(function(){
 		if( this.type === 'radio' || this.type === 'RADIO' ){
@@ -154,8 +156,7 @@ test("Simples.css(elem, 'height') doesn't clear radio buttons (bug #1095)", func
 
 module("CSS: Width and Height");
 
-test("style('width')", function() {
-	expect(7);
+test("style('width')", 7, function() {
 
 	var $div = Simples("#nothiddendiv");
 	$div.css( "width", 30 );
@@ -180,8 +181,7 @@ test("style('width')", function() {
 	equals( blah.css( "width", 10 ), blah, "Make sure that setting a width on an empty set returns the set." );
 });
 
-test("style('height')", function() {
-	expect(6);
+test("style('height')", 6, function() {
 
 	var $div = Simples("#nothiddendiv");
 	$div.css( "height", 30 );
@@ -202,8 +202,7 @@ test("style('height')", function() {
 	equals( blah.css( "height", 10 ), blah, "Make sure that setting a height on an empty set returns the set." );
 });
 
-test("style('innerWidth')", function() {
-	expect(3);
+test("style('innerWidth')", 3, function() {
 
 	var $div = Simples("#nothiddendiv");
 	// set styles
@@ -223,9 +222,8 @@ test("style('innerWidth')", function() {
 	$div.css({ display: null, border: null, padding: null, width: null, height: null });
 });
 
-test("style('innerHeight')", function() {
-	expect(3);
-	
+test("style('innerHeight')", 3, function() {
+
 	var $div = Simples("#nothiddendiv");
 	// set styles
 	$div.css({
