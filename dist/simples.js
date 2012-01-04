@@ -5,7 +5,7 @@
  * Copyright (c) 2009 - 2012, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Wed Jan 4 12:40:17 2012 +0000
+ * Date: Wed Jan 4 13:09:14 2012 +0000
  */
 (function( window, document ) {
 
@@ -259,7 +259,7 @@ try {
 
 // Provide a fallback method if it does not work
 } catch( e ) {
-	/** @private */
+	/** @ignore */
 	Simples.makeArray = function( array, results ) {
 		array = array || [];
 		var i = 0,
@@ -327,7 +327,7 @@ function doScrollCheck() {
  * @description the instance of a Simples object functions / instance methods
  */
 Simples.fn = Simples.prototype = {
-	/**  @private */	 
+	/**  @ignore */	 
 	constructor : Simples,
 	/**
 	 * @constructs
@@ -393,8 +393,7 @@ Simples.fn = Simples.prototype = {
 	 */
 	version : '0.2.0',
 	/**
-	 * @memberof Simples.fn
-	 * @name each
+	 * @name Simples.fn.each
 	 * @function
 	 * @description To loop over each item in the Simples object
 	 * @param {Function} callback The function to call with each item, this is current item, arguments[ item, index, object ]
@@ -407,8 +406,8 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name filter
+	 * @name Simples.fn.filter
+	 * @function
 	 * @description To filter the selected elements on the Simples object 
 	 * @param {Function} testFn The function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
 	 */
@@ -423,8 +422,7 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name find
+	 * @name Simples.fn.find
 	 * @function
 	 * @description used to find elements off of the elements currently on the Simples object 
 	 * @param {String} selector Selector string to find elements
@@ -437,8 +435,7 @@ Simples.fn = Simples.prototype = {
 		return results;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name add
+	 * @name Simples.fn.add
 	 * @function
 	 * @description used to add more elements to the current Simples object
 	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
@@ -448,8 +445,7 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name makeArray
+	 * @name Simples.fn.makeArray
 	 * @function
 	 * @description convert the current Simples object into an Array
 	 */	
@@ -2760,7 +2756,7 @@ getWIN = function( elem ) {
 		elem.nodeType === 9 ?
 			elem.defaultView || elem.parentWindow :
 			false;
-},getOffset;
+};
 
 if( "getBoundingClientRect" in DOC.documentElement ){
 	/**
@@ -3282,14 +3278,17 @@ Simples.Animation = {
 Simples.extend( /** @lends Simples.fn */ {
 	/**
 	 * @description From the instance of the Simples object used to bridge to the Simples.Animation functionality
-	 * @param action {String} the name of the action to be performed, excluding create && _step
+	 * @param action {String} the name of the action to be performed - stop, start, reset, reverse; this is excluding create && _step
 	 */
 	animations: function(action) {
 		if( action != ("create" || "_step") && Simples.Animation[ action ] ){
-			var i = this.length;
-			while (i) {
-				var anims = Simples.data( this[--i], "animation" );
-				Simples.Animation[ action ]( anim, arguments[2] );
+			var i = this.length,
+				action = Simples.Animation[ action ];
+			if( typeof action === "function" ){
+				while (i) {
+					var anims = Simples.data( this[--i], "animation" );
+					Simples.Animation[ action ]( anim, arguments[2] );
+				}
 			}
 		}
 		return this;
