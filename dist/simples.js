@@ -1,13 +1,13 @@
 /** 
  * @license 
- * Simples JavaScript Library v0.1.5
+ * Simples JavaScript Library v0.2.0
  * http://simples.eightsquarestudio.com/
- * Copyright (c) 2009 - 2011, Thomas Cowell
+ * Copyright (c) 2009 - 2012, Thomas Cowell
  * Dual licensed under the MIT or GPL Version 2 licenses.
  *
- * Date: Thu Jul 21 10:25:01 2011 +0100
+ * Date: Wed Jan 4 12:40:17 2012 +0000
  */
-(function( window, undefined ) {
+(function( window, document ) {
 
 // Save a reference to some core methods
 var toString = Object.prototype.toString,
@@ -16,29 +16,23 @@ var toString = Object.prototype.toString,
 	slice = Array.prototype.slice,
 	indexOf = Array.prototype.indexOf,
 	trim = String.prototype.trim,
-/* references to class outputs	 */
-	ArrayClass = '[object Array]',
-	ObjectClass = '[object Object]',
-	NodeListClass = '[object NodeList]', 
-	StringClass = "[object String]", 
-	NumberClass = "[object Number]",
-	FunctionClass = "[object Function]",
-	BooleanClass = "[object Boolean]",
-	HTMLCollectionClass = "[object HTMLCollection]",
-	WindowClass = "[object Window]",
+	UNDEF,
+	WIN = window,
+	DOC = document,
+	RCAPITALISE = /\b(\w)(\w+)\b/g,
+	/** @private */
+	fcapitalise = function( all, first, rest ){
+		return first.toUpperCase() + rest.toLowerCase();
+	},
 	FIRST_SPACES = /^\s*/,
 	LAST_SPACES = /\s*$/,
-	STRING = 'string',
-	NUMBER = "number",
 	DOMLOADED = "DOMContentLoaded",
 	READYSTATE = "onreadystatechange",
-	FUNC = "function",
 	SCRIPT = "script",
 	OPACITY = "opacity",
 	TOP = "top",
 	LEFT = "left",
 	COMPLETE = "complete",
-	EMPTY_STRING = "",
 	// The ready event handler
 	DOMContentLoaded,
 	// Has the ready events already been bound?
@@ -55,26 +49,49 @@ function Simples( selector, context ) {
 }      
 
 /**
+ * @description used to test the Constructor / Class of an object
+ * @param {Object} the object to test
+ * @param {String} the class name to test
+ * @param {Boolean} if you don't want to force the capitalisation of the className
+ **/
+Simples.isConstructor = function( obj, className, mustCapitalise ){
+	if( obj !== null && obj !== UNDEF ){
+		return toString.call( obj ) === "[object "+( mustCapitalise ? className.replace(RCAPITALISE,fcapitalise) : className )+"]";
+	}
+	return false;
+};
+/**
+ * @description used to test the Constructor / Class of an object
+ * @param {Object} the object to test
+ **/
+Simples.getConstructor = function( obj ){
+	if( obj !== null && obj !== UNDEF ){
+		return toString.call( obj ).replace("[object ","").replace("]","");
+	}
+	return false;
+};
+
+/**
  * @description used to merge objects onto the first specfied object
  * @param {Object} target native javascript object to be merged
  * @param {Object|Array} obj1, obj2.... native javascript object or array to be merged onto first
  **/
 Simples.merge = function(first /* obj1, obj2..... */ ) {
     // if only 1 argument is passed in assume Simples is the target
-    var target = (arguments.length === 1 && !(this === window || this === document)) ? this: toString.call(first) === ObjectClass ? first : {};
+    var target = (arguments.length === 1 && !(this === WIN || this === DOC)) ? this: Simples.isConstructor( first, "Object" ) ? first : {};
     // set i to value based on whether there are more than 1 arguments
     var i = arguments.length > 1 ? 1: 0;
     // Loop over arguments
     for (var l = arguments.length; i < l; i++) {
         // if object apply directly to target with same keys
-        var isWhat = toString.call(arguments[i]);
-        if (isWhat === ObjectClass) {
+        var klass = Simples.getConstructor( arguments[i] );
+        if ( klass === "Object" ) {
             for (var key in arguments[i]) {
                 if (hasOwn.call(arguments[i], key)) {
                     target[key] = arguments[i][key];
                 }
             }
-        } else if (isWhat === ArrayClass) {
+        } else if ( klass === "Array" ) {
             // if array apply directly to target with numerical keys
             push.apply(target, arguments[i]);
         }
@@ -90,16 +107,26 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	extend : function( addMethods ){
 		// Detect whether addMethods is an object to extend onto subClass
-		var klass = toString.call( addMethods );
-		if( klass === ObjectClass ){
+		var klass = Simples.getConstructor( addMethods );
+		if( klass === "Object" ){
 			for (var key in addMethods) {
 		        if ( hasOwn.call( addMethods, key ) ) {
 		            Simples.fn[key] = addMethods[key];
 		        }
 		    }
-		} else if( klass === StringClass && typeof arguments[1] === FUNC ){
+		} else if( klass === "String" && typeof arguments[1] === "function" ){
 			Simples.fn[ arguments[0] ]= arguments[1];
 		}
+	},
+	/**
+	 * @description used to coerce a NodeList, HTMLElementCollection or Object into Array
+	 * @param {NodeList|HTMLElementCollection|Object} object to be coerced
+	 * @param {Array|Object} output object to have coerced object added to
+	 */
+	makeArray : function( array, results ) {
+		results = results || [];
+		push.apply( results, slice.call( array || [], 0 ) );
+		return results;
 	},
 	/**
 	 * @description used to check an object to see whether it is empty
@@ -124,7 +151,7 @@ Simples.merge( /** @lends Simples */ {
 		// If the DOM is already ready
 		if ( Simples.isReady ) {
 			// Execute the function immediately
-			callback.call( document, Simples.Event( 'ready' ) );
+			callback.call( DOC, Simples.Event( 'ready' ) );
 
 		// Otherwise, remember the function for later
 		} else if ( readyList ) {
@@ -137,8 +164,8 @@ Simples.merge( /** @lends Simples */ {
 		// Make sure that the DOM is not already loaded
 		if ( !Simples.isReady ) {
 			// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-			if ( !document.body ) {
-				return window.setTimeout( Simples.readyHandler, 13 );
+			if ( !DOC.body ) {
+				return WIN.setTimeout( Simples.readyHandler, 13 );
 			}
 
 			// Remember that the DOM is ready
@@ -149,7 +176,7 @@ Simples.merge( /** @lends Simples */ {
 				// Execute all of them
 				var fn, i = 0;
 				while ( (fn = readyList[ i++ ]) ) {
-					fn.call( document, Simples );
+					fn.call( DOC, Simples );
 				}
 
 				// Reset the list of functions
@@ -163,38 +190,38 @@ Simples.merge( /** @lends Simples */ {
 
 		readyBound = true;
 
-		// Catch cases where $(document).ready() is called after the
+		// Catch cases where $(DOC).ready() is called after the
 		// browser event has already occurred.
-		if ( document.readyState === COMPLETE ) {
+		if ( DOC.readyState === COMPLETE ) {
 			return Simples.readyHandler();
 		}
 
 		// Mozilla, Opera and webkit nightlies currently support this event
-		if ( document.addEventListener ) {
+		if ( DOC.addEventListener ) {
 			// Use the handy event callback
-			document.addEventListener( DOMLOADED, DOMContentLoaded, false );
+			DOC.addEventListener( DOMLOADED, DOMContentLoaded, false );
 
-			// A fallback to window.onload, that will always work
-			window.addEventListener( "load", Simples.readyHandler, false );
+			// A fallback to WIN.onload, that will always work
+			WIN.addEventListener( "load", Simples.readyHandler, false );
 
 		// If IE event model is used
-		} else if ( document.attachEvent ) {
+		} else if ( DOC.attachEvent ) {
 			// ensure firing before onload,
 			// maybe late but safe also for iframes
-			document.attachEvent( READYSTATE, DOMContentLoaded);
+			DOC.attachEvent( READYSTATE, DOMContentLoaded);
 
-			// A fallback to window.onload, that will always work
-			window.attachEvent( "onload", Simples.readyHandler );
+			// A fallback to WIN.onload, that will always work
+			WIN.attachEvent( "onload", Simples.readyHandler );
 
 			// If IE and not a frame
-			// continually check to see if the document is ready
+			// continually check to see if the DOC is ready
 			var toplevel = false;
 
 			try {
-				toplevel = window.frameElement == null;
+				toplevel = WIN.frameElement === null || WIN.frameElement === UNDEF;
 			} catch(e) {}
 
-			if ( document.documentElement.doScroll && toplevel ) {
+			if ( DOC.documentElement.doScroll && toplevel ) {
 				doScrollCheck();
 			}
 		}
@@ -214,8 +241,8 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {String} text String to trim
 	 */
 	trim : function( text ) {
-		text = text == null ? EMPTY_STRING : text;
-		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, EMPTY_STRING ).replace( LAST_SPACES, EMPTY_STRING );
+		text = text === null || text === UNDEF ? "" : text;
+		return trim ? trim.call( text ) : text.toString().replace( FIRST_SPACES, "" ).replace( LAST_SPACES, "" );
 	},
 	/**
 	 * @description an empty function to use as noop function
@@ -223,21 +250,54 @@ Simples.merge( /** @lends Simples */ {
 	noop : function(){}
 });
 
-// Cleanup functions for the document ready method
+// Perform a simple check to determine if the browser is capable of
+// converting a NodeList to an array using builtin methods.
+// Also verifies that the returned array holds DOM nodes
+// (which is not the case in the Blackberry browser)
+try {
+	Array.prototype.slice.call( document.documentElement.childNodes, 0 )[0].nodeType;
+
+// Provide a fallback method if it does not work
+} catch( e ) {
+	/** @private */
+	Simples.makeArray = function( array, results ) {
+		array = array || [];
+		var i = 0,
+			ret = results || [];
+
+		if( Simples.isConstructor(array,"Array") ){
+			push.apply( ret, array );
+		} else {
+			if ( typeof array.length === "number" ) {
+				for ( var l = array.length; i < l; i++ ) {
+					ret.push( array[i] );
+				}
+			} else {
+				for ( ; array[i]; i++ ) {
+					ret.push( array[i] );
+				}
+			}
+		}
+
+		return ret;
+	};
+}
+
+// Cleanup functions for the DOC ready method
 /** @private */
-if ( document.addEventListener ) {
+if ( DOC.addEventListener ) {
 	/** @private */
 	DOMContentLoaded = function() {
-		document.removeEventListener( DOMLOADED, DOMContentLoaded, false );
+		DOC.removeEventListener( DOMLOADED, DOMContentLoaded, false );
 		Simples.readyHandler();
 	};
 
-} else if ( document.attachEvent ) {
+} else if ( DOC.attachEvent ) {
 	/** @private */
 	DOMContentLoaded = function() {
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-		if ( document.readyState === COMPLETE ) {
-			document.detachEvent( READYSTATE, DOMContentLoaded );
+		if ( DOC.readyState === COMPLETE ) {
+			DOC.detachEvent( READYSTATE, DOMContentLoaded );
 			Simples.readyHandler();
 		}
 	};
@@ -252,9 +312,9 @@ function doScrollCheck() {
 	try {
 		// If IE is used, use the trick by Diego Perini
 		// http://javascript.nwbox.com/IEContentLoaded/
-		document.documentElement.doScroll(LEFT);
+		DOC.documentElement.doScroll(LEFT);
 	} catch(e) {
-		window.setTimeout( doScrollCheck, 1 );
+		WIN.setTimeout( doScrollCheck, 1 );
 		return;
 	}
 
@@ -267,6 +327,8 @@ function doScrollCheck() {
  * @description the instance of a Simples object functions / instance methods
  */
 Simples.fn = Simples.prototype = {
+	/**  @private */	 
+	constructor : Simples,
 	/**
 	 * @constructs
 	 * @description to initialize the Simples constructor
@@ -276,10 +338,10 @@ Simples.fn = Simples.prototype = {
 	 */
 	init : function( selector, context ){
 
-		// Handle $(EMPTY_STRING), $(null), or $(undefined)
+		// Handle $(""), $(null), or $(UNDEF)
 		if ( !selector ){
 			return this;
-		} else if( selector.selector !== undefined ){
+		} else if( selector.selector !== UNDEF ){
 			return selector;
 		}
 
@@ -292,34 +354,26 @@ Simples.fn = Simples.prototype = {
 		
 		// The body element only exists once, optimize finding it
 		if ( selector === "body" && !context ) {
-			this.context = document;
-			this[0] = document.body;
+			this.context = DOC;
+			this[0] = DOC.body;
 			this.selector = "body";
 			this.length = 1;
 			return this;
 		}
-	  
-		var objClass = toString.call( selector );
-		if( objClass === StringClass ){
+
+		var klass = Simples.getConstructor( selector );
+		if( klass === "String" ){
 			this.context = context;
 			this.selector = selector;
 		
-			return Simples.Selector( selector, context, this );
+			Simples.Selector( selector, context, this );
 
-		} else if( objClass === HTMLCollectionClass || objClass === NodeListClass ){
+		} else if( klass === "HTMLCollection" || klass === "NodeList" || ( klass === "Array" && context === true ) ){
 
-			this.push.apply( this, slice.call( selector, 0 ) );
-	    } else if( objClass === ArrayClass ){
-	        if( context === true ){
-				// shortcut to use native push
-		        this.push.apply( this, selector );
-			} else {
-				for(var d=0,e=selector.length;d<e;d++){
-					if( selector[d] && ( selector[d].nodeType || selector[d].document ) ){
-						this.push.call( this, selector[d] );
-					}
-				}
-			}
+			Simples.makeArray( selector, this );
+		} else {
+			Simples.makeArray( selector, this );
+			this.filter(function(){ return !!this.nodeType || !!this.document; });
 		}
 		return this;		
 	},
@@ -332,12 +386,12 @@ Simples.fn = Simples.prototype = {
 	 * @name Simples.fn.selector	
 	 * @description The selector used to create the Simples object
 	 */
-	selector : EMPTY_STRING,
+	selector : "",
 	/**
 	 * @name Simples.fn.version	
 	 * @description The version of the Simples library
 	 */
-	version : '0.1.5',
+	version : '0.2.0',
 	/**
 	 * @memberof Simples.fn
 	 * @name each
@@ -390,8 +444,17 @@ Simples.fn = Simples.prototype = {
 	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
 	 */
 	add : function( elems ){
-		this.push.apply( this, slice.call( Simples( elems ), 0 ) );
+		Simples.makeArray( Simples( elems ), this );
 		return this;
+	},
+	/**
+	 * @memberof Simples.fn
+	 * @name makeArray
+	 * @function
+	 * @description convert the current Simples object into an Array
+	 */	
+	makeArray : function(){
+		return Simples.makeArray( this );
 	},
 	// For internal use only.
 	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
@@ -405,9 +468,9 @@ Simples.fn = Simples.prototype = {
 
 Simples.fn.init.prototype = Simples.fn;
 // Inside closure to prevent any collisions or leaks
-(function( Simples ){
+(function( Simples, DOC ){
 
-var root = document.documentElement, div = document.createElement("div"), script = document.createElement(SCRIPT), id = SCRIPT + new Date().getTime();
+var root = DOC.documentElement, div = DOC.createElement("div"), script = DOC.createElement(SCRIPT), id = SCRIPT + new Date().getTime();
 
 div.style.display = "none";
 div.innerHTML = "   <link/><table></table><a href='/a' style='color:red;float:left;opacity:.55;'>a</a><input type='checkbox'/>";
@@ -418,20 +481,20 @@ var all = div.getElementsByTagName("*"), a = div.getElementsByTagName("a")[0];
 if ( !all || !all.length || !a ) {
 	return;
 }
-var fragment = document.createDocumentFragment(), testDiv = document.createElement("div");
+var fragment = DOC.createDocumentFragment(), testDiv = DOC.createElement("div");
 testDiv.innerHTML = "<input type='radio' name='radiotest' checked='checked'/>";
 fragment.appendChild( testDiv.firstChild );
 
 // Technique from Juriy Zaytsev
 // http://thinkweb2.com/projects/prototype/detecting-event-support-without-browser-sniffing/
 var eventSupported = function( eventName ) { 
-	var el = document.createElement("div"); 
+	var el = DOC.createElement("div"); 
 	eventName = "on" + eventName; 
 
 	var isSupported = (eventName in el); 
 	if ( !isSupported ) { 
 		el.setAttribute(eventName, "return;"); 
-		isSupported = typeof el[eventName] === FUNC; 
+		isSupported = typeof el[eventName] === "function"; 
 	} 
 	el = null; 
 
@@ -441,7 +504,7 @@ var eventSupported = function( eventName ) {
 Simples.merge( /** @lends Simples */ {
 	support : { 
 		// to determine whether querySelector is avaliable
-		useQuerySelector : typeof document.querySelectorAll === FUNC,
+		useQuerySelector : typeof DOC.querySelectorAll === "function",
 		// Make sure that element opacity exists
 		// (IE uses filter instead)
 		// Use a regex to work around a WebKit issue. See jQuery #5145
@@ -453,7 +516,7 @@ Simples.merge( /** @lends Simples */ {
 		leadingWhitespace: div.firstChild.nodeType === 3,
 		// Make sure that if no value is specified for a checkbox
 		// that it defaults to "on".
-		// (WebKit defaults to EMPTY_STRING instead)
+		// (WebKit defaults to "" instead)
 		checkOn: div.getElementsByTagName("input")[0].value === "on",
 		// WebKit doesn't clone checked state correctly in fragments   
 		checkClone : fragment.cloneNode(true).cloneNode(true).lastChild.checked, 
@@ -483,7 +546,7 @@ Simples.merge( /** @lends Simples */ {
 			!/compatible/.test( ua ) && /(mozilla)(?:.*? rv:([\w.]+))?/.exec( ua ) ||
 			[];
 
-		return { browser: match[1] || EMPTY_STRING, version: match[2] || "0" };
+		return { browser: match[1] || "", version: match[2] || "0" };
 	},
 	browser : {}
 }); 
@@ -498,9 +561,9 @@ root.insertBefore( script, root.firstChild );
 // Make sure that the execution of code works by injecting a script
 // tag with appendChild/createTextNode
 // (IE doesn't support this, fails, and uses .text instead)
-if ( window[ id ] ) {
+if ( WIN[ id ] ) {
 	Simples.support.scriptEval = true;
-	delete window[ id ];
+	delete WIN[ id ];
 }
 
 root.removeChild( script );
@@ -522,18 +585,475 @@ if ( browserMatch.browser ) {
 }
 
 Simples.ready(function(){
-	var div = document.createElement("div");
+	var div = DOC.createElement("div");
 	div.style.width = div.style.paddingLeft = "1px";
 
-	document.body.appendChild( div );
+	DOC.body.appendChild( div );
 	Simples.support.isBoxModel = div.offsetWidth === 2;
-	document.body.removeChild( div ).style.display = 'none';
+	DOC.body.removeChild( div ).style.display = 'none';
 	div = null;	
 });
 // nulling out support varaibles as finished
 root = div = script = id = testDiv = null;
 
-})( Simples );
+})( Simples, document );
+/*
+    http://www.JSON.org/json2.js
+    2011-10-19
+
+    Public Domain.
+
+    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+
+    See http://www.JSON.org/js.html
+
+
+    This code should be minified before deployment.
+    See http://javascript.crockford.com/jsmin.html
+
+    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
+    NOT CONTROL.
+
+
+    This file creates a global JSON object containing two methods: stringify
+    and parse.
+
+        JSON.stringify(value, replacer, space)
+            value       any JavaScript value, usually an object or array.
+
+            replacer    an optional parameter that determines how object
+                        values are stringified for objects. It can be a
+                        function or an array of strings.
+
+            space       an optional parameter that specifies the indentation
+                        of nested structures. If it is omitted, the text will
+                        be packed without extra whitespace. If it is a number,
+                        it will specify the number of spaces to indent at each
+                        level. If it is a string (such as '\t' or '&nbsp;'),
+                        it contains the characters used to indent at each level.
+
+            This method produces a JSON text from a JavaScript value.
+
+            When an object value is found, if the object contains a toJSON
+            method, its toJSON method will be called and the result will be
+            stringified. A toJSON method does not serialize: it returns the
+            value represented by the name/value pair that should be serialized,
+            or undefined if nothing should be serialized. The toJSON method
+            will be passed the key associated with the value, and this will be
+            bound to the value
+
+            For example, this would serialize Dates as ISO strings.
+
+                Date.prototype.toJSON = function (key) {
+                    function f(n) {
+                        // Format integers to have at least two digits.
+                        return n < 10 ? '0' + n : n;
+                    }
+
+                    return this.getUTCFullYear()   + '-' +
+                         f(this.getUTCMonth() + 1) + '-' +
+                         f(this.getUTCDate())      + 'T' +
+                         f(this.getUTCHours())     + ':' +
+                         f(this.getUTCMinutes())   + ':' +
+                         f(this.getUTCSeconds())   + 'Z';
+                };
+
+            You can provide an optional replacer method. It will be passed the
+            key and value of each member, with this bound to the containing
+            object. The value that is returned from your method will be
+            serialized. If your method returns undefined, then the member will
+            be excluded from the serialization.
+
+            If the replacer parameter is an array of strings, then it will be
+            used to select the members to be serialized. It filters the results
+            such that only members with keys listed in the replacer array are
+            stringified.
+
+            Values that do not have JSON representations, such as undefined or
+            functions, will not be serialized. Such values in objects will be
+            dropped; in arrays they will be replaced with null. You can use
+            a replacer function to replace those with JSON values.
+            JSON.stringify(undefined) returns undefined.
+
+            The optional space parameter produces a stringification of the
+            value that is filled with line breaks and indentation to make it
+            easier to read.
+
+            If the space parameter is a non-empty string, then that string will
+            be used for indentation. If the space parameter is a number, then
+            the indentation will be that many spaces.
+
+            Example:
+
+            text = JSON.stringify(['e', {pluribus: 'unum'}]);
+            // text is '["e",{"pluribus":"unum"}]'
+
+
+            text = JSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
+            // text is '[\n\t"e",\n\t{\n\t\t"pluribus": "unum"\n\t}\n]'
+
+            text = JSON.stringify([new Date()], function (key, value) {
+                return this[key] instanceof Date ?
+                    'Date(' + this[key] + ')' : value;
+            });
+            // text is '["Date(---current time---)"]'
+
+
+        JSON.parse(text, reviver)
+            This method parses a JSON text to produce an object or array.
+            It can throw a SyntaxError exception.
+
+            The optional reviver parameter is a function that can filter and
+            transform the results. It receives each of the keys and values,
+            and its return value is used instead of the original value.
+            If it returns what it received, then the structure is not modified.
+            If it returns undefined then the member is deleted.
+
+            Example:
+
+            // Parse the text. Values that look like ISO date strings will
+            // be converted to Date objects.
+
+            myData = JSON.parse(text, function (key, value) {
+                var a;
+                if (typeof value === 'string') {
+                    a =
+/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+                    if (a) {
+                        return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
+                            +a[5], +a[6]));
+                    }
+                }
+                return value;
+            });
+
+            myData = JSON.parse('["Date(09/09/2001)"]', function (key, value) {
+                var d;
+                if (typeof value === 'string' &&
+                        value.slice(0, 5) === 'Date(' &&
+                        value.slice(-1) === ')') {
+                    d = new Date(value.slice(5, -1));
+                    if (d) {
+                        return d;
+                    }
+                }
+                return value;
+            });
+
+
+    This is a reference implementation. You are free to copy, modify, or
+    redistribute.
+*/
+
+// Create a JSON object only if one does not already exist. We create the
+// methods in a closure to avoid creating global variables.
+
+var JSON;
+if (!JSON) {
+    JSON = {};
+}
+
+(function () {
+    'use strict';
+
+    function f(n) {
+        // Format integers to have at least two digits.
+        return n < 10 ? '0' + n : n;
+    }
+
+    if (typeof Date.prototype.toJSON !== 'function') {
+
+        Date.prototype.toJSON = function (key) {
+            return isFinite(this.valueOf()) ? this.getUTCFullYear() + '-' + f(this.getUTCMonth() + 1) + '-' + f(this.getUTCDate()) + 'T' + f(this.getUTCHours()) + ':' + f(this.getUTCMinutes()) + ':' + f(this.getUTCSeconds())   + 'Z' : null;
+        };
+
+        String.prototype.toJSON      =
+            Number.prototype.toJSON  =
+            Boolean.prototype.toJSON = function (key) {
+                return this.valueOf();
+            };
+    }
+
+    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        gap,
+        indent,
+        meta = {    // table of character substitutions
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            '"' : '\\"',
+            '\\': '\\\\'
+        },
+        rep;
+
+
+    function quote(string) {
+
+// If the string contains no control characters, no quote characters, and no
+// backslash characters, then we can safely slap some quotes around it.
+// Otherwise we must also replace the offending characters with safe escape
+// sequences.
+
+        escapable.lastIndex = 0;
+        return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
+            var c = meta[a];
+            return typeof c === 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + '"' : '"' + string + '"';
+    }
+
+    function str(key, holder) {
+
+// Produce a string from holder[key].
+
+        var i,          // The loop counter.
+            k,          // The member key.
+            v,          // The member value.
+            length,
+            mind = gap,
+            partial,
+            value = holder[key];
+
+// If the value has a toJSON method, call it to obtain a replacement value.
+
+        if (value && typeof value === 'object' && typeof value.toJSON === 'function') {
+            value = value.toJSON(key);
+        }
+
+// If we were called with a replacer function, then call the replacer to
+// obtain a replacement value.
+
+        if (typeof rep === 'function') {
+            value = rep.call(holder, key, value);
+        }
+
+// What happens next depends on the value's type.
+
+        switch (typeof value) {
+        case 'string':
+            return quote(value);
+
+        case 'number':
+
+// JSON numbers must be finite. Encode non-finite numbers as null.
+
+            return isFinite(value) ? String(value) : 'null';
+
+        case 'boolean':
+        case 'null':
+
+// If the value is a boolean or null, convert it to a string. Note:
+// typeof null does not produce 'null'. The case is included here in
+// the remote chance that this gets fixed someday.
+
+            return String(value);
+
+// If the type is 'object', we might be dealing with an object or an array or
+// null.
+
+        case 'object':
+
+// Due to a specification blunder in ECMAScript, typeof null is 'object',
+// so watch out for that case.
+
+            if (!value) {
+                return 'null';
+            }
+
+// Make an array to hold the partial results of stringifying this object value.
+
+            gap += indent;
+            partial = [];
+
+// Is the value an array?
+
+            if (Object.prototype.toString.apply(value) === '[object Array]') {
+
+// The value is an array. Stringify every element. Use null as a placeholder
+// for non-JSON values.
+
+                length = value.length;
+                for (i = 0; i < length; i += 1) {
+                    partial[i] = str(i, value) || 'null';
+                }
+
+// Join all of the elements together, separated with commas, and wrap them in
+// brackets.
+
+                v = partial.length === 0 ? '[]' : gap ? '[\n' + gap + partial.join(',\n' + gap) + '\n' + mind + ']' : '[' + partial.join(',') + ']';
+                gap = mind;
+                return v;
+            }
+
+// If the replacer is an array, use it to select the members to be stringified.
+
+            if (rep && typeof rep === 'object') {
+                length = rep.length;
+                for (i = 0; i < length; i += 1) {
+                    if (typeof rep[i] === 'string') {
+                        k = rep[i];
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            } else {
+
+// Otherwise, iterate through all of the keys in the object.
+
+                for (k in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            }
+
+// Join all of the member texts together, separated with commas,
+// and wrap them in braces.
+
+            v = partial.length === 0 ? '{}' : gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' + mind + '}' : '{' + partial.join(',') + '}';
+            gap = mind;
+            return v;
+        }
+    }
+
+// If the JSON object does not yet have a stringify method, give it one.
+
+    if (typeof JSON.stringify !== 'function') {
+        JSON.stringify = function (value, replacer, space) {
+
+// The stringify method takes a value and an optional replacer, and an optional
+// space parameter, and returns a JSON text. The replacer can be a function
+// that can replace values, or an array of strings that will select the keys.
+// A default replacer method can be provided. Use of the space parameter can
+// produce text that is more easily readable.
+
+            var i;
+            gap = '';
+            indent = '';
+
+// If the space parameter is a number, make an indent string containing that
+// many spaces.
+
+            if (typeof space === 'number') {
+                for (i = 0; i < space; i += 1) {
+                    indent += ' ';
+                }
+
+// If the space parameter is a string, it will be used as the indent string.
+
+            } else if (typeof space === 'string') {
+                indent = space;
+            }
+
+// If there is a replacer, it must be a function or an array.
+// Otherwise, throw an error.
+
+            rep = replacer;
+            if (replacer && typeof replacer !== 'function' &&
+                    (typeof replacer !== 'object' ||
+                    typeof replacer.length !== 'number')) {
+                throw new Error('JSON.stringify');
+            }
+
+// Make a fake root object containing our value under the key of ''.
+// Return the result of stringifying the value.
+
+            return str('', {'': value});
+        };
+    }
+
+
+// If the JSON object does not yet have a parse method, give it one.
+
+    if (typeof JSON.parse !== 'function') {
+
+        var IS_JSON = /^[\],:{}\s]*$/,
+            AT_CHAR = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+            RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+            EMPTY_CHAR = /(?:^|:|,)(?:\s*\[)+/g;
+
+        JSON.parse = function (text, reviver) {
+
+// The parse method takes a text and an optional reviver function, and returns
+// a JavaScript value if the text is a valid JSON text.
+
+            var j;
+
+            function walk(holder, key) {
+
+// The walk method is used to recursively walk the resulting structure so
+// that modifications can be made.
+
+                var k, v, value = holder[key];
+                if (value && typeof value === 'object') {
+                    for (k in value) {
+                        if (Object.prototype.hasOwnProperty.call(value, k)) {
+                            v = walk(value, k);
+                            if (v !== undefined) {
+                                value[k] = v;
+                            } else {
+                                delete value[k];
+                            }
+                        }
+                    }
+                }
+                return reviver.call(holder, key, value);
+            }
+
+
+// Parsing happens in four stages. In the first stage, we replace certain
+// Unicode characters with escape sequences. JavaScript handles many characters
+// incorrectly, either silently deleting them, or treating them as line endings.
+
+            text = String(text);
+            cx.lastIndex = 0;
+            if (cx.test(text)) {
+                text = text.replace(cx, function (a) {
+                    return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                });
+            }
+
+// In the second stage, we run the text against regular expressions that look
+// for non-JSON patterns. We are especially concerned with '()' and 'new'
+// because they can cause invocation, and '=' because it can cause mutation.
+// But just to be safe, we want to reject all unexpected forms.
+
+// We split the second stage into 4 regexp operations in order to work around
+// crippling inefficiencies in IE's and Safari's regexp engines. First we
+// replace the JSON backslash pairs with '@' (a non-JSON character). Second, we
+// replace all simple value tokens with ']' characters. Third, we delete all
+// open brackets that follow a colon or comma or that begin the text. Finally,
+// we look to see that the remaining characters are only whitespace or ']' or
+// ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
+
+            if ( IS_JSON.test( text.replace(AT_CHAR, '@').replace(RIGHT_SQUARE, ']').replace(EMPTY_CHAR, '') ) ) {
+
+// In the third stage we use the eval function to compile the text into a
+// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
+// in JavaScript: it can begin a block or an object literal. We wrap the text
+// in parens to eliminate the ambiguity.
+
+                j = ( new Function('return (' + text + ');') )();
+
+// In the optional fourth stage, we recursively walk the new structure, passing
+// each name/value pair to a reviver function for possible transformation.
+
+                return typeof reviver === 'function' ? walk({'': j}, '') : j;
+            }
+
+// If the text is not JSON parseable, then a SyntaxError is thrown.
+
+            throw new SyntaxError('JSON.parse');
+        };
+    }
+}());
 var accessID = 'simples'+ new Date().getTime(),
 	// The following elements throw uncatchable exceptions if you
 	// attempt to add data properties to them.
@@ -544,7 +1064,7 @@ var accessID = 'simples'+ new Date().getTime(),
 	},
 	/** @private */
 	canDoData = function( elem ){
-		return elem && elem.nodeName && !( elem == window || noData[ elem.nodeName.toLowerCase() ] );
+		return elem && elem.nodeName && !( elem == WIN || noData[ elem.nodeName.toLowerCase() ] );
 	},
 	/** @private */
 	removeHTML5Data = function( elem, key ){
@@ -564,7 +1084,7 @@ var accessID = 'simples'+ new Date().getTime(),
 		
 		if( key ){
 			var val = data ? data[ key ] : Simples.attr( elem, "data-" + key );
-			return ( val == null || val == "" ) ? undefined : val;
+			return ( val == null || val == "" ) ? UNDEF : val;
 		} else {
 			if (!data) {
 				data = {};
@@ -595,10 +1115,10 @@ Simples.merge( /** @lends Simples */ {
 	 * @returns {Object|Null|All} returns dataset object for read where no key, returns value where read and null for eveything else
 	 */
 	data : function( elem, key, value ){
-		if ( canDoData( elem ) && ( key === undefined || typeof key === STRING ) ) {
+		if ( canDoData( elem ) && ( key === UNDEF || typeof key === "string" ) ) {
 			var data = !elem[ accessID ] ? elem[ accessID ] = {} : elem[ accessID ];
 
-			if( key && value !== undefined ){
+			if( key && value !== UNDEF ){
 				// To remove the existing data-* attribute as well as the data value
 				removeHTML5Data( elem, key );
 				if( value !== null ){
@@ -606,7 +1126,7 @@ Simples.merge( /** @lends Simples */ {
 				} else {
 					delete data[ key ];
 				}      
-			} else if( value === undefined ){
+			} else if( value === UNDEF ){
 				if( !key ){
 					return Simples.merge( data, readHTML5Data( elem, null, data ) );
 				} else {
@@ -624,8 +1144,9 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	cleanData : function( elem, andSelf ){
 		// Remove element nodes and prevent memory leaks
-		var canClean = canDoData( elem );
-		var elems = canClean ? slice.call( elem.getElementsByTagName("*") ) : [];
+		var canClean = canDoData( elem ),
+			elems = canClean ? Simples.makeArray( elem.getElementsByTagName("*") ) : [];
+
 		if( canClean && andSelf !== false ){
 			elems.push( elem );
 		}
@@ -657,8 +1178,8 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @returns {Simples|All} returns Simples object for write and delete and the value for read
 	 */	
 	data : function( key, value ){   
-		if( typeof key === STRING ){
-			if( value !== undefined ){
+		if( typeof key === "string" ){
+			if( value !== UNDEF ){
 				var l=this.length;
 				while( l ){
 					Simples.data( this[--l], key, value );
@@ -682,15 +1203,11 @@ var ACCEPTS = {
     text: "text/plain",
     _default: "*/*"
 },
-JSON = "json",
+TYPE_JSON = "json",
 FILE = "file:",
 GET = "GET",
 XML = "xml",
 // REGEXP USED IN THIS FILE
-AJAX_IS_JSON = /^[\],:{}\s]*$/,
-AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
-AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 LAST_AMP = /&$/,
 PARSEERROR = "parsererror",
 // count of active ajax requests
@@ -698,14 +1215,14 @@ ActiveAjaxRequests = 0,
 /** @private method used by Simples.params to build data for request */
 formatData = function(name, value) {
 
-    var str = EMPTY_STRING;
+    var str = "";
 
-    if (typeof name === STRING) {
-        var objClass = toString.call(value);
-		if (objClass === FunctionClass) {
+    if (typeof name === "string") {
+		var klass = Simples.getConstructor( value );
+		if ( klass === "Function" ) {
 
             str = formatData(name, value());
-        } else if (objClass === ObjectClass) {
+        } else if ( klass === "Object" ) {
             var arr = [];
 
             for (var key in value) {
@@ -717,7 +1234,7 @@ formatData = function(name, value) {
             }
 
             str = arr.join('&');
-        } else if (objClass === ArrayClass) {
+        } else if ( klass === "Array" ) {
             str = formatData(name, value.join(','));
         } else if( value != null ){
             str = ( encodeURIComponent(name) + '=' + encodeURIComponent(value) );
@@ -748,7 +1265,7 @@ httpSuccess = function(xhr) {
 /** @private method for httpData parsing is from jQuery 1.4 */
 httpData = function(xhr, type, dataFilter) {
 
-    var ct = xhr.getResponseHeader("content-type") || EMPTY_STRING,
+    var ct = xhr.getResponseHeader("content-type") || "",
     xml = type === XML || !type && ct.indexOf(XML) >= 0,
     data = xml ? xhr.responseXML: xhr.responseText;
 
@@ -756,34 +1273,21 @@ httpData = function(xhr, type, dataFilter) {
         throw PARSEERROR;
     }
 
-    if (typeof dataFilter === FUNC) {
+    if (typeof dataFilter === "function") {
         data = dataFilter(data, type);
     }
 
     // The filter can actually parse the response
-    if (typeof data === STRING) {
+    if (typeof data === "string") {
         // Get the JavaScript object, if JSON is used.
-        if (type === JSON || !type && ct.indexOf(JSON) >= 0) {
+        if (type === TYPE_JSON || !type && ct.indexOf(TYPE_JSON) >= 0) {
             // Make sure the incoming data is actual JSON
-            // Logic borrowed from http://json.org/json2.js
-            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, EMPTY_STRING))) {
-
-                // Try to use the native JSON parser first
-                if (window.JSON && window.JSON.parse) {
-                    data = window.JSON.parse(data);
-
-                } else {
-                    data = ( new Function("return " + data) )();
-                }
-
-            } else {
-                throw "Invalid JSON: " + data;
-            }
-
+            // Now using http://json.org/json2.js so don't need to add any logic
+            data = JSON.parse(data);
             // If the type is SCRIPT, eval it in global context
         } else if (type === SCRIPT || !type && ct.indexOf("javascript") >= 0) {
 
-            eval.call(window, data);
+            eval.call(WIN, data);
         }
     }
 
@@ -817,7 +1321,7 @@ Simples.merge( /** @lends Simples */ {
 		/**
 		 * @description The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
 		 */
-	    dataType: JSON,
+	    dataType: TYPE_JSON,
 		/**
 		 * @description boolean value of whether you want the request to be asynchronous or blocking
 		 */
@@ -833,13 +1337,13 @@ Simples.merge( /** @lends Simples */ {
 		/**
 		 * @description helper to return the correct XHR object for your platform
 		 */
-		xhr: window.XMLHttpRequest && (window.location.protocol !== FILE || !window.ActiveXObject) ?
+		xhr: WIN.XMLHttpRequest && (WIN.location.protocol !== FILE || !WIN.ActiveXObject) ?
 			function() {
-				return new window.XMLHttpRequest();
+				return new WIN.XMLHttpRequest();
 			} :
 			function() {
 				try {
-					return new window.ActiveXObject("Microsoft.XMLHTTP");
+					return new WIN.ActiveXObject("Microsoft.XMLHTTP");
 				} catch(e) {}
 			},
 		/**
@@ -849,7 +1353,7 @@ Simples.merge( /** @lends Simples */ {
 		/**
 		 * Simples.ajaxDefaults.context: context in which the callback is to be executed
 		 */
-		context : window
+		context : WIN
 	},
 	/**
 	 * @description used to send an ajax requests
@@ -963,22 +1467,22 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	scriptLoader : function( src, callback ){
 
-		var script = document.createElement(SCRIPT),
-			head = document.getElementsByTagName("head")[0] || document.documentElement;
+		var script = DOC.createElement(SCRIPT),
+			head = DOC.getElementsByTagName("head")[0] || DOC.documentElement;
 		
 	    if (script.readyState) {
 			/** @private */
 	        script.onreadystatechange = function() {
 	            if (script.readyState === "loaded" || script.readyState === "complete") {
 	                script.onreadystatechange = null;
-	                ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+	                ( ( typeof callback === "function" ) ? callback : Simples.noop ).call( this, src, this );
 					this.parentNode.removeChild( this );
 	            }
 	        };
 	    } else {
 			/** @private */
 	        script.onload = function() {
-	            ( ( typeof callback === FUNC ) ? callback : Simples.noop ).call( this, src, this );
+	            ( ( typeof callback === "function" ) ? callback : Simples.noop ).call( this, src, this );
 				this.parentNode.removeChild( this );
 	        };
 		}
@@ -1003,20 +1507,20 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {Object|Array|String} name : value OR [{name:'',value:''}] OR "name" 
 	 * @param {String} value 
 	 */
-    params: function(obj) {
+    params: function(obj,value) {
 
 	    if( arguments.length === 1 ){ 
-			var arr = [];
-			var objClass = toString.call( obj );	
-		    if ( objClass === ObjectClass ) {
+			var arr = [],
+				klass = Simples.getConstructor( obj );
+		    if ( klass === "Object" ) {
 		        for (var key in obj) {
 
 		            arr[ arr.length ] = formatData( key, obj[key] );
 				}
-		    } else if ( objClass === ArrayClass ) {
+		    } else if ( klass === "Array" ) {
 		        for (var i = 0, l = obj.length; i < l; i++) {
 
-		            if ( toString.call( obj[i] ) === ObjectClass ) {
+		            if ( Simples.isConstructor( obj[i], "Object" ) ) {
 
 		                arr[ arr.length ] = formatData( obj[i].name, obj[i].value );
 		            }
@@ -1042,25 +1546,25 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	/** @private */
 	getElements = function(selector, context) {
 
-	    context = context || document;
+	    context = context || DOC;
 	    var tag = selector.substring(1),
 	    elems,
 	    nodes;
 
 	    if (selector.indexOf('#') === 0) {
 	        // Native function
-	        var id = (context && context.nodeType === 9 ? context: document).getElementById(tag);
+	        var id = (context && context.nodeType === 9 ? context: DOC).getElementById(tag);
 	        // test to make sure id is the own specified, because of name being read as id in some browsers
 	        return id && id.id === tag ? [id] : [];
 
 	    } else if (selector.indexOf('.') === 0) {
-	        if (context.getElementsByClassName) {
+	        if (typeof context.getElementsByClassName === "function" ) {
 	            // Native function
-	            return slice.call(context.getElementsByClassName(tag), 0);
+				return Simples.makeArray( context.getElementsByClassName(tag) );
 	        } else {
 	            // For IE which doesn't support getElementsByClassName
-	            elems = context.getElementsByTagName('*');
-	            nodes = [];
+				elems = Simples.makeArray( context.getElementsByTagName('*') );
+				nodes = [];
 	            // Loop over elements to test for correct class
 	            for (var i = 0, l = elems.length; i < l; i++) {
 	                // Detect whether this element has the class specified
@@ -1071,10 +1575,10 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	            return nodes;
 	        }
 	    } else if (selector.indexOf('[name=') === 0) {
-	        var name = selector.substring(6).replace(/\].*/, EMPTY_STRING);
-	        context = context && context.nodeType === 9 ? context: document;
+	        var name = selector.substring(6).replace(/\].*/, "");
+	        context = context && context.nodeType === 9 ? context: DOC;
 	        if (context.getElementsByName) {
-	            return slice.call(context.getElementsByName(name));
+	            return Simples.makeArray( context.getElementsByName(name) );
 	        } else {
 	            // For IE which doesn't support getElementsByClassName
 	            elems = context.getElementsByName('*');
@@ -1090,27 +1594,26 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	        }
 	    } else {
 	        // assume that if not id or class must be tag
-	        var find = context.getElementsByTagName(selector);
-	        return find ? slice.call(find, 0) : [];
+	        return Simples.makeArray( context.getElementsByTagName(selector) );
 	    }
 	},
 	/** @private */
 	createDOM = function( selector, results ){
 
-		results.context = document;
+		results.context = DOC;
 
 		if( COMPLEX_TAG.test( selector ) ){
             results.selector = "<"+COMPLEX_TAG.exec( selector )[1]+">";
 
-			var div = document.createElement('div');
+			var div = DOC.createElement('div');
             div.innerHTML = selector;
-            results.push.apply( results, slice.call( div.childNodes, 0 ) );
+            Simples.makeArray( div.childNodes, results );
 
         } else if( SINGLE_TAG.test( selector ) ) {
             var tag = SINGLE_TAG.exec( selector );
 
 			results.selector = tag[0];
-            results.push( document.createElement(tag[1]) );
+            results.push( DOC.createElement(tag[1]) );
 		}
 
 		return results;
@@ -1125,33 +1628,31 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 Simples.Selector = function(selector, context, results) {
     results = results || [];
 	results.selector = selector;
-	results.context = context || document;
+	results.context = context || DOC;
 
-    if (typeof(selector) === STRING) {
+    if (typeof(selector) === "string") {
         // check selector if structured to create element
 		if( selector.indexOf('<') > -1 && selector.indexOf('>') > 0 ){
 			return createDOM( selector, results );
         } else if ( QUERY_SELECTOR ) {
-            results.push.apply(results, slice.call((context || document).querySelectorAll(selector), 0));
-            return results;
+            return Simples.makeArray( (context || DOC).querySelectorAll(selector), results );
         } else {
 	        // if it is a multi select split and short cut the process
 	        if (COMMA_WITH_BOUNDARY.test(selector)) {
 	            var get = selector.split(COMMA_WITH_BOUNDARY);
 
 	            for (var x = 0, y = get.length; x < y; x++) {
-
-	                results.push.apply(results, slice.call(Simples.Selector(get[x], context), 0));
+					Simples.makeArray( Simples.Selector(get[x], context), results );
 	            }
 	            return results;
 	        }
             // clean up selector
-            // selector = selector.replace(TAG_STRIP, EMPTY_STRING);
+            // selector = selector.replace(TAG_STRIP, "");
             // get last id in selector
             var index = selector.lastIndexOf(FIRST_ID);
             selector = selector.substring(index > 0 ? index: 0);
             // allow another document to be used for context where getting by id
-            results.context = context = (selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0) ? (context && context.nodeType === 9 ? context: document) : (context || document);
+            results.context = context = (selector.indexOf('#') === 0 || selector.indexOf('[name=') === 0) ? (context && context.nodeType === 9 ? context: DOC) : (context || DOC);
             var split = selector.split(SPACE_WITH_BOUNDARY);
 
             for (var i = 0, l = split.length; i < l; i++) {
@@ -1172,12 +1673,12 @@ Simples.Selector = function(selector, context, results) {
     }
     return results;
 };
-var STRIP_TAB_NEW_LINE = /\n|\t/g,
+var STRIP_TAB_NEW_LINE = /\n|\t|\r/g,
 	SINGLE_ARG_READ = /^outer$|^inner$|^text$/,
 	IMMUTABLE_ATTR = /(button|input)/i,
 	SPECIAL_URL = /href|src|style/,
 	VALID_ELEMENTS = /^<([A-Z][A-Z0-9]*)([^>]*)>(.*)<\/\1>/i, 
-	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"][A-Z0-9:;#\s]*['|"])/i,
+	SPLIT_ATTRIBUTE = /([A-Z]*\s*=\s*['|"]?[A-Z0-9:;#\s]*['|"]?)/i,
 	TAG_LIST = {'UL':'LI','DL':'DT','TR':'TD'},
 	QUOTE_MATCHER = /(["']?)/g,
 	/**
@@ -1186,10 +1687,10 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 	 */
 	wrapHelper = function(xhtml, el) {
 		// insert into documentFragment to ensure insert occurs without messing up order
-		if( xhtml.toString().indexOf("[object ") > -1 ){
-			if( xhtml && xhtml.length !== undefined ){
-				var docFrag = document.createDocumentFragment();
-				xhtml = slice.call( xhtml, 0 );
+		if( xhtml.toString === UNDEF || xhtml.toString().indexOf("[object ") > -1 || ( xhtml && !!xhtml.nodeType ) ){
+			if( xhtml && xhtml.length !== UNDEF ){
+				var docFrag = DOC.createDocumentFragment();
+				xhtml = Simples.makeArray( xhtml, 0 );
 				for(var p=0,r=xhtml.length;p<r;p++){
 					docFrag.appendChild( xhtml[p] );
 				}
@@ -1199,20 +1700,20 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 			return xhtml;
 		}
 	    var attributes = {}, element, x, i = 0, attr, node, attrList, result, tag;
-	    xhtml = EMPTY_STRING + xhtml;
+	    xhtml = "" + xhtml;
 	    if ( VALID_ELEMENTS.test(xhtml) ) {
 	        result = VALID_ELEMENTS.exec(xhtml);
 			tag = result[1];
 
 	        // if the node has any attributes, convert to object
-	        if (result[2] !== EMPTY_STRING) {
+	        if (result[2] !== "") {
 	            attrList = result[2].split( SPLIT_ATTRIBUTE );
 
 	            for (var l=attrList.length; i < l; i++) {
 	                attr = Simples.trim( attrList[i] );
-	                if (attr !== EMPTY_STRING && attr !== " ") {
+	                if (attr !== "" && attr !== " ") {
 	                    node = attr.split('=');
-	                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, EMPTY_STRING);
+	                    attributes[ node[0] ] = node[1].replace( QUOTE_MATCHER, "");
 	                }
 	            }
 	        }
@@ -1221,7 +1722,7 @@ var STRIP_TAB_NEW_LINE = /\n|\t/g,
 			tag = (el.firstChild === null) ? TAG_LIST[el.tagName] || el.tagName : el.firstChild.tagName;
 		}
 
-	    element = document.createElement(tag);
+	    element = DOC.createElement(tag);
 
 	    for( x in attributes ){
 			Simples.attr( element, x, attributes[x] );
@@ -1251,7 +1752,7 @@ Simples.merge( /** @lends Simples */ {
 
 					return html;
 				case "text" :
-					var str = EMPTY_STRING, elems = elem.childNodes;
+					var str = "", elems = elem.childNodes;
 					for ( var i = 0; elems[i]; i++ ) {
 						elem = elems[i];
 
@@ -1285,7 +1786,7 @@ Simples.merge( /** @lends Simples */ {
 				while ( elem.firstChild ) {
 					elem.removeChild( elem.firstChild );
 				}
-				elem.appendChild( (elem && elem.ownerDocument || document).createTextNode( html.toString() ) );
+				elem.appendChild( (elem && elem.ownerDocument || DOC).createTextNode( html.toString() ) );
 				break;
 			case 'remove' :
 				if( parent ){
@@ -1305,7 +1806,7 @@ Simples.merge( /** @lends Simples */ {
 					        parent.replaceChild( el, elem );						
 						}
 						break;
-					case TOP :
+					case 'top' :
 						elem.insertBefore( wrapHelper(html, elem), elem.firstChild);
 						break;
 					case 'bottom' : 
@@ -1347,16 +1848,16 @@ Simples.merge( /** @lends Simples */ {
 					default :  
 						Simples.cleanData( this, false );
 						html = html != null ? html : location;
-						var list, len, i = 0, testString = html.toString();
-						if ( testString.indexOf("[object ") === -1 ) {
-							elem.innerHTML = EMPTY_STRING+html;
+						var list, len, i = 0, testStringIndex = html.toString().indexOf("[object");
+						if ( testStringIndex === -1 ) {
+							elem.innerHTML = ""+html;
 							list = elem.getElementsByTagName('SCRIPT');
 							len = list.length;
 							for (; i < len; i++) {
 								eval(list[i].text);
 							}
-						} else if( testString.indexOf("[object ") > -1 ) {
-							elem.innerHTML = EMPTY_STRING;
+						} else if( testStringIndex > -1 ) {
+							elem.innerHTML = "";
 							elem.appendChild( wrapHelper( html, elem ) );
 						}					
 				}
@@ -1394,10 +1895,10 @@ Simples.merge( /** @lends Simples */ {
 	 */
 	attr : function( elem, name, value ){
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
-			return undefined;
+			return UNDEF;
 		}
 
-		if( value === undefined ){
+		if( value === UNDEF ){
 			if ( elem.nodeName.toUpperCase() === "FORM" && elem.getAttributeNode(name) ) {
 				// browsers index elements by id/name on forms, give priority to attributes.				
 				return elem.getAttributeNode( name ).nodeValue;
@@ -1417,19 +1918,19 @@ Simples.merge( /** @lends Simples */ {
 				elem.removeAttribute( name );
 			}
 		} else { 
-			if ( ( typeof value == ( FUNC || 'object' ) ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
-				return undefined;
+			if ( ( typeof value == ( "function" || 'object' ) ) || ( name === "type" && IMMUTABLE_ATTR.test( elem.nodeName ) ) ) {
+				return UNDEF;
 			}
 
 			if( name === "style" && !Simples.support.style ){
 				// get style correctly
-				elem.style.cssText = EMPTY_STRING + value;
+				elem.style.cssText = "" + value;
 			} else if ( elem.nodeType === 1 && !SPECIAL_URL.test( name ) && name in elem ) { 
 				// These attributes don't require special treatment 
-				elem[ name ] = EMPTY_STRING+value;
+				elem[ name ] = ""+value;
 			} else { 
 				// it must be this
-				elem.setAttribute(name, EMPTY_STRING+value);
+				elem.setAttribute(name, ""+value);
 			}
 		}
 	}
@@ -1447,7 +1948,7 @@ Simples.extend( /** @lends Simples.fn */ {
 		if ( arguments.length === 0 || ( arguments.length === 1 && SINGLE_ARG_READ.test( location ) ) ) {
 			return Simples.domRead( this[0], location );
 		}
-		location = location != null ? location : EMPTY_STRING;
+		location = location != null ? location : "";
 
 		var c=0,i=0,l=this.length, results;
 		while(i<l){
@@ -1497,18 +1998,18 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {String} value the value to specify, if undefined will read the attribute, if null will remove the attribute, else will add the value as a string
 	 */
 	attr : function(name, value){
-		var nameClass = toString.call( name );
+		var klass = Simples.getConstructor( name );
 			
-		if( nameClass === ObjectClass ){
+		if( klass === "Object" ){
 			for( var key in name ){
 				var i=0,l=this.length,val = name[key];
 				while(i<l){
 					Simples.attr( this[i++], key, val );
 				}
 			}
-		} else if( nameClass === StringClass ){
-			if( value === undefined ){
-				return Simples.attr( this[0], name, value );
+		} else if( klass === "String" ){
+			if( value === UNDEF ){
+				return Simples.attr( this[0], name );
 			} else { 
 				for(var m=0,n=this.length;m<n;m++){
 					Simples.attr( this[m], name, value );
@@ -1523,11 +2024,11 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @params {String|Function} name the string to specify the traversing, i.e. childNodes, parentNode, etc or a function to walk 
 	 */
 	traverse : function( name ){
-		var isWhat = toString.call( name ), results = new Simples(), i=0,l = this.length;
+		var isWhat = Simples.getConstructor( name ), results = new Simples(), i=0,l = this.length;
 		while( i<l ){
-			var current = this[i++], elem = ( isWhat === StringClass ) ? current[ name ] : ( isWhat === FunctionClass ) ? name.call( current, current ) : null;
+			var current = this[i++], elem = ( isWhat === "String" ) ? current[ name ] : ( isWhat === "Function" ) ? name.call( current, current ) : null;
 			if( elem ){
-				results.push.apply( results, elem && ( elem.item || elem.length ) ? slice.call( elem, 0 ) : [ elem ] );
+				results.push.apply( results, ( elem.item || elem.length ) ? Simples.makeArray( elem ) : [ elem ] );
 			}
 		}
 		
@@ -1545,25 +2046,21 @@ Simples.extend( /** @lends Simples.fn */ {
 });
 // exclude the following css properties to add px
 var REXCLUDE = /z-?index|font-?weight|opacity|zoom|line-?height/i,
-	RALPHA = /alpha([^)]*)/,
+	RALPHA = /alpha\([^)]*\)/,
 	ROPACITY = /opacity=([^)]*)/,
 	RFLOAT = /float/i,
 	RDASH_ALPHA = /-([a-z])/ig,
 	RUPPER = /([A-Z])/g,
-	RCAPITALISE = /\b(\w)(\w)\b/g,
-	RNUMPX = /^-?d+(?:px)?$/i,
-	RNUM = /^-?d/,
+	RNUMPX = /^-?\d+(?:px)?$/i,
+	RNUM = /^-?\d/,
 	WIDTH = "width",
 	HEIGHT = "height",
 	// cache check for defaultView.getComputedStyle
-	getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
+	isGetComputedStyle = !!DOC.defaultView && !!DOC.defaultView.getComputedStyle,
+	isCurrentStyle = !!document.documentElement.currentStyle,
 	/** @private normalize float css property */
 	fcamelCase = function( all, letter ) {
 		return letter.toUpperCase();
-	},
-	/** @private */
-	fcapitalise = function( all, first, rest ){
-		return first.toUpperCase() + rest.toLowerCase();
 	},
 	styleFloat = Simples.support.cssFloat ? "cssFloat": "styleFloat";
 
@@ -1692,9 +2189,8 @@ Simples.merge( /** @lends Simples */ {
 
 	    // IE uses filters for opacity
 	    if (!Simples.support.opacity && name === OPACITY && elem.currentStyle) {
-
-	        ret = ROPACITY.test(elem.currentStyle.filter || EMPTY_STRING) ? (parseFloat(RegExp.$1) / 100) + EMPTY_STRING: EMPTY_STRING;
-	        return ret === EMPTY_STRING ? "1": ret;
+	        ret = ROPACITY.test( (elem.currentStyle ? elem.currentStyle.filter : elem.style.filter ) || "") ? (parseFloat(RegExp.$1) / 100) + "": "";
+	        return ret === "" ? "1": ret;
 	    }
 
 	    // Make sure we're using the right name for getting the float value
@@ -1705,7 +2201,7 @@ Simples.merge( /** @lends Simples */ {
 	    if (style && style[name]) {
 	        ret = style[name];
 
-	    } else if (getComputedStyle) {
+	    } else if (isGetComputedStyle) {
 
 	        // Only "float" is needed here
 	        if (RFLOAT.test(name)) {
@@ -1727,16 +2223,18 @@ Simples.merge( /** @lends Simples */ {
 	        }
 
 	        // We should always get a number back from opacity
-	        if (name === OPACITY && ret === EMPTY_STRING) {
+	        if (name === OPACITY && ret === "") {
 	            ret = "1";
 	        }
 
-	    } else if (elem.currentStyle) {
+	    } else if (isCurrentStyle) {
 
-	        var camelCase = name.replace(RDASH_ALPHA, fcamelCase );
+	        name = name.replace(RDASH_ALPHA, fcamelCase );
+	        ret = elem.currentStyle && elem.currentStyle[name];
 
-	        ret = elem.currentStyle[name] || elem.currentStyle[camelCase];
-
+			if ( ret === null && style && style[ name ] ) {
+				ret = style[ name ];
+			}
 	        // From the awesome hack by Dean Edwards
 	        // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 	        // If we're not dealing with a regular pixel number
@@ -1744,20 +2242,24 @@ Simples.merge( /** @lends Simples */ {
 	        if (!RNUMPX.test(ret) && RNUM.test(ret)) {
 	            // Remember the original values
 	            var left = style.left,
-	            rsLeft = elem.runtimeStyle.left;
+				rsLeft = elem.runtimeStyle && elem.runtimeStyle.left;
 
 	            // Put in the new values to get a computed value out
-	            elem.runtimeStyle.left = elem.currentStyle.left;
-	            style.left = camelCase === "fontSize" ? "1em": (ret || 0);
+	            if( rsLeft ){
+					elem.runtimeStyle.left = elem.currentStyle.left;
+	            }
+	            style.left = name === "fontSize" ? "1em": (ret || 0);
 	            ret = style.pixelLeft + "px";
 
 	            // Revert the changed values
 	            style.left = left;
-	            elem.runtimeStyle.left = rsLeft;
+	            if ( rsLeft ) {
+					elem.runtimeStyle.left = rsLeft;
+	            }
 	        }
 	    }
 
-	    return ret;
+	    return ret === "" ? "auto" : ret;
 	},
 	/**
 	 * @description use to set the supplied elements style attribute 
@@ -1768,19 +2270,19 @@ Simples.merge( /** @lends Simples */ {
 	setStyle : function( elem, name, value ){                       
 		// don't set styles on text and comment nodes
 		if ( !elem || elem.nodeType === 3 || elem.nodeType === 8 ) {
-			return undefined;
+			return UNDEF;
 		}
 
 		// ignore negative width and height values #1599
 		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
-			value = undefined;
+			value = UNDEF;
 		}
 
-		if ( typeof value === NUMBER && !REXCLUDE.test(name) ) {
+		if ( typeof value === "number" && !REXCLUDE.test(name) ) {
 			value += "px";
 		}
 
-		var style = elem.style || elem, set = value !== undefined;
+		var style = elem.style || elem, set = value !== UNDEF;
 
 		// IE uses filters for opacity
 		if ( !Simples.support.opacity && name === OPACITY ) {
@@ -1790,12 +2292,12 @@ Simples.merge( /** @lends Simples */ {
 				style.zoom = 1;
 
 				// Set the alpha filter to set the opacity
-				var opacity = parseInt( value, 10 ) + EMPTY_STRING === "NaN" ? EMPTY_STRING : "alpha(opacity=" + value * 100 + ")";
-				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || EMPTY_STRING;
+				var opacity = parseInt( value, 10 ) + "" === "NaN" ? "" : "alpha(opacity=" + (value * 100) + ")";
+				var filter = style.filter || Simples.currentCSS( elem, "filter" ) || "";
 				style.filter = RALPHA.test(filter) ? filter.replace(RALPHA, opacity) : opacity;
 			}
 
-			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + EMPTY_STRING:EMPTY_STRING;
+			return style.filter && style.filter.indexOf("opacity=") >= 0 ? (parseFloat( ROPACITY.exec(style.filter)[1] ) / 100) + "":"";
 		}
 
 		// Make sure we're using the right name for getting the float value
@@ -1806,7 +2308,8 @@ Simples.merge( /** @lends Simples */ {
 		name = name.replace( RDASH_ALPHA, fcamelCase); 
 
 		if ( set ) {
-			style[ name ] = value;
+			// set value to empty string when null to prevent IE issue
+			style[ name ] = value === null ? "" : value;
 		}
 
 		return style[ name ];
@@ -1815,7 +2318,7 @@ Simples.merge( /** @lends Simples */ {
 
 Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * @description Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+	 * @description Used to read the current computed style of the first element or write through this.css the style atttribute, see Simples.getStyle
 	 * @param {String} type the computed style attribute to read
 	 * @param {Boolean} extra whether to include extra
 	 */	
@@ -1832,22 +2335,22 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {Number|String} value to be set either a pure number 12 or string with the 12px
 	 */	
 	css : function( name, value ){ 
-		if( value === undefined && typeof name === STRING ){
+		if( value === UNDEF && typeof name === "string" ){
 			return Simples.currentCSS( this[0], name );  
 		}
 
 		// ignore negative width and height values #1599
 		if ( (name === WIDTH || name === HEIGHT) && parseFloat(value) < 0 ) {
-			value = undefined;
+			value = UNDEF;
 		}
 		
-		var nameClass = toString.call( name );
-		if( nameClass === StringClass && value !== undefined ){
+		var klass = Simples.getConstructor( name );
+		if( klass === "String" && value !== UNDEF ){
 			var i=0,l=this.length;
 			while( i<l ){
 				Simples.setStyle( this[i++], name, value );
 			}
-		} else if( nameClass === ObjectClass ) {
+		} else if( klass === "Object" ) {
 			for( var key in name ){
 				this.css( key, name[ key ] );
 			}
@@ -1873,6 +2376,7 @@ function clearEvents( elem, type, events, handlers ){
 
 		elem.detachEvent( "on" + type, handlers[ type ] );
 	}
+	
 	if( events && events[type] ){ delete events[ type ]; }
 	if( handlers && handlers[type] ){ delete handlers[ type ]; }
 }
@@ -1978,6 +2482,12 @@ Simples.merge( /** @lends Simples */ {
 	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
+		} else if( typeof type === "string" && type.indexOf(" ") > -1 ){
+			type = type.split(" ");
+			for(var m=0,n=type.length;m<n;m++){
+				Simples.attach( elem, type[m], callback );
+			}
+			return;
 		}
 		
 		if ( callback === false ) {
@@ -1985,11 +2495,11 @@ Simples.merge( /** @lends Simples */ {
 		}
 		// For whatever reason, IE has trouble passing the window object
 		// around, causing it to be cloned in the process
-		if ( elem.setInterval && ( elem !== window && !elem.frameElement ) ) {
-			elem = window;
+		if ( elem.setInterval && ( elem !== WIN && !elem.frameElement ) ) {
+			elem = WIN;
 		}
         
-		if( toString.call( callback ) === FunctionClass && canDoData( elem ) ){ 
+		if( Simples.isConstructor( callback, "Function" ) && canDoData( elem ) ){ 
 			
 			var data = Simples.data( elem ),
 				events = data.events ? data.events : data.events = {},
@@ -2000,7 +2510,7 @@ Simples.merge( /** @lends Simples */ {
 				
 			if( !handler ){
 				handler = handlers[ type ] = function( evt ){
-					return Simples !== undefined ? Simples._eventHandler.apply( handler.elem, arguments ) : undefined;
+					return Simples !== UNDEF ? Simples._eventHandler.apply( handler.elem, arguments ) : UNDEF;
 				};
 				handler.elem = elem;
 				// Attach to the element
@@ -2028,6 +2538,12 @@ Simples.merge( /** @lends Simples */ {
 		
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
+		} else if( typeof type === "string" && type.indexOf(" ") > -1 ){
+			type = type.split(" ");
+			for(var m=0,n=type.length;m<n;m++){
+				Simples.detach( elem, type[m], callback );
+			}
+			return;
 		}
 
 		if( type && type.type ){
@@ -2041,7 +2557,7 @@ Simples.merge( /** @lends Simples */ {
 			events = elemData.events,
 			handlers = elemData.handlers;
 		
-		if( type === undefined ){
+		if( type === UNDEF ){
 			for( var eventType in events ){
 				clearEvents( elem, eventType, events, handlers );
 			}
@@ -2049,7 +2565,7 @@ Simples.merge( /** @lends Simples */ {
 			var event = events[ type ];
 
 			for(var i=0;i<event.length;i++){
-				if( callback === undefined || callback.guid === event[i].guid ){
+				if( callback === UNDEF || callback.guid === event[i].guid ){
 					event.splice( i--, 1 );
 				}
 			}
@@ -2074,14 +2590,14 @@ Simples.merge( /** @lends Simples */ {
 			var e;
 			if( elem.dispatchEvent ){
 				// Build Event
-				e = document.createEvent("HTMLEvents");
+				e = DOC.createEvent("HTMLEvents");
 				e.initEvent(type, true, true); 
-				if( data ){ e.data = data; }
+				if( data ){ e.data = JSON.stringify(data); }
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
-				e = document.createEventObject();
-				if( data ){ e.data = data; }
+				e = DOC.createEventObject();
+				if( data ){ e.data = JSON.stringify(data); }
 				e.target = elem;
 				e.eventType = "on"+type;
 				elem.fireEvent( "on"+type, e );
@@ -2089,7 +2605,7 @@ Simples.merge( /** @lends Simples */ {
 		}		                                         
 	},
 	/** @private properties as part of the fix process */
-	_eventProperties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode layerX layerY metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
+	_eventProperties : "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue offsetX offsetY originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target toElement view wheelDelta which".split(" "),
 	/** @private to fix the native Event */
 	_eventFix : function( event ){
 		 if( event[ accessID ] ){
@@ -2108,7 +2624,7 @@ Simples.merge( /** @lends Simples */ {
 
 		// Fix target property, if necessary
 		if ( !event.target ) {
-			event.target = event.srcElement || document; // Fixes #1925 where srcElement might not be defined either
+			event.target = event.srcElement || DOC; // Fixes #1925 where srcElement might not be defined either
 		}
 
 		// check if target is a textnode (safari)
@@ -2123,7 +2639,7 @@ Simples.merge( /** @lends Simples */ {
 
 		// Calculate pageX/Y if missing and clientX/Y available
 		if ( event.pageX == null && event.clientX != null ) {
-			var doc = document.documentElement, body = document.body;
+			var doc = DOC.documentElement, body = DOC.body;
 			event.pageX = event.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
 			event.pageY = event.clientY + (doc && doc.scrollTop  || body && body.scrollTop  || 0) - (doc && doc.clientTop  || body && body.clientTop  || 0);
 		}
@@ -2140,8 +2656,12 @@ Simples.merge( /** @lends Simples */ {
 
 		// Add which for click: 1 === left; 2 === middle; 3 === right
 		// Note: button is not normalized, so don't use it
-		if ( !event.which && event.button !== undefined ) {
+		if ( !event.which && event.button !== UNDEF ) {
 			event.which = (event.button & 1 ? 1 : ( event.button & 2 ? 3 : ( event.button & 4 ? 2 : 0 ) ));
+		}
+
+		if( event.data ){
+            event.data = JSON.parse(event.data);
 		}
 
 	    return event;
@@ -2151,22 +2671,22 @@ Simples.merge( /** @lends Simples */ {
 	/** @private event handler this is bound to the elem event */
 	_eventHandler : function( event ){ 
 		var events, callbacks;
-		var args = slice.call( arguments );
-		event = args[0] = Simples._eventFix( event || window.event );
+		var args = slice.call( arguments, 0 );
+		event = args[0] = Simples._eventFix( event || WIN.event );
         event.currentTarget = this;
 
 		events = Simples.data( this, "events" );
 		callbacks = (events || {})[ event.type ];
          
 		if( events && callbacks ){
-			callbacks = callbacks.slice(0);
+			callbacks = slice.call(callbacks, 0);
 			
 			for( var i=0,l=callbacks.length;i<l;i++){ 
 				var callback = callbacks[i];
 				event.handler = callback.callback;
 				
 				var ret = event.handler.apply( this, args );
-				if( ret !== undefined ){
+				if( ret !== UNDEF ){
 					event.result = ret;
 					if ( ret === false ) { 
 						event.preventDefault();
@@ -2190,7 +2710,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {Function} callback the callback to bind, false can be specified to have a return false callback
 	 */
 	bind : function( type, callback ){
-		if( typeof type === STRING && ( callback === false || toString.call( callback ) === FunctionClass ) ){
+		if( typeof type === "string" && ( callback === false || Simples.isConstructor( callback, "Function" ) ) ){
 			// Loop over elements    
 			var i=0,l=this.length;
 			while(i<l){
@@ -2220,7 +2740,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @param {Any} data the data to attach to the event
 	 */
 	trigger : function( type, data ){
-		if( typeof type === STRING){ 
+		if( typeof type === "string"){ 
 			// Loop over elements
 			var i=0,l=this.length;
 			while(i<l){
@@ -2234,15 +2754,15 @@ Simples.extend( /** @lends Simples.fn */ {
 // OMG its another non-W3C standard browser 
 var REGEX_HTML_BODY = /^body|html$/i,
 /** @private */
-getWindow = function( elem ) {
+getWIN = function( elem ) {
 	return ("scrollTo" in elem && elem.document) ?
 		elem :
 		elem.nodeType === 9 ?
 			elem.defaultView || elem.parentWindow :
 			false;
-};
+},getOffset;
 
-if( "getBoundingClientRect" in document.documentElement ){
+if( "getBoundingClientRect" in DOC.documentElement ){
 	/**
 	 * @description to get the top, left offset of an element
 	 * @param {Element} elem the element to get the offset of
@@ -2259,7 +2779,7 @@ if( "getBoundingClientRect" in document.documentElement ){
 		}
 
 		var box = elem.getBoundingClientRect(), doc = elem.ownerDocument, body = doc.body,
-			docElem = doc.documentElement, win = getWindow(doc),
+			docElem = doc.documentElement, win = getWIN(doc),
 			clientTop  = docElem.clientTop  || body.clientTop  || 0,
 			clientLeft = docElem.clientLeft || body.clientLeft || 0,
 			scrollTop  = (win.pageYOffset || Simples.support.boxModel && docElem.scrollTop  || body.scrollTop ),
@@ -2332,7 +2852,7 @@ if( "getBoundingClientRect" in document.documentElement ){
 }
 /** @private */
 Simples.offset.init = function(){
-	var body = document.body, container = document.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
+	var body = DOC.body, container = DOC.createElement("div"), innerDiv, checkDiv, table, td, bodyMarginTop = parseFloat( Simples.currentCSS(body, "marginTop", true) ) || 0,
 		html = "<div style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;'><div></div></div><table style='position:absolute;top:0;left:0;margin:0;border:5px solid #000;padding:0;width:1px;height:1px;' cellpadding='0' cellspacing='0'><tr><td></td></tr></table>";
 
 	Simples.merge( container.style, { position: "absolute", top: 0, left: 0, margin: 0, border: 0, width: "1px", height: "1px", visibility: "hidden" } );
@@ -2351,7 +2871,7 @@ Simples.offset.init = function(){
 
 	// safari subtracts parent border width here which is 5px
 	Simples.offset.supportsFixedPosition = (checkDiv.offsetTop === 20 || checkDiv.offsetTop === 15);
-	checkDiv.style.position = checkDiv.style.top = EMPTY_STRING;
+	checkDiv.style.position = checkDiv.style.top = "";
 
 	innerDiv.style.overflow = "hidden";
 	innerDiv.style.position = "relative";
@@ -2428,7 +2948,7 @@ Simples.merge( /** @lends Simples */ {
 	 * @returns {Element}
 	 */
 	offsetParent : function( elem ) {
-		var offsetParent = elem.offsetParent || document.body;
+		var offsetParent = elem.offsetParent || DOC.body;
 		while ( offsetParent && (!REGEX_HTML_BODY.test(offsetParent.nodeName) && Simples.currentCSS(offsetParent, "position") === "static") ) {
 			offsetParent = offsetParent.offsetParent;
 		}
@@ -2472,7 +2992,7 @@ Simples.merge( /** @lends Simples */ {
 	 * @param {Number} value
 	 */
 	setScroll : function( elem, name, val ){
-		win = getWindow( elem );
+		win = getWIN( elem );
 
 		if ( win ) {
 			win.scrollTo(
@@ -2494,7 +3014,7 @@ Simples.merge( /** @lends Simples */ {
 	getScroll : function( elem, name ){
 		var isTop = name === TOP;
 		name = isTop ? "scrollTop" : "scrollLeft";
-		win = getWindow( elem );
+		win = getWIN( elem );
 
 		// Return the scroll offset
 		return win ? ( ("pageXOffset" in win) ? win[ isTop ? "pageYOffset" : "pageXOffset" ] : Simples.support.boxModel && win.document.documentElement[ name ] || win.document.body[ name ] ) : elem[ name ];		
@@ -2536,7 +3056,7 @@ Simples.extend( /** @lends Simples.fn */ {
 	 * @returns {Number|Simples} the value of the scrollTop / scrollLeft or Simples object
 	 */	
 	scroll : function( name, val ){
-		if( val !== undefined ){
+		if( val !== UNDEF ){
 			var len = this.length;
 			while( len ){
 				Simples.setScroll( this[ --len ], name, val );
@@ -2607,7 +3127,7 @@ Simples.Animation = {
 	create : function( elem, setStyle, opts ){
 		opts = opts || {};
 		if ( !( elem && elem.nodeType ) || Simples.isEmptyObject( setStyle ) ) {
-			if (typeof opts.callback === FUNC) {
+			if (typeof opts.callback === "function") {
 				opts.callback.call(elem);
 			}
 			return null;
@@ -2616,9 +3136,9 @@ Simples.Animation = {
 		var anim = {
 			0 : elem,
 			id : Simples.guid++,
-			callback : ( typeof opts.callback === FUNC ) ? opts.callback : Simples.noop,
-			duration : ( typeof opts.duration === NUMBER && opts.duration > -1 ) ? opts.duration : 600,
-			tween : ( typeof opts.tween === FUNC ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
+			callback : ( typeof opts.callback === "function" ) ? opts.callback : Simples.noop,
+			duration : ( typeof opts.duration === "number" && opts.duration > -1 ) ? opts.duration : 600,
+			tween : ( typeof opts.tween === "function" ) ? opts.tween : ( Simples.Animation.tweens[ opts.tween ] || Simples.Animation.tweens.easing ),
 			start : {},
 			finish : {}
 		};
@@ -2629,8 +3149,8 @@ Simples.Animation = {
 				opacity = ( cKey === OPACITY && setStyle[ key ] >= 0 && setStyle[ key ] <= 1 );
 
 			if( opacity || ALLOW_TYPES.test( cKey ) ){
-				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + EMPTY_STRING ).replace(REGEX_PIXEL,EMPTY_STRING) * 1;
-				anim.finish[ cKey ] = ( setStyle[ key ] + EMPTY_STRING ).replace(REGEX_PIXEL,EMPTY_STRING) * 1;
+				anim.start[ cKey ] = ( Simples.getStyle( elem, cKey ) + "" ).replace(REGEX_PIXEL,"") * 1;
+				anim.finish[ cKey ] = ( setStyle[ key ] + "" ).replace(REGEX_PIXEL,"") * 1;
 			}                                        
 		}
 
@@ -2662,7 +3182,7 @@ Simples.Animation = {
 			
 			if( !TIMER_ID ){
 				this.interval = Math.round( 1000/ this.frameRate );
-				TIMER_ID = window.setInterval(function(){ Simples.Animation._step(); }, this.interval );
+				TIMER_ID = WIN.setInterval(function(){ Simples.Animation._step(); }, this.interval );
 			}
 		}
 	},
@@ -2730,7 +3250,7 @@ Simples.Animation = {
 				}
 			}
 		} else if( TIMER_ID ){
-			window.clearInterval( TIMER_ID );
+			WIN.clearInterval( TIMER_ID );
 			TIMER_ID = null;
 		}
 	},
@@ -2794,4 +3314,4 @@ Simples.extend( /** @lends Simples.fn */ {
 // Expose Simples to the global object
 window.Simples = window.$ = Simples;
 
-})(window);       
+})(window,document);
