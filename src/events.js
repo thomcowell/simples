@@ -124,8 +124,8 @@ Simples.merge( /** @lends Simples */ {
 			return;
 		} else if( typeof type === "string" && type.indexOf(" ") > -1 ){
 			type = type.split(" ");
-			for(var i=0,l=type.length;i<l;i++){
-				Simples.attach( elem, type[i], callback );
+			for(var m=0,n=type.length;m<n;m++){
+				Simples.attach( elem, type[m], callback );
 			}
 			return;
 		}
@@ -180,8 +180,8 @@ Simples.merge( /** @lends Simples */ {
 			return;
 		} else if( typeof type === "string" && type.indexOf(" ") > -1 ){
 			type = type.split(" ");
-			for(var i=0,l=type.length;i<l;i++){
-				Simples.detach( elem, type[i], callback );
+			for(var m=0,n=type.length;m<n;m++){
+				Simples.detach( elem, type[m], callback );
 			}
 			return;
 		}

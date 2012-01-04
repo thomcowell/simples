@@ -26,11 +26,11 @@ var SINGLE_TAG = /<(\w+)\s?\/?>/,
 	    } else if (selector.indexOf('.') === 0) {
 	        if (typeof context.getElementsByClassName === "function" ) {
 	            // Native function
-	            return Simples.makeArray( context.getElementsByClassName(tag) );
+				return Simples.makeArray( context.getElementsByClassName(tag) );
 	        } else {
 	            // For IE which doesn't support getElementsByClassName
-	            elems = Simples.makeArray( context.getElementsByTagName('*') );
-	            nodes = [];
+				elems = Simples.makeArray( context.getElementsByTagName('*') );
+				nodes = [];
 	            // Loop over elements to test for correct class
 	            for (var i = 0, l = elems.length; i < l; i++) {
 	                // Detect whether this element has the class specified
@@ -108,7 +108,7 @@ Simples.Selector = function(selector, context, results) {
 	            var get = selector.split(COMMA_WITH_BOUNDARY);
 
 	            for (var x = 0, y = get.length; x < y; x++) {
-	            	Simples.makeArray( Simples.Selector(get[x], context), results );
+					Simples.makeArray( Simples.Selector(get[x], context), results );
 	            }
 	            return results;
 	        }

@@ -270,7 +270,7 @@ try {
 
 		return ret;
 	};
-};
+}
 
 // Cleanup functions for the DOC ready method
 /** @private */
@@ -362,7 +362,7 @@ Simples.fn = Simples.prototype = {
 			Simples.makeArray( selector, this );
 		} else {
 			Simples.makeArray( selector, this );
-			this.filter(function(){ return !!this.nodeType || !!this.document });
+			this.filter(function(){ return !!this.nodeType || !!this.document; });
 		}
 		return this;		
 	},

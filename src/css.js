@@ -196,11 +196,11 @@ Simples.merge( /** @lends Simples */ {
 	        if (!RNUMPX.test(ret) && RNUM.test(ret)) {
 	            // Remember the original values
 	            var left = style.left,
-	            rsLeft = elem.runtimeStyle && elem.runtimeStyle.left;
+				rsLeft = elem.runtimeStyle && elem.runtimeStyle.left;
 
 	            // Put in the new values to get a computed value out
 	            if( rsLeft ){
-	            	elem.runtimeStyle.left = elem.currentStyle.left;
+					elem.runtimeStyle.left = elem.currentStyle.left;
 	            }
 	            style.left = name === "fontSize" ? "1em": (ret || 0);
 	            ret = style.pixelLeft + "px";
@@ -208,7 +208,7 @@ Simples.merge( /** @lends Simples */ {
 	            // Revert the changed values
 	            style.left = left;
 	            if ( rsLeft ) {
-	            	elem.runtimeStyle.left = rsLeft;
+					elem.runtimeStyle.left = rsLeft;
 	            }
 	        }
 	    }

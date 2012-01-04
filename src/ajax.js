@@ -15,10 +15,6 @@ FILE = "file:",
 GET = "GET",
 XML = "xml",
 // REGEXP USED IN THIS FILE
-AJAX_IS_JSON = /^[\],:{}\s]*$/,
-AJAX_AT = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-AJAX_RIGHT_SQUARE = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
-AJAX_EMPTY = /(?:^|:|,)(?:\s*\[)+/g,
 LAST_AMP = /&$/,
 PARSEERROR = "parsererror",
 // count of active ajax requests
@@ -29,7 +25,7 @@ formatData = function(name, value) {
     var str = "";
 
     if (typeof name === "string") {
-    	var klass = Simples.getConstructor( value );
+		var klass = Simples.getConstructor( value );
 		if ( klass === "Function" ) {
 
             str = formatData(name, value());
