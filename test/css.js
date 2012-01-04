@@ -114,19 +114,25 @@ test("css(String, Object)", function() {
 });
 
 if(Simples.browser.msie) {
-  test("css(String, Object) for MSIE", function() {
+  test("css(String, Object) for MSIE", 7, function() {
     // for #1438, IE throws JS error when filter exists but doesn't have opacity in it
 	Simples('#foo').css("filter", "progid:DXImageTransform.Microsoft.Chroma(color='red');");
   	equals( Simples('#foo').css('opacity'), '1', "Assert opacity is 1 when a different filter is set in IE, #1438" );
 
     var filterVal = "progid:DXImageTransform.Microsoft.alpha(opacity=30) progid:DXImageTransform.Microsoft.Blur(pixelradius=5)";
     var filterVal2 = "progid:DXImageTransform.Microsoft.alpha(opacity=100) progid:DXImageTransform.Microsoft.Blur(pixelradius=5)";
+    
     Simples('#foo').css("filter", filterVal);
     equals( Simples('#foo').css("filter").replace(/\t|\r|\n/g,""), filterVal, "css('filter', val) works" );
     equals( Simples('#foo').css("opacity"), 0.3, "Setting opacity in IE with other filters works" );
-    Simples('#foo').css("opacity", 1); //.replace(/\t|\r|\n/g,"")
+    
+    Simples('#foo').css("opacity", 1);
     equals( Simples('#foo').css("filter").replace(/\t|\r|\n/g,""), filterVal2, "Setting opacity in IE doesn't clobber other filters" );
     equals( Simples('#foo').css("opacity"), 1, "Setting opacity in IE with other filters works" );
+	
+	Simples('#foo').css("opacity", 0.3);
+    equals( Simples('#foo').css("filter").replace(/\t|\r|\n/g,""), filterVal, "css('filter', val) works" );
+    equals( Simples('#foo').css("opacity"), 0.3, "Setting opacity in IE with other filters works" );
   });
 }   
 
