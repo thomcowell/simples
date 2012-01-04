@@ -93,21 +93,8 @@ httpData = function(xhr, type, dataFilter) {
         // Get the JavaScript object, if JSON is used.
         if (type === JSON || !type && ct.indexOf(JSON) >= 0) {
             // Make sure the incoming data is actual JSON
-            // Logic borrowed from http://json.org/json2.js
-            if (AJAX_IS_JSON.test(data.replace(AJAX_AT, "@").replace(AJAX_RIGHT_SQUARE, "]").replace(AJAX_EMPTY, ""))) {
-
-                // Try to use the native JSON parser first
-                if (WIN.JSON && WIN.JSON.parse) {
-                    data = WIN.JSON.parse(data);
-
-                } else {
-                    data = ( new Function("return " + data) )();
-                }
-
-            } else {
-                throw "Invalid JSON: " + data;
-            }
-
+            // Now using http://json.org/json2.js so don't need to add any logic
+            data = JSON.parse(data);
             // If the type is SCRIPT, eval it in global context
         } else if (type === SCRIPT || !type && ct.indexOf("javascript") >= 0) {
 

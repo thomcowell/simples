@@ -1,1 +1,1 @@
-header.js,core.js,support.js,data.js,ajax.js,selector.js,dom.js,css.js,events.js,position.js,animation.js,footer.js
+header.js,core.js,support.js,json2.js,data.js,ajax.js,selector.js,dom.js,css.js,events.js,position.js,animation.js,footer.js
