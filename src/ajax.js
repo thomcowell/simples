@@ -10,7 +10,7 @@ var ACCEPTS = {
     text: "text/plain",
     _default: "*/*"
 },
-JSON = "json",
+TYPE_JSON = "json",
 FILE = "file:",
 GET = "GET",
 XML = "xml",
@@ -91,7 +91,7 @@ httpData = function(xhr, type, dataFilter) {
     // The filter can actually parse the response
     if (typeof data === "string") {
         // Get the JavaScript object, if JSON is used.
-        if (type === JSON || !type && ct.indexOf(JSON) >= 0) {
+        if (type === TYPE_JSON || !type && ct.indexOf(TYPE_JSON) >= 0) {
             // Make sure the incoming data is actual JSON
             // Now using http://json.org/json2.js so don't need to add any logic
             data = JSON.parse(data);
@@ -132,7 +132,7 @@ Simples.merge( /** @lends Simples */ {
 		/**
 		 * @description The data type that'll be returned from the server the default is simply to determine what data was returned from the and act accordingly. -- xml: "application/xml, text/xml", html: "text/html", json: "application/json, text/javascript", text: "text/plain", _default: "*%2F*"
 		 */
-	    dataType: JSON,
+	    dataType: TYPE_JSON,
 		/**
 		 * @description boolean value of whether you want the request to be asynchronous or blocking
 		 */
