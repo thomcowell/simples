@@ -39,9 +39,9 @@ function Simples( selector, context ) {
 
 /**
  * @description used to test the Constructor / Class of an object
- * @param {Object} the object to test
- * @param {String} the class name to test
- * @param {Boolean} if you don't want to force the capitalisation of the className
+ * @param {Object} object the object to test
+ * @param {String} objectClass the class name to test
+ * @param {Boolean} doCapitalisation if you don't want to force the capitalisation of the className
  **/
 Simples.isConstructor = function( obj, className, mustCapitalise ){
 	if( obj !== null && obj !== UNDEF ){
@@ -243,12 +243,13 @@ Simples.merge( /** @lends Simples */ {
 // converting a NodeList to an array using builtin methods.
 // Also verifies that the returned array holds DOM nodes
 // (which is not the case in the Blackberry browser)
+/** @ignore */
 try {
 	Array.prototype.slice.call( document.documentElement.childNodes, 0 )[0].nodeType;
 
 // Provide a fallback method if it does not work
 } catch( e ) {
-	/** @private */
+	/** @ignore */
 	Simples.makeArray = function( array, results ) {
 		array = array || [];
 		var i = 0,
@@ -316,7 +317,7 @@ function doScrollCheck() {
  * @description the instance of a Simples object functions / instance methods
  */
 Simples.fn = Simples.prototype = {
-	/**  @private */	 
+	/**  @ignore */	 
 	constructor : Simples,
 	/**
 	 * @constructs
@@ -381,9 +382,21 @@ Simples.fn = Simples.prototype = {
 	 * @description The version of the Simples library
 	 */
 	version : '@VERSION',
+	// For internal use only.
+	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
+	/** @private */
+	push: push,
+	/** @private */
+	sort: [].sort,
+	/** @private */
+	splice: [].splice
+};      
+
+Simples.fn.init.prototype = Simples.fn;
+
+Simples.extend( /** @lends Simples.fn */ {
 	/**
-	 * @memberof Simples.fn
-	 * @name each
+	 * @name Simples.fn.each
 	 * @function
 	 * @description To loop over each item in the Simples object
 	 * @param {Function} callback The function to call with each item, this is current item, arguments[ item, index, object ]
@@ -396,8 +409,8 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name filter
+	 * @name Simples.fn.filter
+	 * @function
 	 * @description To filter the selected elements on the Simples object 
 	 * @param {Function} testFn The function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element
 	 */
@@ -412,8 +425,7 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name find
+	 * @name Simples.fn.find
 	 * @function
 	 * @description used to find elements off of the elements currently on the Simples object 
 	 * @param {String} selector Selector string to find elements
@@ -426,8 +438,7 @@ Simples.fn = Simples.prototype = {
 		return results;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name add
+	 * @name Simples.fn.add
 	 * @function
 	 * @description used to add more elements to the current Simples object
 	 * @param {Elements} elems An array or Simples object of elements to concatenate to the current simples Object
@@ -437,22 +448,11 @@ Simples.fn = Simples.prototype = {
 		return this;
 	},
 	/**
-	 * @memberof Simples.fn
-	 * @name makeArray
+	 * @name Simples.fn.makeArray
 	 * @function
 	 * @description convert the current Simples object into an Array
 	 */	
 	makeArray : function(){
 		return Simples.makeArray( this );
-	},
-	// For internal use only.
-	// Behaves like an Array's method, not like a Simples method. For hooking up to Sizzle.
-	/** @private */
-	push: push,
-	/** @private */
-	sort: [].sort,
-	/** @private */
-	splice: [].splice
-};      
-
-Simples.fn.init.prototype = Simples.fn;
+	}
+});

@@ -205,14 +205,17 @@ Simples.Animation = {
 Simples.extend( /** @lends Simples.fn */ {
 	/**
 	 * @description From the instance of the Simples object used to bridge to the Simples.Animation functionality
-	 * @param action {String} the name of the action to be performed, excluding create && _step
+	 * @param action {String} the name of the action to be performed - stop, start, reset, reverse; this is excluding create && _step
 	 */
 	animations: function(action) {
 		if( action != ("create" || "_step") && Simples.Animation[ action ] ){
-			var i = this.length;
-			while (i) {
-				var anims = Simples.data( this[--i], "animation" );
-				Simples.Animation[ action ]( anim, arguments[2] );
+			var i = this.length,
+				action = Simples.Animation[ action ];
+			if( typeof action === "function" ){
+				while (i) {
+					var anims = Simples.data( this[--i], "animation" );
+					Simples.Animation[ action ]( anim, arguments[2] );
+				}
 			}
 		}
 		return this;
