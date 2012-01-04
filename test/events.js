@@ -62,9 +62,9 @@ test("trigger(), with data", 2, function() {
 		equals( event.data.foo, "bar", "trigger() with data, Check value of passed data" );
 	};
 	
-	Simples("#firstp").bind('data', handler);
-	Simples("#firstp").trigger('data', {foo: "bar"});
-	Simples("#firstp").unbind("data", handler);
+	Simples("#firstp").bind('click', handler);
+	Simples("#firstp").trigger('click', {foo: "bar"});
+	Simples("#firstp").unbind("click", handler);
 });
 
 test("bind(), no data", 1, function() {
@@ -99,9 +99,9 @@ test("bind(), trigger change on select", 3, function() {
 test("bind() only on real nodes", 1, function() {
 
 	// using contents will get comments regular, text, and comment nodes
-	Simples("#nonnodes").traverse("childNodes").bind("tester", function () {
+	Simples("#nonnodes").traverse("childNodes").bind("mouseout", function () {
 		equals( this.nodeType, 1, "Check node,textnode,comment bind just does real nodes" );
-	}).trigger("tester");
+	}).trigger("mouseout");
 });
 
 test("bind(), with same function", 2, function() {
@@ -110,13 +110,13 @@ test("bind(), with same function", 2, function() {
 		count++;
 	};
 
-	Simples("#liveHandlerOrder").bind("foo.bar", func).bind("foo.zar", func);
-	Simples("#liveHandlerOrder").trigger("foo.bar");
+	Simples("#liveHandlerOrder").bind("click", func).bind("change", func);
+	Simples("#liveHandlerOrder").trigger("click");
 
 	equals(count, 1, "Verify binding function with multiple namespaces." );
 
-	Simples("#liveHandlerOrder").unbind("foo.bar", func).unbind("foo.zar", func);
-	Simples("#liveHandlerOrder").trigger("foo.bar");
+	Simples("#liveHandlerOrder").unbind("click", func).unbind("change", func);
+	Simples("#liveHandlerOrder").trigger("click");
 
 	equals(count, 1, "Verify that removing events still work." );
 });
@@ -187,28 +187,28 @@ test("unbind(type)", 0, function() {
 	}
 	
 	message = "unbind passing function";
-	$elem.bind('error1', error).unbind('error1',error).trigger('error1');
+	$elem.bind('click', error).unbind('click',error).trigger('click');
 	
 	message = "unbind all from event";
-	$elem.bind('error1', error).unbind('error1').trigger('error1');
+	$elem.bind('click', error).unbind('click').trigger('click');
 	
 	message = "unbind all";
-	$elem.bind('error1', error).unbind().trigger('error1');
-	
+	$elem.bind('click', error).unbind().trigger('click');
+	debugger;
 	message = "unbind many with function";
-	$elem.bind('error1 error2',error)
-		 .unbind('error1 error2', error )
-		 .trigger('error1').trigger('error2');
+	$elem.bind('click mouseenter',error)
+		 .unbind('click mouseenter', error )
+		 .trigger('click').trigger('mouseenter');
 
 	message = "unbind many"; // #3538
-	$elem.bind('error1 error2',error)
-		 .unbind('error1 error2')
-		 .trigger('error1').trigger('error2');
+	$elem.bind('click mouseenter',error)
+		 .unbind('click mouseenter')
+		 .trigger('click').trigger('mouseenter');
 	
 	message = "unbind without a type or handler";
-	$elem.bind("error1 error2.test",error)
+	$elem.bind("click mouseenter",error)
 		 .unbind()
-		 .trigger("error1").trigger("error2");
+		 .trigger("click").trigger("mouseenter");
 });
 
 test("unbind(eventObject)", 4, function() {
@@ -217,28 +217,28 @@ test("unbind(eventObject)", 4, function() {
 
 	function assert( expected ){
 		num = 0;
-		$elem.trigger('foo').trigger('bar');
+		$elem.trigger('click').trigger('mouseout');
 		equals( num, expected, "Check the right handlers are triggered" );
 	}
 	
 	$elem
 		// This handler shouldn't be unbound
-		.bind('foo', function(){
+		.bind('click', function(){
 			num += 1;
 		})
-		.bind('foo', function(e){ 
+		.bind('click', function(e){ 
 			$elem.unbind( e );
 			num += 2;
 		})
 		// Neither this one
-		.bind('bar', function(){
+		.bind('mouseout', function(){
 			num += 4;
 		});
 		
 	assert( 7 );
 	assert( 5 );
 	
-	$elem.unbind('bar');
+	$elem.unbind('mouseout');
 	assert( 1 );
 	
 	$elem.unbind();	
@@ -277,7 +277,7 @@ test("trigger() bubbling", 14, function() {
 	equals( ap, 1, "ap bubble" );
 });
 
-test("trigger(type, [data])", 10, function() {
+test("trigger(type, [data])", 9, function() {
 
 	var handler = function(event) {
 		equals( event.type, "click", "check passed data" );
@@ -307,14 +307,6 @@ test("trigger(type, [data])", 10, function() {
 		pass = false;
 	}
 	ok( pass, "Trigger focus on hidden element" );
-	
-	pass = true;
-	try {
-		Simples('table').slice(0).bind('test:test', function(){}).trigger('test:test');
-	} catch (e) {
-		pass = false;
-	}
-	ok( pass, "Trigger on a table with a colon in the even type, see #3533" );
 
 	var form = Simples("<form/>").attr({'action':'http://www.eightsquarestudio.com/submitTest','method':'POST'});
 	form.html("<input name='dah' type='hidden'/><input id='submit' name='submit' type='submit'/>")
@@ -374,22 +366,22 @@ test("trigger(eventObject, [data], [fn])", 20, function() {
 	equals( event.isPropagationStopped(), true, "Verify isPropagationStopped" );
 	equals( event.isImmediatePropagationStopped(), true, "Verify isPropagationStopped" );
 	
-	$parent.bind('foo',function(e){
+	$parent.bind('click',function(e){
 		// Tries bubbling
-		equals( e.type, 'foo', 'Verify event type when passed passing an event object' );
+		equals( e.type, 'click', 'Verify event type when passed passing an event object' );
 		equals( e.target.id, 'child', 'Verify event.target when passed passing an event object' );
 		equals( e.currentTarget.id, 'par', 'Verify event.target when passed passing an event object' );
 	});
 	
-	$child.trigger("foo");
+	$child.trigger("click");
 	
 	$parent.unbind();
 
-	$parent.bind('foo', function(){
+	$parent.bind('click', function(){
 		ok( false, "This assertion shouldn't be reached");
 	});
 	
-	$child.bind('foo',function( e ){
+	$child.bind('click',function( e ){
 		equals( arguments.length, 1, "Check arguments length");
 		same( e.data, [1,2,3], "Check event.data");
 		
@@ -406,15 +398,15 @@ test("trigger(eventObject, [data], [fn])", 20, function() {
 	// in which event handlers are iterated.
 	//$child.bind('foo', error );
 	
-	$child.trigger( "foo", [1,2,3] ).unbind();
+	$child.trigger( "click", [1,2,3] ).unbind();
 	
-	$child.bind("foo",function( e ){
+	$child.bind("click",function( e ){
 		ok( true, "This assertion was called");
 		e.stopPropagation();
 	});
 
 	// Will error if it bubbles
-	$child.trigger('foo').unbind(); 
+	$child.trigger('click').unbind(); 
     
 	$link = Simples('<a>').attr('href','http://www.eightsquarestudio.com').html('text','Eight Square Studio');
 	$child.html( "bottom", $link );
