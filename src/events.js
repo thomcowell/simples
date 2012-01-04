@@ -16,7 +16,7 @@ function clearEvents( elem, type, events, handlers ){
 
 		elem.detachEvent( "on" + type, handlers[ type ] );
 	}
-	elem[ "on" + type ] = null;
+	
 	if( events && events[type] ){ delete events[ type ]; }
 	if( handlers && handlers[type] ){ delete handlers[ type ]; }
 }
