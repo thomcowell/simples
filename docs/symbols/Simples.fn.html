@@ -269,16 +269,6 @@ ul.inheritsList
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
-								Simples.fn.<b><a href="../symbols/Simples.fn.html#.filter">filter</a></b>
-								</div>
-								<div class="description">To filter the selected elements on the Simples object</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">
 								Simples.fn.<b><a href="../symbols/Simples.fn.html#.length">length</a></b>
 								</div>
 								<div class="description">The count of items on the Simples object</div>
@@ -410,6 +400,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">Simples.fn.<b><a href="../symbols/Simples.fn.html#.filter">filter</a></b>(testFn)
+								</div>
+								<div class="description">To filter the selected elements on the Simples object</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">Simples.fn.<b><a href="../symbols/Simples.fn.html#.find">find</a></b>(selector)
 								</div>
 								<div class="description">used to find elements off of the elements currently on the Simples object</div>
@@ -431,6 +430,15 @@ ul.inheritsList
 								<div class="fixedFont">Simples.fn.<b><a href="../symbols/Simples.fn.html#.html">html</a></b>(location, html)
 								</div>
 								<div class="description">to read or write to the dom basd on the elements on the Simples object</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">Simples.fn.<b><a href="../symbols/Simples.fn.html#.makeArray">makeArray</a></b>()
+								</div>
+								<div class="description">convert the current Simples object into an Array</div>
 							</td>
 						</tr>
 					
@@ -493,7 +501,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont">Simples.fn.<b><a href="../symbols/Simples.fn.html#.style">style</a></b>(type, extra)
 								</div>
-								<div class="description">Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle</div>
+								<div class="description">Used to read the current computed style of the first element or write through this.css the style atttribute, see Simples.getStyle</div>
 							</td>
 						</tr>
 					
@@ -568,28 +576,6 @@ ul.inheritsList
 				<div class="sectionTitle">
 					Field Detail
 				</div>
-				
-					<a name=".filter"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">Simples.fn.</span><b>filter</b>
-					
-					</div>
-					<div class="description">
-						To filter the selected elements on the Simples object
-						
-						
-					</div>
-					
-					
-
-						
-						
-						
-						
-
-					<hr />
 				
 					<a name=".length"> </a>
 					<div class="fixedFont">&lt;static&gt; 
@@ -835,7 +821,7 @@ ul.inheritsList
 									<b>action</b>
 									
 								</dt>
-								<dd>{String} the name of the action to be performed, excluding create && _step</dd>
+								<dd>{String} the name of the action to be performed - stop, start, reset, reverse; this is excluding create && _step</dd>
 							
 							</dl>
 						
@@ -1071,6 +1057,42 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".filter"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">Simples.fn.</span><b>filter</b>(testFn)
+					
+					</div>
+					<div class="description">
+						To filter the selected elements on the Simples object
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>testFn</b>
+									
+								</dt>
+								<dd>The function to call with each item, this is current item, arguments[ item, index, object ], need to return true from callback to retain element all other return values will remove the element</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name=".find"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -1199,6 +1221,31 @@ ul.inheritsList
 								<dd><span class="light fixedFont">{<a href="../symbols/Simples.html">Simples</a>|String}</span> if writing to the dom will return this, else will return string of dom</dd>
 							
 							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".makeArray"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">Simples.fn.</span><b>makeArray</b>()
+					
+					</div>
+					<div class="description">
+						convert the current Simples object into an Array
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
 						
 						
 						
@@ -1475,7 +1522,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Used to read the current computed style of the first element or write through this.css teh style atttribute, see Simples.getStyle
+						Used to read the current computed style of the first element or write through this.css the style atttribute, see Simples.getStyle
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/src_css.js.html">css.js</a>.
@@ -1653,7 +1700,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Jul 21 2011 10:26:04 GMT+0100 (BST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Wed Jan 04 2012 20:38:22 GMT-0000 (GMT)
 		</div>
 	</body>
 </html>
