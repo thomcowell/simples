@@ -196,7 +196,7 @@ test("unbind(type)", 0, function() {
 	
 	message = "unbind all";
 	$elem.bind('click', error).unbind().trigger('click');
-	debugger;
+
 	message = "unbind many with function";
 	$elem.bind('click mouseenter',error)
 		 .unbind('click mouseenter', error )
@@ -279,8 +279,8 @@ test("trigger() bubbling", 14, function() {
 	equals( ap, 1, "ap bubble" );
 });
 
-test("trigger(type, [data])", 9, function() {
-
+test("trigger(type, [data])", function() {
+	expect(/msie/i.test(navigator.userAgent) ? 7 : 9);
 	var handler = function(event) {
 		equals( event.type, "click", "check passed data" );
 		same( event.data, [ 1, "2", "abc"], "check passed data" );
