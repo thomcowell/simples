@@ -122,6 +122,12 @@ Simples.merge( /** @lends Simples */ {
 	attach : function( elem, type, callback ){
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
 			return;
+		} else if( typeof type === "string" && type.indexOf(" ") > -1 ){
+			type = type.split(" ");
+			for(var i=0,l=type.length;i<l;i++){
+				Simples.attach( elem, type[i], callback );
+			}
+			return;
 		}
 		
 		if ( callback === false ) {
@@ -171,6 +177,12 @@ Simples.merge( /** @lends Simples */ {
 	detach : function( elem, type, callback ){
 		
 		if ( elem.nodeType === 3 || elem.nodeType === 8 ) {
+			return;
+		} else if( typeof type === "string" && type.indexOf(" ") > -1 ){
+			type = type.split(" ");
+			for(var i=0,l=type.length;i<l;i++){
+				Simples.detach( elem, type[i], callback );
+			}
 			return;
 		}
 
