@@ -220,12 +220,12 @@ Simples.merge( /** @lends Simples */ {
 				// Build Event
 				e = DOC.createEvent("HTMLEvents");
 				e.initEvent(type, true, true); 
-				if( data ){ e.data = data; }
+				if( data ){ e.data = JSON.stringify(data); }
 				// Dispatch the event to the ELEMENT
 				elem.dispatchEvent(e);
 			} else if( elem.fireEvent ) {
 				e = DOC.createEventObject();
-				if( data ){ e.data = data; }
+				if( data ){ e.data = JSON.stringify(data); }
 				e.target = elem;
 				e.eventType = "on"+type;
 				elem.fireEvent( "on"+type, e );
@@ -288,6 +288,10 @@ Simples.merge( /** @lends Simples */ {
 			event.which = (event.button & 1 ? 1 : ( event.button & 2 ? 3 : ( event.button & 4 ? 2 : 0 ) ));
 		}
 
+		if( event.data ){
+            event.data = JSON.parse(event.data);
+		}
+
 	    return event;
 	},
 	/** @private to create a unique identifier */
@@ -295,7 +299,7 @@ Simples.merge( /** @lends Simples */ {
 	/** @private event handler this is bound to the elem event */
 	_eventHandler : function( event ){ 
 		var events, callbacks;
-		var args = slice.call( arguments );
+		var args = slice.call( arguments, 0 );
 		event = args[0] = Simples._eventFix( event || WIN.event );
         event.currentTarget = this;
 
@@ -303,7 +307,7 @@ Simples.merge( /** @lends Simples */ {
 		callbacks = (events || {})[ event.type ];
          
 		if( events && callbacks ){
-			callbacks = callbacks.slice(0);
+			callbacks = slice.call(callbacks, 0);
 			
 			for( var i=0,l=callbacks.length;i<l;i++){ 
 				var callback = callbacks[i];
