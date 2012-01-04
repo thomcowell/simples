@@ -113,7 +113,7 @@ test("css(String, Object)", function() {
 	equals( Simples("#t2037 .hidden").css("display"), "none", "Make sure browser thinks it is hidden" );
 });
 
-if(Simples.browser.msie) {
+if( Simples.browser.msie && (Simples.browser.version * 1) < 9 ) {
   test("css(String, Object) for MSIE", 7, function() {
     // for #1438, IE throws JS error when filter exists but doesn't have opacity in it
 	Simples('#foo').css("filter", "progid:DXImageTransform.Microsoft.Chroma(color='red');");

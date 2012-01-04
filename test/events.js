@@ -280,7 +280,7 @@ test("trigger() bubbling", 14, function() {
 });
 
 test("trigger(type, [data])", function() {
-	expect(/msie/i.test(navigator.userAgent) ? 7 : 9);
+	expect( Simples.browser.msie && (Simples.browser.version * 1) < 9 ? 7 : 9 );
 	var handler = function(event) {
 		equals( event.type, "click", "check passed data" );
 		same( event.data, [ 1, "2", "abc"], "check passed data" );
