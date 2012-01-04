@@ -353,24 +353,24 @@ test("reset()", 6, function(){
 	};
 	
 	var anim = createAnim( id );
-	anim[0].style.opacity = 0.5;
+	Simples.setStyle( anim[0], "opacity", 0.5);
 	Simples.Animation.animations[ id ] = anim
 	Simples.Animation.length = 1;
 	TIMER_ID = 3434;
 	
 	Simples.Animation.reset( anim );
-	equal( 1, anim[0].style.opacity, "will reset to start");
+	equal( 1, Simples.getStyle(anim[0],"opacity"), "will reset to start");
 	
-    anim[0].style.opacity = 0.5;
+    Simples.setStyle( anim[0], "opacity", 0.5);
 	
 	Simples.Animation.reset( anim, true );
-	equal( 0, anim[0].style.opacity, "will reset to start");
+	equal( 0, Simples.getStyle(anim[0],"opacity"), "will reset to start");
 	
 	anim.startTime = 7236723;
 	willStop = true
-	anim[0].style.opacity = 0.5;
+	Simples.setStyle( anim[0], "opacity", 0.5);
 	Simples.Animation.reset( anim, true );
-	equal( 0, anim[0].style.opacity, "will reset to start");
+	equal( 0, Simples.getStyle(anim[0],"opacity"), "will reset to start");
 			
 	Simples.Animation.stop = Simples.Animation._stop;
 }); 
