@@ -66,7 +66,6 @@ test("css(String|Hash)", 30, function() {
 	if ( prctval === 16 || prctval === 24 ) {
 		checkval = prctval;
 	}
-	console.log(Simples('#nothiddendivchild').style("fontSize"), Simples('#nothiddendivchild').css("fontSize") )
 
 	equals( prctval, checkval, "Verify fontSize % set." );
 
