@@ -13,7 +13,7 @@ test("bind() and unbind() setup data correctly", 5, function() {
 	};
 	
 	Simples("#firstp").bind( "click", callback );
-    same( callback.guid, Simples.guid - 1, "should have the guid set" );
+    same( callback.guid, "simples-guid-" + (Simples.guid - 1), "should have the guid set" );
 	ok( !!Simples.data( Simples("#firstp")[0], "handlers").click, 'should attach handler function to function' );
 	same( Simples.data( Simples("#firstp")[0], "events").click, [ {callback: callback, guid: callback.guid }],"Event handler bound correctly." );
 

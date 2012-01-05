@@ -145,7 +145,7 @@ Simples.merge( /** @lends Simples */ {
 				events = data.events ? data.events : data.events = {},
 				handlers = data.handlers ? data.handlers : data.handlers = {};
 			
-			var guid = !callback.guid ? callback.guid = Simples.guid++ : callback.guid, 
+			var guid = !callback.guid ? callback.guid = "simples-guid-" + Simples.guid++ : callback.guid, 
 				handler = handlers[ type ];
 				
 			if( !handler ){
