@@ -4,15 +4,28 @@ Simples.PubSub = (function(){
 		listen : function( type, callback, single ){
 			if( !(type && typeof callback === "function") ){ return false; }
 			if( !callback.guid ){ callback.guid = "simples-guid-" + Simples.guid++; }
-			listeners[ type ] = listeners[ type ] || [];
-			listeners[ type ].push( callback );
+			if( single === true ){
+				if( listenerFired[ type ] ){
+					callback( listenerFired[ type ] );
+				} else {
+					singleListener[ type ] = singleListener[ type ] || [];
+					singleListener[ type ].push( callback );
+				}
+			} else {
+				listeners[ type ] = listeners[ type ] || [];
+				listeners[ type ].push( callback );
+			}
 			return callback.guid;
 		},
 		send : function( type, data ){
 			if( !data ){ return false; }
-			var callbacks = listeners[ type ] || [],i=0,l=callbacks.length;
+			var callbacks = singleListener[ type ] || listeners[ type ] || [],i=0,l=callbacks.length;
 			while( i<l ){
 				callbacks[i++]( data );
+			}
+			listenerFired[ type ] = data;
+			if( singleListener[ type ] ){
+				delete singleListener[ type ];
 			}
 			return true;
 		},
