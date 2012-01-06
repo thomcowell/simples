@@ -1,4 +1,4 @@
-Simples.PubSub = (function(){
+Simples.message = (function( undef ){
 	var listeners = {},singleListener ={},listenerFired = {};
 	return {
 		listen : function( type, callback, single ){
@@ -29,17 +29,26 @@ Simples.PubSub = (function(){
 			}
 			return true;
 		},
-		stopListening : function( type, callback ){
-			if( !type || typeof callback !== "function" || !callback.guid || !listeners[ type ] ){ return false; }
-			var callbacks = listeners[ type ],i=0,l=callbacks.length;
+		stopListeningFor : function( type, callback ){
+			var guid = typeof callback === "function" ? callback.guid : typeof callback === "string" ? callback : undef;
+			if( !guid || !type || !listeners[ type ] ){ return false; }
+			var callbacks = listeners[ type ],
+				i=0,
+				l=callbacks.length;
+
 			while( i<l ){
-				if( callbacks[i].guid == callback.guid ){
+				if( callbacks[i].guid == guid ){
 					callbacks.splice( i, 1 );
 					return true;
 				}
 				i++;
 			}
 			return false;
+		},
+		count : function( type ){
+			if( !type ){ return 0; }
+			var l = listeners[ type ] || 0, s = singleListener[ type ] || 0;
+			return l + s;
 		}
 	};
 })();
