@@ -29,13 +29,15 @@ if( "getBoundingClientRect" in DOC.documentElement ){
 			docElem = doc.documentElement, win = getWIN(doc),
 			clientTop  = docElem.clientTop  || body.clientTop  || 0,
 			clientLeft = docElem.clientLeft || body.clientLeft || 0,
-			scrollTop  = (win.pageYOffset || Simples.support.boxModel && docElem.scrollTop  || body.scrollTop ),
-			scrollLeft = (win.pageXOffset || Simples.support.boxModel && docElem.scrollLeft || body.scrollLeft),
-			top  = box.top  + scrollTop  - clientTop, left = box.left + scrollLeft - clientLeft;
+			scrollTop  = (win.pageYOffset || Simples.support.isBoxModel && docElem.scrollTop  || body.scrollTop ),
+			scrollLeft = (win.pageXOffset || Simples.support.isBoxModel && docElem.scrollLeft || body.scrollLeft),
+			top  = box.top  + scrollTop  - clientTop,
+			left = box.left + scrollLeft - clientLeft;
 
 		return { top: top, left: left };
 	};	                 
 } else {
+	/** @ignore */
 	Simples.offset = function( elem ) {
 
 		if ( !elem || !elem.ownerDocument ) {
