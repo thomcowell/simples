@@ -16,17 +16,20 @@ if( "getBoundingClientRect" in DOC.documentElement ){
 	 * @returns {Object} top, left
 	 */
 	Simples.offset = function( elem ){
+		var box,
+			doc = elem && elem.ownerDocument,
+			body = doc.body,
+			docElem = doc.documentElement;
 
-		if ( !elem || !elem.ownerDocument ) {
-			return null;
-		}
+		try{
+			box = elem.getBoundingClientRect();
+		} catch(e){}
 
-		if ( elem === elem.ownerDocument.body ) {
-			return Simples.bodyOffset( elem );
-		}
+		if( !box ){ return {top:0,left:0} }
+		if( !doc ) { return null; }
+		if( elem === body ) { return Simples.bodyOffset( elem ); }
 
-		var box = elem.getBoundingClientRect(), doc = elem.ownerDocument, body = doc.body,
-			docElem = doc.documentElement, win = getWIN(doc),
+		var win = getWIN(doc),
 			clientTop  = docElem.clientTop  || body.clientTop  || 0,
 			clientLeft = docElem.clientLeft || body.clientLeft || 0,
 			scrollTop  = (win.pageYOffset || Simples.support.isBoxModel && docElem.scrollTop  || body.scrollTop ),
