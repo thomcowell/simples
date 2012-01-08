@@ -3,7 +3,7 @@ Simples.message = (function( undef ){
 
 	return {
 		listenFor : function( type, callback, single ){
-			if( !type || typeof callback !== "function") ){ return false; }
+			if( !type || typeof callback !== "function" ){ return false; }
 			if( !callback.guid ){ 
 				callback.guid = "simples-guid-" + Simples.guid++;
 			}
@@ -25,7 +25,7 @@ Simples.message = (function( undef ){
 		},
 		send : function( type, data ){
 			if( !type ){ return false; }
-			var callbacks = [].push.apply( (listeners[ type ] || []).slice(0), (singleListener[ type ] || []).slice(0) ),
+			var callbacks = (listeners[ type ] || []).slice(0).concat((singleListener[ type ] || []).slice(0) ),
 				i=0,
 				l=callbacks.length;
 			while( i<l ){
@@ -37,7 +37,7 @@ Simples.message = (function( undef ){
 			}
 			return true;
 		},
-		stopListeningFor : function( type, callback ){
+		silence : function( type, callback ){
 			var guid = typeof callback === "function" ? callback.guid : typeof callback === "string" ? callback : undef;
 			if( !guid || !type || !(listeners[ type ] && listeners[ type ].length) ){ return false; }
 			var callbacks = listeners[type],
@@ -52,26 +52,26 @@ Simples.message = (function( undef ){
 			}
 			if( singleListener[ type ] ){
 				var singleCallbacks = singleListener[ type ],
-					i = 0,
-					l = singleCallbacks.length;
-				while( i<l ){
-					if( callbacks[i].guid == guid ){
-						singleCallbackssplice( i, 1 );
+					m = 0,
+					n = singleCallbacks.length;
+				while( m<n ){
+					if( callbacks[m].guid == guid ){
+						singleCallbackssplice( m, 1 );
 						break;
 					}
-					i++;
+					m++;
 				}
 			}
 			return false;
 		},
 		count : function( type ){
 			if( !type ){ return 0; }
-			return [].push.apply( (listeners[ type ] || []).slice(0), (singleListener[ type ] || []).slice(0) ).length;
+			return (listeners[ type ] || []).slice(0).concat((singleListener[ type ] || []).slice(0) ).length;
 		},
-		listening : function( type, callback ){
+		isListening : function( type, callback ){
 			var guid = typeof callback === "function" ? callback.guid : typeof callback === "string" ? callback : undef;
 			if( !guid || !type || !listeners[ type ] ){ return false; }
-			var callbacks = [].push.apply( (listeners[ type ] || []).slice(0), (singleListener[ type ] || []).slice(0) ),
+			var callbacks = (listeners[ type ] || []).slice(0).concat((singleListener[ type ] || []).slice(0) ),
 				i=0,
 				l=callbacks.length;
 
