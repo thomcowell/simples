@@ -70,13 +70,13 @@ Simples.message = (function( undef ){
 		},
 		isListening : function( type, callback ){
 			var guid = typeof callback === "function" ? callback.guid : typeof callback === "string" ? callback : undef;
-			if( !guid || !type || !listeners[ type ] ){ return false; }
+			if( !guid || !type ){ return false; }
 			var callbacks = (listeners[ type ] || []).slice(0).concat((singleListener[ type ] || []).slice(0) ),
 				i=0,
 				l=callbacks.length;
 
 			while( i<l ){
-				if( callbacks[i].guid == guid ){
+				if( callbacks[i++].guid == guid ){
 					return true;
 				}
 			}
