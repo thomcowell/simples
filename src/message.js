@@ -11,7 +11,7 @@ Simples.message = (function( undef ){
 				if( listenerFired[ type ] ){
 					setTimeout(function(){
 						callback( listenerFired[ type ] );
-					},13);
+					},0);
 					return true;
 				} else {
 					singleListener[ type ] = singleListener[ type ] || [];
@@ -39,24 +39,26 @@ Simples.message = (function( undef ){
 		},
 		silence : function( type, callback ){
 			var guid = typeof callback === "function" ? callback.guid : typeof callback === "string" ? callback : undef;
-			if( !guid || !type || !(listeners[ type ] && listeners[ type ].length) ){ return false; }
-			var callbacks = listeners[type],
-				i=0,
-				l=callbacks.length;
-
-			while( i<l ){
-				if( callbacks[i].guid == guid ){
-					callbacks.splice( i, 1 );
+			if( !guid || !type ){ return false; }
+	
+			if( listeners[type] ){
+				var callbacks = listeners[type],
+					i=0,
+					l=callbacks.length;
+				while( i<l ){
+					if( callbacks[i].guid == guid ){
+						callbacks.splice( i, 1 );
+					}
+					i++;
 				}
-				i++;
 			}
 			if( singleListener[ type ] ){
 				var singleCallbacks = singleListener[ type ],
 					m = 0,
 					n = singleCallbacks.length;
 				while( m<n ){
-					if( callbacks[m].guid == guid ){
-						singleCallbackssplice( m, 1 );
+					if( singleCallbacks[m].guid == guid ){
+						singleCallbacks.splice( m, 1 );
 						break;
 					}
 					m++;
