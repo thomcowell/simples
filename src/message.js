@@ -2,7 +2,14 @@ Simples.message = (function( undef ){
 	var listeners = {},singleListener ={},listenerFired = {};
 
 	return {
-		listenFor : function( type, callback, single ){
+		/**
+		 * @name Simples.message.listenFor
+		 * @description to set up a listener for a specific type of callback
+		 * @param {String} type the name of the listener event to listen for
+		 * @param {Function} callback the method to be executed when the event is fired
+		 * @returns {String} guid of the listener being bound
+		 */
+		on : function( type, callback, single ){
 			if( !type || typeof callback !== "function" ){ return false; }
 			if( !callback.guid ){ 
 				callback.guid = "simples-guid-" + Simples.guid++;
@@ -23,6 +30,13 @@ Simples.message = (function( undef ){
 			}
 			return callback.guid;
 		},
+		/**
+		 * @name Simples.message.send
+		 * @description to initiate the execution of the callbacks for a given event name
+		 * @param {String} type the name of the listener event being fired
+		 * @param {Object|String|Number} data the message or data to be passed to callback
+		 * @param {Boolean} single is this a single only fired event
+		 */	
 		send : function( type, data ){
 			if( !type ){ return false; }
 			var callbacks = (listeners[ type ] || []).slice(0).concat((singleListener[ type ] || []).slice(0) ),
@@ -37,7 +51,14 @@ Simples.message = (function( undef ){
 			}
 			return true;
 		},
-		silence : function( type, callback ){
+		/**
+		 * @name Simples.message.silence
+		 * @description to remove a listener for a specific type of callback
+		 * @param {String} type the name of the listener event being fired
+		 * @param {Function|String} callback|guid the callback bound or the guid of the callback to be removed
+		 * @returns {Boolean}
+		 */
+		off : function( type, callback ){
 			var guid = typeof callback === "function" ? callback.guid : typeof callback === "string" ? callback : undef;
 			if( !guid || !type ){ return false; }
 	

@@ -1,7 +1,7 @@
 module("Messaging");
 // sense check to ensure no browser incorrectly returns bad values
 test("correct api defined", function(){
-	var apis = ["listenFor","send","silence","count","isListening"];
+	var apis = ["on","send","off","count","isListening"];
 	expect( apis.length );
 
 	for(var i=0,l=apis.length;i<l;i++){
@@ -10,14 +10,14 @@ test("correct api defined", function(){
 });
 
 test("listeners bound", 10, function(){
-	// Test that listenFor responds correctly to bad passed in values
-	strictEqual( false, Simples.message.listenFor(), "should return false if no type and callback is specified" );
-	strictEqual( false, Simples.message.listenFor("hammer"), "should return false if no callback is specified" );
-	strictEqual( false, Simples.message.listenFor("hammer","time"), "should return false if no callback is specified" );
-	strictEqual( false, Simples.message.listenFor(undefined,function(){ok(false,"nope shouldn't fire"); }), "should return false if no callback is specified" );
+	// Test that on responds correctly to bad passed in values
+	strictEqual( false, Simples.message.on(), "should return false if no type and callback is specified" );
+	strictEqual( false, Simples.message.on("hammer"), "should return false if no callback is specified" );
+	strictEqual( false, Simples.message.on("hammer","time"), "should return false if no callback is specified" );
+	strictEqual( false, Simples.message.on(undefined,function(){ok(false,"nope shouldn't fire"); }), "should return false if no callback is specified" );
 
-	// Test that listenFor queues up callback correctly
-	var guid = Simples.message.listenFor("data-drum",function( data ){
+	// Test that on queues up callback correctly
+	var guid = Simples.message.on("data-drum",function( data ){
 		ok( true, "should have bound listener");
 	});
 	equal( guid, "simples-guid-" + ( Simples.guid - 1 ), "should have guid returned" );
@@ -29,7 +29,7 @@ test("listeners bound", 10, function(){
 		ok( true, "should have bound listener");
 	}
 	testFunction.guid = "my-special-guid-12932";
-	var guid2 = Simples.message.listenFor("data-drum", testFunction );
+	var guid2 = Simples.message.on("data-drum", testFunction );
 
 	equal( guid2, "my-special-guid-12932", "should not alter existing guid" );
 	equal( Simples.message.count("data-drum"), 2, "Should have 1 bound callback" );
@@ -37,8 +37,8 @@ test("listeners bound", 10, function(){
 });
 
 test("single listeners bound", 6, function(){
-	// Test that listenFor queues up callback correctly
-	var guid = Simples.message.listenFor("data-drum-singles",function( data ){
+	// Test that on queues up callback correctly
+	var guid = Simples.message.on("data-drum-singles",function( data ){
 		ok( true, "should have bound listener");
 	}, true);
 	equal( guid, "simples-guid-" + ( Simples.guid - 1 ), "should have guid returned" );
@@ -50,7 +50,7 @@ test("single listeners bound", 6, function(){
 		ok( true, "should have bound listener");
 	}
 	testFunction.guid = "my-special-guid-12932";
-	var guid2 = Simples.message.listenFor("data-drum-singles", testFunction, true );
+	var guid2 = Simples.message.on("data-drum-singles", testFunction, true );
 
 	equal( guid2, "my-special-guid-12932", "should not alter existing guid" );
 	equal( Simples.message.count("data-drum-singles"), 2, "Should have 2 bound callback" );
@@ -58,14 +58,14 @@ test("single listeners bound", 6, function(){
 });
 
 test("stopListening for listeners ", 6, function(){
-	// Test that listenFor queues up callback correctly
-	var guid = Simples.message.listenFor("data-test",function( data ){
+	// Test that on queues up callback correctly
+	var guid = Simples.message.on("data-test",function( data ){
 		ok( true, "should have bound listener");
 	});
 	equal( Simples.message.count("data-test"), 1, "Should have 1 bound callback" );
 	ok( Simples.message.isListening("data-test", guid), "Should have 1 bound callback" );
 
-	Simples.message.silence("data-test", guid);
+	Simples.message.off("data-test", guid);
 	equal( Simples.message.count("data-test"), 0, "Should have 1 bound callback" );
 
 	// Test callback with guid is handled correctly
@@ -73,23 +73,23 @@ test("stopListening for listeners ", 6, function(){
 		ok( true, "should have bound listener");
 	}
 
-	Simples.message.listenFor("data-test", testFunction );
+	Simples.message.on("data-test", testFunction );
 	equal( Simples.message.count("data-test"), 1, "Should have 1 bound callback" );
 	ok( Simples.message.isListening("data-test", testFunction ), "Should have 1 bound callback" );
 
-	Simples.message.silence("data-test", testFunction );
+	Simples.message.off("data-test", testFunction );
 	equal( Simples.message.count("data-test"), 0, "Should have 1 bound callback" );
 });
 
 test("stopListening for single listeners ", 6, function(){
-	// Test that listenFor queues up callback correctly (single)
-	var guid = Simples.message.listenFor("data-test",function( data ){
+	// Test that on queues up callback correctly (single)
+	var guid = Simples.message.on("data-test",function( data ){
 		ok( true, "should have bound listener");
 	}, true);
 	equal( Simples.message.count("data-test"), 1, "Should have 1 bound callback" );
 	ok( Simples.message.isListening("data-test", guid), "Should have 1 bound callback" );
 
-	Simples.message.silence("data-test", guid);
+	Simples.message.off("data-test", guid);
 	equal( Simples.message.count("data-test"), 0, "Should have 1 bound callback" );	
 
 	// Test callback with guid is handled correctly
@@ -97,17 +97,17 @@ test("stopListening for single listeners ", 6, function(){
 		ok( true, "should have bound listener");
 	}
 
-	Simples.message.listenFor("data-test", testFunction, true );
+	Simples.message.on("data-test", testFunction, true );
 	equal( Simples.message.count("data-test"), 1, "Should have 1 bound callback" );
 	ok( Simples.message.isListening("data-test", testFunction ), "Should have 1 bound callback" );
 
-	Simples.message.silence("data-test", testFunction );
+	Simples.message.off("data-test", testFunction );
 	equal( Simples.message.count("data-test"), 0, "Should have 1 bound callback" );
 });
 
 test("send for listeners ", 6, function(){
 	var testData = {super:5,hammer:true};
-	var guid = Simples.message.listenFor("test-send",function( data ){
+	var guid = Simples.message.on("test-send",function( data ){
 		ok( true, "should have bound listener");
 		deepEqual( testData, data, "data should be the same");
 	});
@@ -116,7 +116,7 @@ test("send for listeners ", 6, function(){
 	Simples.message.send( "test-send", testData );
 	Simples.message.send( "test-send", testData );
 
-	Simples.message.silence("test-send", guid);
+	Simples.message.off("test-send", guid);
 
 	equal( Simples.message.count("test-send"), 0, "Should have 1 bound callback" );
 
@@ -127,7 +127,7 @@ test("send for single listeners ", 6, function(){
 	stop();
 
 	var testData = {super:5,hammer:true};
-	var guid = Simples.message.listenFor("test-send-single",function( data ){
+	var guid = Simples.message.on("test-send-single",function( data ){
 		ok( true, "should have bound listener");
 		deepEqual( testData, data, "data should be the same");
 	}, true);
@@ -138,7 +138,7 @@ test("send for single listeners ", 6, function(){
 	equal( Simples.message.count("test-send-single"), 0, "Should have 1 bound callback" );
 	Simples.message.send( "test-send-single", testData );
 
-	Simples.message.listenFor("test-send-single",function( data ){
+	Simples.message.on("test-send-single",function( data ){
 		ok( true, "should have bound listener");
 		deepEqual( testData, data, "data should be the same");
 		start();
@@ -150,12 +150,12 @@ test("send for single listeners ", 6, function(){
 test("send for single listeners and listeners", 11, function(){
 
 	var testData = {super:5,hammer:true};
-	var guid = Simples.message.listenFor("test-send-2",function( data ){
+	var guid = Simples.message.on("test-send-2",function( data ){
 		ok( true, "should have bound listener");
 		deepEqual( testData, data, "data should be the same");
 	}, true);
 
-	var guid2 = Simples.message.listenFor("test-send-2",function( data ){
+	var guid2 = Simples.message.on("test-send-2",function( data ){
 		ok( true, "should have bound listener");
 		deepEqual( testData, data, "data should be the same");
 	});	
@@ -167,8 +167,8 @@ test("send for single listeners and listeners", 11, function(){
 	Simples.message.send( "test-send-2", testData );
 	Simples.message.send( "test-send-2", testData );
 
-	Simples.message.silence( "test-send-2", guid );
-	Simples.message.silence( "test-send-2", guid2 );
+	Simples.message.off( "test-send-2", guid );
+	Simples.message.off( "test-send-2", guid2 );
 	equal( Simples.message.count("test-send-2"), 0, "Should have 0 bound callback" );
 
 	Simples.message.send( "test-send-2", testData );
